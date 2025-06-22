@@ -1,0 +1,28 @@
+{
+ "program name": "PyAirfoil",
+ "program version": "0.0.1a",
+ "component": {
+  "airfoil": {
+   "name": "Airfoil",
+   "chord": 1.0,
+   "origin_X": 0.0,
+   "origin_Y": 0.0,
+   "le_thickness": 0.05,
+   "le_depth": 0.04,
+   "le_offset": 0.0,
+   "le_angle": 0.22000000000000003,
+   "te_thickness": 0.01,
+   "te_depth": 0.01,
+   "te_offset": 0.0,
+   "te_angle": 0.05,
+   "ps_fwd_angle": 22.0,
+   "ps_rwd_angle": -15.0,
+   "ps_fwd_accel": 0.2,
+   "ps_rwd_accel": 0.1,
+   "ss_fwd_angle": -11.0,
+   "ss_rwd_angle": -3.0,
+   "ss_fwd_accel": 0.16,
+   "ss_rwd_accel": 0.4
+  }
+ }
+}

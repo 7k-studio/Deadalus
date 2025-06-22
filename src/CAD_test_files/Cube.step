@@ -1,0 +1,140 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Cube 1x1x1'),'1');
+FILE_NAME('Cube.step','2024-06-11T12:00:00',('Author'),('Company'),'','STEP203','');
+FILE_SCHEMA(('CONFIG_CONTROL_DESIGN'));
+ENDSEC;
+DATA;
+// Define Cartesian points for the 8 vertices of the cube
+#1 = CARTESIAN_POINT('', (0.0, 0.0, 0.0));
+#2 = CARTESIAN_POINT('', (1.0, 0.0, 0.0));
+#3 = CARTESIAN_POINT('', (1.0, 1.0, 0.0));
+#4 = CARTESIAN_POINT('', (0.0, 1.0, 0.0));
+#5 = CARTESIAN_POINT('', (0.0, 0.0, 1.0));
+#6 = CARTESIAN_POINT('', (1.0, 0.0, 1.0));
+#7 = CARTESIAN_POINT('', (1.0, 1.0, 1.0));
+#8 = CARTESIAN_POINT('', (0.0, 1.0, 1.0));
+
+// Vertices
+#10 = VERTEX_POINT('', #1);
+#11 = VERTEX_POINT('', #2);
+#12 = VERTEX_POINT('', #3);
+#13 = VERTEX_POINT('', #4);
+#14 = VERTEX_POINT('', #5);
+#15 = VERTEX_POINT('', #6);
+#16 = VERTEX_POINT('', #7);
+#17 = VERTEX_POINT('', #8);
+
+// Edges (12 edges)
+#20 = EDGE_CURVE('', #10, #11, #30, .T.);
+#21 = EDGE_CURVE('', #11, #12, #31, .T.);
+#22 = EDGE_CURVE('', #12, #13, #32, .T.);
+#23 = EDGE_CURVE('', #13, #10, #33, .T.);
+#24 = EDGE_CURVE('', #14, #15, #34, .T.);
+#25 = EDGE_CURVE('', #15, #16, #35, .T.);
+#26 = EDGE_CURVE('', #16, #17, #36, .T.);
+#27 = EDGE_CURVE('', #17, #14, #37, .T.);
+#28 = EDGE_CURVE('', #10, #14, #38, .T.);
+#29 = EDGE_CURVE('', #11, #15, #39, .T.);
+#40 = EDGE_CURVE('', #12, #16, #41, .T.);
+#42 = EDGE_CURVE('', #13, #17, #43, .T.);
+
+// Lines for edges
+#30 = LINE('', #1, #50);
+#31 = LINE('', #2, #51);
+#32 = LINE('', #3, #52);
+#33 = LINE('', #4, #53);
+#34 = LINE('', #5, #54);
+#35 = LINE('', #6, #55);
+#36 = LINE('', #7, #56);
+#37 = LINE('', #8, #57);
+#38 = LINE('', #1, #58);
+#39 = LINE('', #2, #59);
+#41 = LINE('', #3, #60);
+#43 = LINE('', #4, #61);
+
+// Direction vectors for lines
+#50 = VECTOR('', (1.0, 0.0, 0.0), 1.0);
+#51 = VECTOR('', (0.0, 1.0, 0.0), 1.0);
+#52 = VECTOR('', (-1.0, 0.0, 0.0), 1.0);
+#53 = VECTOR('', (0.0, -1.0, 0.0), 1.0);
+#54 = VECTOR('', (1.0, 0.0, 0.0), 1.0);
+#55 = VECTOR('', (0.0, 1.0, 0.0), 1.0);
+#56 = VECTOR('', (-1.0, 0.0, 0.0), 1.0);
+#57 = VECTOR('', (0.0, -1.0, 0.0), 1.0);
+#58 = VECTOR('', (0.0, 0.0, 1.0), 1.0);
+#59 = VECTOR('', (0.0, 0.0, 1.0), 1.0);
+#60 = VECTOR('', (0.0, 0.0, 1.0), 1.0);
+#61 = VECTOR('', (0.0, 0.0, 1.0), 1.0);
+
+// Faces (6 faces, each as a loop of 4 edges)
+#70 = FACE_OUTER_BOUND('', #80, .T.);
+#71 = FACE_OUTER_BOUND('', #81, .T.);
+#72 = FACE_OUTER_BOUND('', #82, .T.);
+#73 = FACE_OUTER_BOUND('', #83, .T.);
+#74 = FACE_OUTER_BOUND('', #84, .T.);
+#75 = FACE_OUTER_BOUND('', #85, .T.);
+
+// Edge loops for faces
+#80 = EDGE_LOOP('', (#20, #21, #22, #23)); // bottom
+#81 = EDGE_LOOP('', (#24, #25, #26, #27)); // top
+#82 = EDGE_LOOP('', (#20, #29, #24, #28)); // side 1
+#83 = EDGE_LOOP('', (#21, #40, #25, #29)); // side 2
+#84 = EDGE_LOOP('', (#22, #42, #26, #40)); // side 3
+#85 = EDGE_LOOP('', (#23, #28, #27, #42)); // side 4
+
+// Planes for faces
+#90 = PLANE('', #100);
+#91 = PLANE('', #101);
+#92 = PLANE('', #102);
+#93 = PLANE('', #103);
+#94 = PLANE('', #104);
+#95 = PLANE('', #105);
+
+// Axis2 placement for planes
+#100 = AXIS2_PLACEMENT_3D('', #1, #110, #111); // bottom
+#101 = AXIS2_PLACEMENT_3D('', #5, #112, #113); // top
+#102 = AXIS2_PLACEMENT_3D('', #1, #114, #115); // side 1
+#103 = AXIS2_PLACEMENT_3D('', #2, #116, #117); // side 2
+#104 = AXIS2_PLACEMENT_3D('', #3, #118, #119); // side 3
+#105 = AXIS2_PLACEMENT_3D('', #4, #120, #121); // side 4
+
+// Directions for planes
+#110 = DIRECTION('', (0.0, 0.0, 1.0));
+#111 = DIRECTION('', (1.0, 0.0, 0.0));
+#112 = DIRECTION('', (0.0, 0.0, -1.0));
+#113 = DIRECTION('', (1.0, 0.0, 0.0));
+#114 = DIRECTION('', (1.0, 0.0, 0.0));
+#115 = DIRECTION('', (0.0, 0.0, 1.0));
+#116 = DIRECTION('', (0.0, 1.0, 0.0));
+#117 = DIRECTION('', (0.0, 0.0, 1.0));
+#118 = DIRECTION('', (-1.0, 0.0, 0.0));
+#119 = DIRECTION('', (0.0, 0.0, 1.0));
+#120 = DIRECTION('', (0.0, -1.0, 0.0));
+#121 = DIRECTION('', (0.0, 0.0, 1.0));
+
+// Advanced faces
+#130 = ADVANCED_FACE('', (#70), #90, .T.);
+#131 = ADVANCED_FACE('', (#71), #91, .T.);
+#132 = ADVANCED_FACE('', (#72), #92, .T.);
+#133 = ADVANCED_FACE('', (#73), #93, .T.);
+#134 = ADVANCED_FACE('', (#74), #94, .T.);
+#135 = ADVANCED_FACE('', (#75), #95, .T.);
+
+// Shell and solid
+#140 = CLOSED_SHELL('', (#130, #131, #132, #133, #134, #135));
+#150 = MANIFOLD_SOLID_BREP('', #140);
+
+// Add product structure and shape representation for geometry
+#200 = PRODUCT_CONTEXT('', 'part definition', #210);
+#201 = PRODUCT('Cube', '', '', (#200));
+#202 = PRODUCT_DEFINITION_FORMATION('', '', #201);
+#203 = PRODUCT_DEFINITION('', '', #202, #204);
+#204 = PRODUCT_DEFINITION_CONTEXT('part definition', 'design', #210);
+#210 = APPLICATION_CONTEXT('configuration controlled 3d designs of mechanical parts and assemblies');
+#220 = SHAPE_DEFINITION_REPRESENTATION(#221, #230);
+#221 = PRODUCT_DEFINITION_SHAPE('', '', #203);
+#230 = ADVANCED_BREP_SHAPE_REPRESENTATION('', (#150), #240);
+#240 = GEOMETRIC_REPRESENTATION_CONTEXT(3, '3D Context with unit mm');
+ENDSEC;
+END-ISO-10303-21;

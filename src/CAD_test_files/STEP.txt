@@ -1,0 +1,23 @@
+Oto jak możesz podejść do generowania pliku STEP podobnego do wing.STEP na podstawie punktów 4 splajnów (np. le, ps, ss, te) o wspólnych wierzchołkach:
+
+Krok po kroku
+Zbierz punkty: Potrzebujesz 4 list punktów (każda lista to 2D tablica: [x, y] lub [x, y, z]) dla każdej krawędzi splajnu (np. le, ps, ss, te). Każda lista powinna mieć tyle samo punktów i odpowiadać kolejnym "krawędziom" przekroju skrzydła.
+Wygeneruj punkty STEP: Dla każdego punktu wygeneruj wpis CARTESIAN_POINT.
+Wygeneruj splajny: Dla każdej krawędzi wygeneruj B_SPLINE_CURVE_WITH_KNOTS na podstawie punktów.
+Wierzchołki: Dla końców splajnów wygeneruj VERTEX_POINT.
+Krawędzie: Połącz wierzchołki splajnów w EDGE_CURVE i ORIENTED_EDGE.
+Pętla krawędziowa: Zbuduj EDGE_LOOP z 4 krawędzi.
+Powierzchnia: Zbuduj B_SPLINE_SURFACE_WITH_KNOTS na podstawie siatki punktów (np. 4xN).
+FACE_OUTER_BOUND i ADVANCED_FACE: Zbuduj powierzchnię ograniczoną pętlą.
+Model: Dodaj SHELL_BASED_SURFACE_MODEL, OPEN_SHELL, itd.
+Nagłówek i jednostki: Dodaj sekcję HEADER, UNITS, CONTEXT, ENDSEC.
+step.py
+Podstawowy kod generujący STEP dla skrzydła na bazie 4 splajnów (każdy z N punktów):
+
+Wskazówki:
+
+Funkcja export_simple_wing przyjmuje słownik splajnów, każdy jako tuple/lista (x_list, y_list).
+Jeśli masz punkty 3D, zamień (x, y) na (x, y, z) w pętli.
+Jeśli chcesz wygenerować pełny STEP jak w pliku wing.STEP (z kategoriami, datami, itd.), daj znać – można dodać te sekcje.
+Kod generuje tylko podstawową geometrię skrzydła (powierzchnia + pętla krawędziowa).
+Czy chcesz, abym rozwinął kod o dodatkowe sekcje (np. PRODUCT, CONTEXT, SHAPE_REPRESENTATION)?

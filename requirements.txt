@@ -1,0 +1,7 @@
+PyQt5
+PyOpenGL
+PyOpenGL_accelerate
+ezdxf
+matplotlib
+scipy
+tqdm

@@ -1,0 +1,153 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Minimal solid cube'), '1');
+FILE_NAME('cube.stp','2024-06-22T00:00:00',(''),(''),'GitHub Copilot','GitHub Copilot','');
+FILE_SCHEMA(('CONFIG_CONTROL_DESIGN'));
+ENDSEC;
+DATA;
+#1 = CARTESIAN_POINT('',(0.0,0.0,0.0));
+#2 = CARTESIAN_POINT('',(10.0,0.0,0.0));
+#3 = CARTESIAN_POINT('',(10.0,10.0,0.0));
+#4 = CARTESIAN_POINT('',(0.0,10.0,0.0));
+#5 = CARTESIAN_POINT('',(0.0,0.0,10.0));
+#6 = CARTESIAN_POINT('',(10.0,0.0,10.0));
+#7 = CARTESIAN_POINT('',(10.0,10.0,10.0));
+#8 = CARTESIAN_POINT('',(0.0,10.0,10.0));
+
+#10 = VERTEX_POINT('',#1);
+#11 = VERTEX_POINT('',#2);
+#12 = VERTEX_POINT('',#3);
+#13 = VERTEX_POINT('',#4);
+#14 = VERTEX_POINT('',#5);
+#15 = VERTEX_POINT('',#6);
+#16 = VERTEX_POINT('',#7);
+#17 = VERTEX_POINT('',#8);
+
+// Edges
+#20 = EDGE_CURVE('',#10,#11,#30,.T.);
+#21 = EDGE_CURVE('',#11,#12,#31,.T.);
+#22 = EDGE_CURVE('',#12,#13,#32,.T.);
+#23 = EDGE_CURVE('',#13,#10,#33,.T.);
+#24 = EDGE_CURVE('',#14,#15,#34,.T.);
+#25 = EDGE_CURVE('',#15,#16,#35,.T.);
+#26 = EDGE_CURVE('',#16,#17,#36,.T.);
+#27 = EDGE_CURVE('',#17,#14,#37,.T.);
+#28 = EDGE_CURVE('',#10,#14,#38,.T.);
+#29 = EDGE_CURVE('',#11,#15,#39,.T.);
+#40 = EDGE_CURVE('',#12,#16,#41,.T.);
+#41 = EDGE_CURVE('',#13,#17,#42,.T.);
+
+// Lines for edges
+#30 = LINE('',#1,#50);
+#31 = LINE('',#2,#51);
+#32 = LINE('',#3,#52);
+#33 = LINE('',#4,#53);
+#34 = LINE('',#5,#54);
+#35 = LINE('',#6,#55);
+#36 = LINE('',#7,#56);
+#37 = LINE('',#8,#57);
+#38 = LINE('',#1,#58);
+#39 = LINE('',#2,#59);
+#41 = LINE('',#3,#60);
+#42 = LINE('',#4,#61);
+
+#50 = VECTOR('',#70,1.0);
+#51 = VECTOR('',#71,1.0);
+#52 = VECTOR('',#72,1.0);
+#53 = VECTOR('',#73,1.0);
+#54 = VECTOR('',#74,1.0);
+#55 = VECTOR('',#75,1.0);
+#56 = VECTOR('',#76,1.0);
+#57 = VECTOR('',#77,1.0);
+#58 = VECTOR('',#78,1.0);
+#59 = VECTOR('',#79,1.0);
+#60 = VECTOR('',#80,1.0);
+#61 = VECTOR('',#81,1.0);
+
+// Directions for vectors
+#70 = DIRECTION('',(1.0,0.0,0.0));
+#71 = DIRECTION('',(0.0,1.0,0.0));
+#72 = DIRECTION('',(-1.0,0.0,0.0));
+#73 = DIRECTION('',(0.0,-1.0,0.0));
+#74 = DIRECTION('',(1.0,0.0,0.0));
+#75 = DIRECTION('',(0.0,1.0,0.0));
+#76 = DIRECTION('',(-1.0,0.0,0.0));
+#77 = DIRECTION('',(0.0,-1.0,0.0));
+#78 = DIRECTION('',(0.0,0.0,1.0));
+#79 = DIRECTION('',(0.0,0.0,1.0));
+#80 = DIRECTION('',(0.0,0.0,1.0));
+#81 = DIRECTION('',(0.0,0.0,1.0));
+
+// Edge loops for each face
+#100 = EDGE_LOOP('',(#20,#21,#22,#23)); // bottom
+#101 = EDGE_LOOP('',(#24,#25,#26,#27)); // top
+#102 = EDGE_LOOP('',(#20,#29,#24,#28)); // front
+#103 = EDGE_LOOP('',(#21,#40,#25,#29)); // right
+#104 = EDGE_LOOP('',(#22,#41,#26,#40)); // back
+#105 = EDGE_LOOP('',(#23,#28,#27,#41)); // left
+
+// Faces
+#110 = FACE_OUTER_BOUND('',#100,.T.);
+#111 = FACE_OUTER_BOUND('',#101,.T.);
+#112 = FACE_OUTER_BOUND('',#102,.T.);
+#113 = FACE_OUTER_BOUND('',#103,.T.);
+#114 = FACE_OUTER_BOUND('',#104,.T.);
+#115 = FACE_OUTER_BOUND('',#105,.T.);
+
+#120 = PLANE('',#130);
+#121 = PLANE('',#131);
+#122 = PLANE('',#132);
+#123 = PLANE('',#133);
+#124 = PLANE('',#134);
+#125 = PLANE('',#135);
+
+#130 = AXIS2_PLACEMENT_3D('',#1,#90,#91);    // bottom
+#131 = AXIS2_PLACEMENT_3D('',#5,#92,#93);    // top
+#132 = AXIS2_PLACEMENT_3D('',#1,#94,#95);    // front
+#133 = AXIS2_PLACEMENT_3D('',#2,#96,#97);    // right
+#134 = AXIS2_PLACEMENT_3D('',#3,#98,#99);    // back
+#135 = AXIS2_PLACEMENT_3D('',#4,#100,#101);  // left
+
+#90 = DIRECTION('',(0.0,0.0,1.0));
+#91 = DIRECTION('',(1.0,0.0,0.0));
+#92 = DIRECTION('',(0.0,0.0,-1.0));
+#93 = DIRECTION('',(1.0,0.0,0.0));
+#94 = DIRECTION('',(0.0,1.0,0.0));
+#95 = DIRECTION('',(1.0,0.0,0.0));
+#96 = DIRECTION('',(1.0,0.0,0.0));
+#97 = DIRECTION('',(0.0,0.0,1.0));
+#98 = DIRECTION('',(0.0,-1.0,0.0));
+#99 = DIRECTION('',(1.0,0.0,0.0));
+#100 = DIRECTION('',(-1.0,0.0,0.0));
+#101 = DIRECTION('',(0.0,0.0,1.0));
+
+// Advanced faces
+#200 = ADVANCED_FACE('',(#110),#120,.T.);
+#201 = ADVANCED_FACE('',(#111),#121,.T.);
+#202 = ADVANCED_FACE('',(#112),#122,.T.);
+#203 = ADVANCED_FACE('',(#113),#123,.T.);
+#204 = ADVANCED_FACE('',(#114),#124,.T.);
+#205 = ADVANCED_FACE('',(#115),#125,.T.);
+
+// Shell and solid
+#210 = CLOSED_SHELL('',(#200,#201,#202,#203,#204,#205));
+#211 = MANIFOLD_SOLID_BREP('',#210);
+
+// Representation
+#220 = (LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.));
+#221 = (PLANE_ANGLE_UNIT()NAMED_UNIT(*)SI_UNIT($,.RADIAN.));
+#222 = (NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT());
+#223 = (GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNIT_ASSIGNED_CONTEXT((#220,#221,#222))REPRESENTATION_CONTEXT('',''));
+#224 = ADVANCED_BREP_SHAPE_REPRESENTATION('',(#211),#223);
+
+// Product structure
+#230 = PRODUCT_DEFINITION_SHAPE('','',#231);
+#231 = PRODUCT_DEFINITION('','',#232,#233);
+#232 = PRODUCT_DEFINITION_FORMATION('','',#234);
+#233 = DESIGN_CONTEXT('design',#235,'');
+#234 = PRODUCT('Cube','Cube','',(#211));
+#235 = APPLICATION_CONTEXT('configuration controlled 3d designs of mechanical parts and assemblies');
+#236 = SHAPE_DEFINITION_REPRESENTATION(#230,#224);
+
+ENDSEC;
+END-ISO-10303-21;
