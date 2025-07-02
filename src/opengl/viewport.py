@@ -66,7 +66,7 @@ class ViewportOpenGL(QGLWidget):
         # Drawing objects
         for i in range(len(globals.PROJECT.project_components)):
 
-            bckgrd.draw_origin_arrows(self, linewidth=3, zoom=self.zoom, X=globals.PROJECT.project_components[i].origin_X, Y=globals.PROJECT.project_components[i].origin_Y, Z=globals.PROJECT.project_components[i].origin_Z)
+            bckgrd.draw_origin_arrows(self, linewidth=3, zoom=self.zoom, X=globals.PROJECT.project_components[i].params['origin_X'], Y=globals.PROJECT.project_components[i].params['origin_Y'], Z=globals.PROJECT.project_components[i].params['origin_Z'])
             print(f"Drawing component {i+1}/{len(globals.PROJECT.project_components)}")
 
             for j in range(len(globals.PROJECT.project_components[i].wings)):

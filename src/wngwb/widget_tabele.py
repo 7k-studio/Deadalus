@@ -56,7 +56,7 @@ class Tabele(QTableWidget):
 
             # Input field for direct keyboard input
             try:
-                value = format(value, '.5f')  # Format value to 5 decimal places
+                value = format(value, '.4f')  # Format value to 4 decimal places
             except TypeError:
                 pass
             value_input = QLineEdit(str(value))
@@ -147,10 +147,9 @@ class Tabele(QTableWidget):
 
 
     def populate_table(self, element_obj):
-        """Populate the table with data from an airfoil object."""
-
+        """Populate the table with data from an element object."""
         self.setRowCount(0)  # Clear existing rows
-        for key, value in {key: value for key, value in vars(element_obj).items() if key != "infos"}.items():
+        for key, value in element_obj.params.items():
             row = self.rowCount()
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem(key))

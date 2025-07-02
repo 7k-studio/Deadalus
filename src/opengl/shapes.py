@@ -140,29 +140,29 @@ def draw_airfoil(self, segment):
     glColor3f(0.0, 0.0, 1.0)  # Blue color for leading edge
     glBegin(GL_LINES)
     for i in range(len(le[0])-1):
-        glVertex3f(le[0][i], le[1][i], segment.origin_Z)
-        glVertex3f(le[0][i+1], le[1][i+1], segment.origin_Z)
+        glVertex3f(le[0][i], le[1][i], segment.params['origin_Z'])
+        glVertex3f(le[0][i+1], le[1][i+1], segment.params['origin_Z'])
     glEnd()
 
     glColor3f(0.0, 1.0, 0.0)  # Green color for presssure side
     glBegin(GL_LINES)
     for i in range(len(ps[0])-1):
-        glVertex3f(ps[0][i], ps[1][i], segment.origin_Z)
-        glVertex3f(ps[0][i+1], ps[1][i+1], segment.origin_Z)
+        glVertex3f(ps[0][i], ps[1][i], segment.params['origin_Z'])
+        glVertex3f(ps[0][i+1], ps[1][i+1], segment.params['origin_Z'])
     glEnd()
 
     glColor3f(1.0, 0.0, 0.0)  # Red color for suction side
     glBegin(GL_LINES)
     for i in range(len(ss[0])-1):
-        glVertex3f(ss[0][i], ss[1][i], segment.origin_Z)
-        glVertex3f(ss[0][i+1], ss[1][i+1], segment.origin_Z)
+        glVertex3f(ss[0][i], ss[1][i], segment.params['origin_Z'])
+        glVertex3f(ss[0][i+1], ss[1][i+1], segment.params['origin_Z'])
     glEnd()
 
     glColor3f(1.0, 1.0, 0.0)  # Yellow color for trailing edge
     glBegin(GL_LINES)
     for i in range(len(te[0])-1):
-        glVertex3f(te[0][i], te[1][i], segment.origin_Z)
-        glVertex3f(te[0][i+1], te[1][i+1], segment.origin_Z)
+        glVertex3f(te[0][i], te[1][i], segment.params['origin_Z'])
+        glVertex3f(te[0][i+1], te[1][i+1], segment.params['origin_Z'])
     glEnd()
 
 def draw_wing(self, wing, no_of_segments):

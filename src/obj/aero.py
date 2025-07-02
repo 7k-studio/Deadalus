@@ -132,9 +132,6 @@ class Airfoil:
         ps_spline = CreateBSpline(ps_constr)
         ss_spline = CreateBSpline(ss_constr)
 
-        print('Construction: le')
-        print(le_constr)
-
         return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
 
     def update_airfoil(self):
@@ -146,12 +143,16 @@ class Segment:
         self.infos = {'name': 'segment',
                       'creation_date': '',
                       'modification_date': ''}
+        
         self.airfoil = Airfoil()
-        self.origin_X = 0
-        self.origin_Y = 0
-        self.origin_Z = 0
-        self.incidence = 0
-        self.scale = 1
+
+        self.params = {
+            'origin_X': 0,
+            'origin_Y': 0,
+            'origin_Z': 0,
+            'incidence': 0,
+            'scale': 1,
+        }
 
         self.points = {
             'le': [],
@@ -246,11 +247,11 @@ class Segment:
         wng_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].origin_Y
         wng_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].origin_Z
 
-        seg_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].origin_X
-        seg_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].origin_Y
-        seg_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].origin_Z
-        scale = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].scale
-        incidence = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].incidence
+        seg_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_X']
+        seg_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Y']
+        seg_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Z']
+        scale = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['scale']
+        incidence = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['incidence']
 
         print("Transforming airfoil geometry...")
         print(f"> {cmp_X}, {cmp_Y}, {cmp_Z}")
@@ -271,9 +272,12 @@ class Wing:
         self.infos = {'name': 'wing',
                       'creation_date': '',
                       'modification_date': ''}
-        self.origin_X = 0
-        self.origin_Y = 0
-        self.origin_Z = 0
+        self.params = {
+            'origin_X': 0,
+            'origin_Y': 0,
+            'origin_Z': 0,   
+        }
+
         self.segments = []
 
 class Component:
@@ -281,7 +285,10 @@ class Component:
         self.infos = {'name': 'component',
                       'creation_date': '',
                       'modification_date': ''}
-        self.origin_X = 0
-        self.origin_Y = 0
-        self.origin_Z = 0
+        self.params = {
+            'origin_X': 0,
+            'origin_Y': 0,
+            'origin_Z': 0,
+        }
+
         self.wings = []

@@ -21,7 +21,7 @@ class SplashScreen(QWidget):
 
         # Add splash image
         splash_label = QLabel(self)
-        pixmap = QPixmap("images/splash.png")
+        pixmap = QPixmap("src/images/splash.png")
         if pixmap.isNull():
             print("Error: 'splash.png' not found or invalid path.")
         splash_label.setPixmap(pixmap)
@@ -57,7 +57,7 @@ class SplashScreen(QWidget):
 
         # Add close button
         close_button = QPushButton(self)
-        icon = QIcon("images/cross.png")
+        icon = QIcon("src/images/cross.png")
         if icon.isNull():
             print("Error: 'cross.png' not found or invalid path.")
         close_button.setIcon(icon)
