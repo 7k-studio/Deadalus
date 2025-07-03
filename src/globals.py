@@ -1,20 +1,37 @@
 from datetime import date
+import json
 
 class Program:
     def __init__(self):
         self.program_name = "AirFLOW"
         self.program_version = "0.1.0dev"
-        self.general = {
-            "performance": "normal",  # Options: "normal", "fast", "slow" 
+
+        self.preferences = {
+            'general': {
+                "performance": "normal",  # Options: "normal", "fast", "slow" 
+            },
+            'airfoil_designer': {
+                "show_grid": True,
+                "show_construction": True,
+            },
+            'wing_designer': {
+                "show_grid": True,
+                "show_ruler": True,
+            }
         }
-        self.airfoil_designer = {
-            "show_grid": True,
-            "show_construction": True,
-        }
-        self.wing_designer = {
-            "show_grid": True,
-            "show_ruler": True,
-        }
+        
+        self.readPreferences()  # Load preferences from file
+
+    def readPreferences(self):
+        """Read preferences from a JSON file."""
+        try:
+            with open("src/settings", "r") as infile:
+                self.preferences = json.load(infile)
+                print("Preferences loaded successfully.")
+        except FileNotFoundError:
+            print("Preferences file not found. Using default settings.")
+        except json.JSONDecodeError:
+            print("Error decoding preferences file. Using default settings.")
 
 class Project:
     def __init__(self):

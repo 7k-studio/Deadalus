@@ -5,21 +5,42 @@ This project implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The applic
 ## Project Structure
 
 ```
-pyqt_opengl_viewport
+AirFLOW
 ├── src
 │   ├── main.py                # Entry point of the application
-│   ├── gui
-│   │   ├── main_window.py     # Main window layout and setup
-│   │   ├── tree_menu.py       # Tree menu for navigation
-│   │   ├── console_widget.py   # Command-line-like interface for user input
-│   │   └── menu_bar.py        # Dropdown menu for file operations
-│   ├── opengl
+|   ├── preferences.py
+|   ├── globals.py
+|   ├── arfdes
+|   |   ├── airfoil_designer.py
+|   |   ├── menu_bar.py
+|   |   ├── plot_canvas.py
+|   |   └── widget_tabele.py
+|   ├── data
+|   ├── images
+|   ├── obj
+|   |   ├── aero.py
+|   |   └── car.py
+|   ├── opengl
+|   |   ├── bckgrd.py
+|   |   ├── shapes.py
+|   |   ├── test_cube.py
 │   │   ├── viewport.py        # OpenGL viewport handling
 │   │   └── shaders
 │   │       ├── vertex_shader.glsl   # Vertex shader code
 │   │       └── fragment_shader.glsl # Fragment shader code
-│   └── utils
-│       └── helpers.py         # Utility functions and helpers
+|   ├── splash
+|   ├── utils
+|   |   ├── dxf.py
+|   |   ├── step.py
+|   |   ├── tools_airfoil.py
+|   |   ├── tools_program.py
+|   |   ├── tools_wing.py
+│   |   └── helpers.py         # Utility functions and helpers
+│   ├── wngwb
+│   │   ├── main_window.py     # Main window layout and setup
+│   │   ├── tree_menu.py       # Tree menu for navigation
+│   │   ├── console_widget.py   # Command-line-like interface for user input
+│   │   └── menu_bar.py        # Dropdown menu for file operations
 ├── requirements.txt           # Project dependencies
 └── README.md                  # Project documentation
 ```

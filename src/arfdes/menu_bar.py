@@ -14,9 +14,9 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
-from utils.tools_airfoil import Reference_load
+from arfdes.tools_airfoil import Reference_load
 from obj.aero import Airfoil
-from utils.tools_airfoil import add_airfoil_to_tree
+from arfdes.tools_airfoil import add_airfoil_to_tree
 
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
@@ -201,8 +201,6 @@ class MenuBar(QMenuBar):
                 # Add the airfoil to the tree menu
                 self.main_window.add_airfoil(Airfoil)
 
-            #Airfoil_0.UP_points, Airfoil_0.DW_points, Airfoil_0.name = Reference_load(fileName)
-            #Airfoil_0.le, Airfoil_0.ps, Airfoil_0.ss, Airfoil_0.te = Convert(0.08, 0.08, Airfoil_0.UP_points, Airfoil_0.DW_points)
 
     def deleteAirfoil(self):
         print("Deleting selected airfoil")
@@ -369,15 +367,10 @@ class MenuBar(QMenuBar):
         print("Fit2Ref action triggered")
 
     def preferencesWindow(self):        
-        print("Placeholder action triggered")
-        msg = QMessageBox(self)
-        msg.setWindowTitle("Preferences")
-        msg.setText("Preferences functionality is under development.")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
-        #self.airfoil_designer_window = AirfoilDesigner()dardButtons(QMessageBox.Ok)
-        #self.airfoil_designer_window.show()        #self.airfoil_designer_window.show()
+        """Open the preferences dialog."""
+        from preferences import PreferencesWindow
+        self.preferences_dialog = PreferencesWindow(self)
+        self.preferences_dialog.show()
 
     def toggleReference(self):
         sender = self.sender()

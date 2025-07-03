@@ -1,33 +1,6 @@
-#System imports
-from datetime import date
-
 #MatPlotLib imports
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from matplotlib.patches import Circle, Rectangle
-
-#Math/Physics imports
-import numpy as np
-import math
-from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
-from scipy.optimize import minimize, root_scalar
-from scipy import interpolate
-
-#Self imports
-import obj
-import utils.tools_wing
-import utils.dxf
-from arfdes.widget_tabele import Tabele
-from .menu_bar import MenuBar
-from obj.aero import Airfoil
-from utils.tools_airfoil import Reference_load
-from utils.tools_airfoil import CreateBSpline
-from utils.tools_airfoil import add_airfoil_to_tree
-import globals
 
 class PlotCanvas(FigureCanvasQTAgg):
     ''' This class creates a canvas for plotting the airfoil using Matplotlib. '''

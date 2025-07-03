@@ -27,7 +27,7 @@ from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 from arfdes.airfoil_designer import AirfoilDesigner
 import globals  # Import from globals.py
 
-from utils import tools_wing  # Import add_component_to_tree
+from wngwb import tools_wing  # Import add_component_to_tree
 
 from datetime import date
 
@@ -259,22 +259,8 @@ class MenuBar(QMenuBar):
         self.airfoil_designer_window = AirfoilDesigner()  # Pass airfoil_list
         self.airfoil_designer_window.show()
 
-        # Add a button or menu action to open the AirfoilDesigner
-        #self.open_airfoil_designer_action = QAction("Open Airfoil Designer", self)
-        #self.open_airfoil_designer_action.triggered.connect(self.open_airfoil_designer)
-        #self.menu_bar.addAction(self.open_airfoil_designer_action)
-
-    #def open_airfoil_designer(self):
-        """Open the AirfoilDesigner window."""
-        #self.airfoil_designer = AirfoilDesigner(airfoil_list)  # Pass airfoil_list
-        #self.airfoil_designer.show()
-
     def preferencesWindow(self):
-        msg = QMessageBox(self)
-        msg.setWindowTitle("Preferences")
-        msg.setText("Preferences functionality is under development.")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
-        #self.airfoil_designer_window = AirfoilDesigner()
-        #self.airfoil_designer_window.show()
+        """Open the preferences dialog."""
+        from preferences import PreferencesWindow
+        self.preferences_dialog = PreferencesWindow(self)
+        self.preferences_dialog.show()

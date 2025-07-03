@@ -28,60 +28,40 @@ class Tabele(QTableWidget):
         self.setColumnWidth(1, 100)  # Set minimum width for column 2
 
     def add_editable_row(self, row, value):
-        param_name = self.item(row, 0).text()
-        if param_name == 'airfoil':
-            airfoil_dropdown = QtWidgets.QComboBox()
-            #airfoil_dropdown.addItems([airfoil.name for airfoil in globals.airfoil_list])
-            #airfoil_dropdown.addItems(globals.PROJECT.project_airfoils)
-            airfoil_dropdown.addItems([airfoil.infos['name'] for airfoil in globals.PROJECT.project_airfoils])
-                
-            try:
-                airfoil_dropdown.setCurrentText(value)  # Set the current value
-            except TypeError:
-                print("ERROR: globals.PROJECT.project_airfoils is not iterable.")
+        """Add an editable row with up/down buttons and input field."""
+        # Create a custom widget for editing with up/down buttons and input
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
 
-            airfoil_dropdown.currentTextChanged.connect(lambda new_value: self.update_airfoil_value(row, new_value))
-            self.setCellWidget(row, 1, airfoil_dropdown)
+        # Input field for direct keyboard input
+        try:
+            value = format(value, '.4f')  # Format value to 4 decimal places
+        except TypeError:
+            pass
+        value_input = QLineEdit(str(value))
+        value_input.setAlignment(Qt.AlignCenter)
+        value_input.setMinimumWidth(60)
+        value_input.editingFinished.connect(lambda: self.update_value_from_input(row, value_input))
 
-            self.save_current_element_state()
-        
-        elif param_name == 'wings' or param_name == 'segments':
-            pass  # Skip these parameters as they are not editable in this context
+        # Up button
+        up_button = QPushButton("▲")
+        up_button.setFixedSize(20, 20)
+        up_button.clicked.connect(lambda: self.adjust_value(row, 0.1))
 
-        else:
-            # Create a custom widget for editing with up/down buttons and input
-            container = QWidget()
-            layout = QHBoxLayout(container)
-            layout.setContentsMargins(0, 0, 0, 0)
+        # Down button
+        down_button = QPushButton("▼")
+        down_button.setFixedSize(20, 20)
+        down_button.clicked.connect(lambda: self.adjust_value(row, -0.1))
 
-            # Input field for direct keyboard input
-            try:
-                value = format(value, '.4f')  # Format value to 4 decimal places
-            except TypeError:
-                pass
-            value_input = QLineEdit(str(value))
-            value_input.setAlignment(Qt.AlignCenter)
-            value_input.setMinimumWidth(60)
-            value_input.editingFinished.connect(lambda: self.update_value_from_input(row, value_input))
+        # Add widgets to layout
+        layout.addWidget(down_button)
+        layout.addWidget(value_input)
+        layout.addWidget(up_button)
 
-            # Up button
-            up_button = QPushButton("▲")
-            up_button.setFixedSize(20, 20)
-            up_button.clicked.connect(lambda: self.adjust_value(row, 0.1))
+        self.setCellWidget(row, 1, container)
 
-            # Down button
-            down_button = QPushButton("▼")
-            down_button.setFixedSize(20, 20)
-            down_button.clicked.connect(lambda: self.adjust_value(row, -0.1))
-
-            # Add widgets to layout
-            layout.addWidget(down_button)
-            layout.addWidget(value_input)
-            layout.addWidget(up_button)
-
-            self.setCellWidget(row, 1, container)
-
-            self.save_current_element_state()
+        self.save_current_element_state()
 
     def update_airfoil_value(self, row, new_name):
         # Find the Airfoil object by name
@@ -149,14 +129,58 @@ class Tabele(QTableWidget):
     def populate_table(self, element_obj):
         """Populate the table with data from an element object."""
         self.setRowCount(0)  # Clear existing rows
-        for key, value in element_obj.params.items():
+
+        # Special handling for Segment to show available airfoils in ComboBox
+        if hasattr(element_obj, 'airfoil'):
+            # Airfoil ComboBox row
             row = self.rowCount()
             self.insertRow(row)
-            self.setItem(row, 0, QTableWidgetItem(key))
-            self.add_editable_row(row, value)
-            nominal_value = QTableWidgetItem(str(value))
+            self.setItem(row, 0, QTableWidgetItem('airfoil'))
+            airfoil_dropdown = QtWidgets.QComboBox(self)  # <-- przekazanie self jako parent
+            airfoil_names = [airfoil.infos['name'] for airfoil in globals.PROJECT.project_airfoils]
+            airfoil_dropdown.addItems(airfoil_names)
+            current_name = getattr(element_obj.airfoil, 'infos', {}).get('name', '')
+            if current_name in airfoil_names:
+                airfoil_dropdown.setCurrentText(current_name)
+            elif airfoil_names:
+                airfoil_dropdown.setCurrentIndex(0)
+            airfoil_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            self.setCellWidget(row, 1, airfoil_dropdown)
+            nominal_value = QTableWidgetItem(current_name)
             nominal_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
+            self.setItem(row, 2, nominal_value)
+        
+        # Special handling for Segment to show available anchors in ComboBox
+        if hasattr(element_obj, 'anchor'):
+            # Airfoil ComboBox row
+            row = self.rowCount()
+            self.insertRow(row)
+            self.setItem(row, 0, QTableWidgetItem('anchor'))
+            anchor_dropdown = QtWidgets.QComboBox(self)  # <-- przekazanie self jako parent
+            anchor_names = ['G0', 'G1', 'G2']
+            anchor_dropdown.addItems(anchor_names)
+            current_name = getattr(element_obj, 'anchor', '')
+            if current_name in anchor_names:
+                anchor_dropdown.setCurrentText(current_name)
+            elif anchor_names:
+                anchor_dropdown.setCurrentIndex(0)
+            anchor_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            self.setCellWidget(row, 1, anchor_dropdown)
+            nominal_value = QTableWidgetItem(current_name)
+            nominal_value.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 2, nominal_value)
+        
+        # Default: show all params of element
+        if hasattr(element_obj, 'params'):
+            # Params rows
+            for key, value in element_obj.params.items():
+                row = self.rowCount()
+                self.insertRow(row)
+                self.setItem(row, 0, QTableWidgetItem(key))
+                self.add_editable_row(row, value)
+                nominal_value = QTableWidgetItem(str(value))
+                nominal_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 2, nominal_value)
 
     def display_selected_element(self, item):
         """Display the selected element in the table."""

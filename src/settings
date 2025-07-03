@@ -1,0 +1,15 @@
+{
+ "general": [
+  {
+   "performance": "normal"
+  }
+ ],
+ "airfoil_designer": {
+  "show_grid": false,
+  "show_construction": true
+ },
+ "wing_designer": {
+  "show_grid": true,
+  "show_ruler": true
+ }
+}

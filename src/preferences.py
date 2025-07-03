@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox
 )
 from globals import AIRFLOW
+import json
 
 class PreferencesWindow(QDialog):
     def __init__(self, parent=None):
@@ -55,14 +56,14 @@ class PreferencesWindow(QDialog):
         self.general_tab.setLayout(layout)
 
     def on_performance_changed(self, value):
-        AIRFLOW.general["performance"] = value
+        AIRFLOW.preferences['general']["performance"] = value
 
     def init_airfoil_tab(self):
         layout = QVBoxLayout()
         self.airfoil_show_grid = QCheckBox("Show Grid")
-        self.airfoil_show_grid.setChecked(AIRFLOW.airfoil_designer["show_grid"])
+        self.airfoil_show_grid.setChecked(AIRFLOW.preferences['airfoil_designer']['show_grid'])
         self.airfoil_show_construction = QCheckBox("Show Construction")
-        self.airfoil_show_construction.setChecked(AIRFLOW.airfoil_designer["show_construction"])
+        self.airfoil_show_construction.setChecked(AIRFLOW.preferences['airfoil_designer']['show_construction'])
         layout.addWidget(self.airfoil_show_grid)
         layout.addWidget(self.airfoil_show_construction)
         layout.addStretch()
@@ -71,20 +72,43 @@ class PreferencesWindow(QDialog):
     def init_wing_tab(self):
         layout = QVBoxLayout()
         self.wing_show_grid = QCheckBox("Show Grid")
-        self.wing_show_grid.setChecked(AIRFLOW.wing_designer["show_grid"])
+        self.wing_show_grid.setChecked(AIRFLOW.preferences['wing_designer']['show_grid'])
         self.wing_show_construction = QCheckBox("Show Ruler")
-        self.wing_show_construction.setChecked(AIRFLOW.wing_designer["show_ruler"])
+        self.wing_show_construction.setChecked(AIRFLOW.preferences['wing_designer']['show_ruler'])
         layout.addWidget(self.wing_show_grid)
         layout.addWidget(self.wing_show_construction)
         layout.addStretch()
         self.wing_tab.setLayout(layout)
 
     def save_preferences(self):
-        AIRFLOW.airfoil_designer["show_grid"] = self.airfoil_show_grid.isChecked()
-        AIRFLOW.airfoil_designer["show_construction"] = self.airfoil_show_construction.isChecked()
-        AIRFLOW.wing_designer["show_grid"] = self.wing_show_grid.isChecked()
-        AIRFLOW.wing_designer["show_construction"] = self.wing_show_construction.isChecked()
+        AIRFLOW.preferences['airfoil_designer']["show_grid"] = self.airfoil_show_grid.isChecked()
+        AIRFLOW.preferences['airfoil_designer']["show_construction"] = self.airfoil_show_construction.isChecked()
+        AIRFLOW.preferences['wing_designer']["show_grid"] = self.wing_show_grid.isChecked()
+        AIRFLOW.preferences['wing_designer']["show_construction"] = self.wing_show_construction.isChecked()
         self.accept()
+        
+        """Save the airfoil data to a JSON format file."""
+        # Use self.program_info to access program details
+
+        preferences = {}
+
+        preferences['general'] = {
+            "performance": str(AIRFLOW.preferences['general'].get("performance", "")),
+            },
+        preferences['airfoil_designer'] = {
+            "show_grid": AIRFLOW.preferences['airfoil_designer'].get("show_grid", True),
+            "show_construction": AIRFLOW.preferences['airfoil_designer'].get("show_construction", True),
+        }
+        preferences['wing_designer'] = {
+            "show_grid": AIRFLOW.preferences['wing_designer'].get("show_grid", True),
+            "show_ruler": AIRFLOW.preferences['wing_designer'].get("show_ruler", True),
+        }
+ 
+        json_object = json.dumps(preferences, indent=1)
+
+        with open(f"src/settings", "w") as outfile:
+            outfile.write(json_object)
+            print(f"Saved file: settings")
 
 # For testing the dialog independently
 if __name__ == "__main__":

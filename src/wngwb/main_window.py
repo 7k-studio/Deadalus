@@ -9,12 +9,12 @@ from PyQt5.QtCore import Qt
 import numpy as np
 
 import obj.aero
-import utils.tools_wing
+import wngwb.tools_wing
 import utils.dxf
 import random
 
 from PyQt5.QtWidgets import (
-    QTableWidget, QTableWidgetItem, QPushButton
+    QTableWidget, QTableWidgetItem, QPushButton, QSizePolicy
 )
 
 from opengl.viewport import ViewportOpenGL
@@ -30,10 +30,10 @@ from wngwb.widget_tree import TreeMenu  # Import TreeMenu
 #from globals import airfoil_list  # Import from globals.py
 import globals  # Import from globals.py
 #from designer.airfoil_designer import AirfoilDesigner  # Import AirfoilDesigner
-from utils import tools_wing  # Import add_component_to_tree
+from wngwb import tools_wing  # Import add_component_to_tree
 from datetime import date
 
-Trans = utils.tools_wing
+Trans = wngwb.tools_wing
 
 class MainWindow(QMainWindow):
 
@@ -61,8 +61,10 @@ class MainWindow(QMainWindow):
         self.setMenuBar(self.menu_bar)
 
         # Use the TreeMenu class directly
-        self.tree_menu = TreeMenu(self)  # Use the TreeMenu class
-        self.tree_menu.setMinimumWidth(100)  # Set minimum width for TreeMenu
+        self.tree_menu = TreeMenu(self)
+        self.tree_menu.setMinimumWidth(50)  # Nie pozwól schować całkowicie
+        self.tree_menu.setMaximumWidth(300)
+        self.tree_menu.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.outer_splitter.addWidget(self.tree_menu)
 
         # Inner splitter to divide Viewport and Tabele
@@ -73,16 +75,26 @@ class MainWindow(QMainWindow):
         self.open_gl = ViewportOpenGL(parent=self.viewport)
         viewport_layout = QVBoxLayout(self.viewport)
         viewport_layout.addWidget(self.open_gl)
-        self.viewport.setMinimumWidth(500)  # Set minimum width for Viewport
+        self.viewport.setMinimumWidth(500)
+        self.viewport.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.inner_splitter.addWidget(self.viewport)
 
         # Add the Tabele module to the inner splitter
         self.tabele = Tabele(self, tree_menu=self.tree_menu, project=globals.PROJECT)
-        self.tabele.setMinimumWidth(100)  # Set minimum width for Tabele
+        self.tabele.setMinimumWidth(200)
+        self.tabele.setMaximumWidth(300)  # Opcjonalnie: ogranicz maksymalną szerokość
+        self.tabele.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.inner_splitter.addWidget(self.tabele)
 
         # Add the inner splitter to the outer splitter
         self.outer_splitter.addWidget(self.inner_splitter)
+
+        # Set stretch factors for splitters to control resizing behavior
+        self.outer_splitter.setStretchFactor(0, 0)  # TreeMenu (fixed)
+        self.outer_splitter.setStretchFactor(1, 1)  # inner_splitter (main area)
+
+        self.inner_splitter.setStretchFactor(0, 10)  # Viewport (promoted)
+        self.inner_splitter.setStretchFactor(1, 0)   # Tabele (fixed)
 
         # Add the outer splitter to the main layout
         main_layout.addWidget(self.outer_splitter)
@@ -118,4 +130,7 @@ class MainWindow(QMainWindow):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         # Add rendering logic here
-        
+
+    def show_tree_menu(self):
+        self.outer_splitter.setSizes([200, self.width() - 200])
+

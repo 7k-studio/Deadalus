@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (
     QPushButton, QLineEdit, QHeaderView
 )
 from PyQt5.QtCore import Qt, pyqtSignal
-from utils.tools_airfoil import add_airfoil_to_tree
+from arfdes.tools_airfoil import add_airfoil_to_tree
 
 import globals  # Import from globals.py
 

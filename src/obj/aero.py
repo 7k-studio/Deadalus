@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-from utils.tools_airfoil import CreateBSpline
+from arfdes.tools_airfoil import CreateBSpline
 import globals
 
 class Airfoil_old:
@@ -145,6 +145,7 @@ class Segment:
                       'modification_date': ''}
         
         self.airfoil = Airfoil()
+        self.anchor = 'G0' # G1 or G2
 
         self.params = {
             'origin_X': 0,

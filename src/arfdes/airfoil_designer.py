@@ -29,14 +29,14 @@ from scipy import interpolate
 
 #Self imports
 import obj
-import utils.tools_wing
+import wngwb.tools_wing
 import utils.dxf
 from arfdes.widget_tabele import Tabele
 from .menu_bar import MenuBar
 from obj.aero import Airfoil
-from utils.tools_airfoil import Reference_load
-from utils.tools_airfoil import CreateBSpline
-from utils.tools_airfoil import add_airfoil_to_tree
+from arfdes.tools_airfoil import Reference_load
+from arfdes.tools_airfoil import CreateBSpline
+from arfdes.tools_airfoil import add_airfoil_to_tree
 import globals
 
 from arfdes.plot_canvas import PlotCanvas
