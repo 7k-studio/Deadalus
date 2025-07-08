@@ -47,6 +47,8 @@ class PreferencesWindow(QDialog):
         self.general_performance = QComboBox()
         self.general_performance.addItems(["fast", "normal", "good"])
         self.general_performance.currentTextChanged.connect(self.on_performance_changed)
+        # Fix: Ensure AIRFLOW.preferences['general'] is a dict, not a list
+        self.general_performance.setCurrentText(AIRFLOW.preferences['general'].get('performance', 'normal'))
 
         perf_layout.addWidget(perf_text)
         perf_layout.addWidget(self.general_performance)
@@ -62,9 +64,13 @@ class PreferencesWindow(QDialog):
         layout = QVBoxLayout()
         self.airfoil_show_grid = QCheckBox("Show Grid")
         self.airfoil_show_grid.setChecked(AIRFLOW.preferences['airfoil_designer']['show_grid'])
+        self.airfoil_show_control_points = QCheckBox("Show Control Points")
+        self.airfoil_show_control_points.setChecked(AIRFLOW.preferences['airfoil_designer']['show_control_points'])
         self.airfoil_show_construction = QCheckBox("Show Construction")
         self.airfoil_show_construction.setChecked(AIRFLOW.preferences['airfoil_designer']['show_construction'])
+
         layout.addWidget(self.airfoil_show_grid)
+        layout.addWidget(self.airfoil_show_control_points)
         layout.addWidget(self.airfoil_show_construction)
         layout.addStretch()
         self.airfoil_tab.setLayout(layout)
@@ -73,18 +79,19 @@ class PreferencesWindow(QDialog):
         layout = QVBoxLayout()
         self.wing_show_grid = QCheckBox("Show Grid")
         self.wing_show_grid.setChecked(AIRFLOW.preferences['wing_designer']['show_grid'])
-        self.wing_show_construction = QCheckBox("Show Ruler")
-        self.wing_show_construction.setChecked(AIRFLOW.preferences['wing_designer']['show_ruler'])
+        self.wing_show_ruler = QCheckBox("Show Ruler")
+        self.wing_show_ruler.setChecked(AIRFLOW.preferences['wing_designer']['show_ruler'])
         layout.addWidget(self.wing_show_grid)
-        layout.addWidget(self.wing_show_construction)
+        layout.addWidget(self.wing_show_ruler)
         layout.addStretch()
         self.wing_tab.setLayout(layout)
 
     def save_preferences(self):
         AIRFLOW.preferences['airfoil_designer']["show_grid"] = self.airfoil_show_grid.isChecked()
+        AIRFLOW.preferences['airfoil_designer']["show_control_points"] = self.airfoil_show_control_points.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_construction"] = self.airfoil_show_construction.isChecked()
         AIRFLOW.preferences['wing_designer']["show_grid"] = self.wing_show_grid.isChecked()
-        AIRFLOW.preferences['wing_designer']["show_construction"] = self.wing_show_construction.isChecked()
+        AIRFLOW.preferences['wing_designer']["show_ruler"] = self.wing_show_ruler.isChecked()
         self.accept()
         
         """Save the airfoil data to a JSON format file."""
@@ -92,11 +99,13 @@ class PreferencesWindow(QDialog):
 
         preferences = {}
 
+        # Fix: Remove trailing comma so this is a dict, not a tuple
         preferences['general'] = {
             "performance": str(AIRFLOW.preferences['general'].get("performance", "")),
-            },
+        }
         preferences['airfoil_designer'] = {
             "show_grid": AIRFLOW.preferences['airfoil_designer'].get("show_grid", True),
+            "show_control_points": AIRFLOW.preferences['airfoil_designer'].get("show_control_points", True),
             "show_construction": AIRFLOW.preferences['airfoil_designer'].get("show_construction", True),
         }
         preferences['wing_designer'] = {

@@ -96,7 +96,8 @@ class Airfoil:
         p_le_ps = [self.params['origin_X']+self.params['le_depth'], self.params['origin_Y']+self.params['le_thickness']/2+self.params['le_offset']]
         p_le_ss = [self.params['origin_X']+self.params['le_depth'], self.params['origin_Y']-self.params['le_thickness']/2+self.params['le_offset']]
 
-        le_constr = np.vstack([p_le_ss, p_le_d, p_le_start, p_le_t, p_le_ps]).T
+        #le_constr = np.vstack([p_le_ss, p_le_d, p_le_start, p_le_t, p_le_ps]).T
+        le_constr = np.vstack([p_le_ss, p_le_d, p_le_t, p_le_ps]).T
 
         p_te_start = [self.params['origin_X']+self.params['chord'], self.params['origin_Y']]
         a3 = math.tan(np.radians(90+self.params['te_angle']))
@@ -110,7 +111,8 @@ class Airfoil:
         p_te_ps = [self.params['origin_X']+self.params['chord']-self.params['te_depth'], self.params['origin_Y']+self.params['te_thickness']/2+self.params['te_offset']]
         p_te_ss = [self.params['origin_X']+self.params['chord']-self.params['te_depth'], self.params['origin_Y']-self.params['te_thickness']/2+self.params['te_offset']]
 
-        te_constr = np.vstack([p_te_ss, p_te_d, p_te_start, p_te_t, p_te_ps]).T
+        #te_constr = np.vstack([p_te_ss, p_te_d, p_te_start, p_te_t, p_te_ps]).T
+        te_constr = np.vstack([p_te_ss, p_te_d, p_te_t, p_te_ps]).T
 
         p_ps_le = p_le_ps
         p_ps_te = p_te_ps

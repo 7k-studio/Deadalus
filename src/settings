@@ -1,15 +1,14 @@
 {
- "general": [
-  {
-   "performance": "normal"
-  }
- ],
+ "general": {
+  "performance": "good"
+ },
  "airfoil_designer": {
-  "show_grid": false,
+  "show_grid": true,
+  "show_control_points": true,
   "show_construction": true
  },
  "wing_designer": {
   "show_grid": true,
-  "show_ruler": true
+  "show_ruler": false
  }
 }

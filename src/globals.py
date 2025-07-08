@@ -12,6 +12,7 @@ class Program:
             },
             'airfoil_designer': {
                 "show_grid": True,
+                "show_control_points": True,
                 "show_construction": True,
             },
             'wing_designer': {
@@ -26,7 +27,11 @@ class Program:
         """Read preferences from a JSON file."""
         try:
             with open("src/settings", "r") as infile:
-                self.preferences = json.load(infile)
+                loaded = json.load(infile)
+                # Only update keys that exist in the default preferences
+                for section in self.preferences:
+                    if section in loaded and isinstance(loaded[section], dict):
+                        self.preferences[section].update(loaded[section])
                 print("Preferences loaded successfully.")
         except FileNotFoundError:
             print("Preferences file not found. Using default settings.")

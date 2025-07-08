@@ -11,13 +11,14 @@ import json
 import globals  # Import from globals.py
 
 
-def add_airfoil_to_tree(tree_menu, name, airfoil_obj):
+def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
     """Add an airfoil to the list and tree menu."""
     modification_date = airfoil_obj.infos.get('modification_date', 'Unknown')
     creation_date = airfoil_obj.infos.get('creation_date', 'Unknown')
     description = airfoil_obj.infos.get('description', 'No description')
     tree_item = QTreeWidgetItem([name, str(modification_date), str(creation_date), description])
     tree_menu.addTopLevelItem(tree_item)
+    print(f"Airfoil '{name}' added to the tree menu.")
 
 def Reference_load(file):
     AirfoilCoord = []
@@ -69,13 +70,13 @@ def CreateBSpline(const_points):
     t=np.append(t,[1,1,1])
 
     tck=[t,[const_points[0],const_points[1]],3]
-    if globals.AIRFLOW.general['performance'] == 'fast':
+    if globals.AIRFLOW.preferences['general']['performance'] == 'fast':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*1,25)),endpoint=True)
-    if globals.AIRFLOW.general['performance'] == 'normal':
+    if globals.AIRFLOW.preferences['general']['performance'] == 'normal':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*2,50)),endpoint=True)
-    if globals.AIRFLOW.general['performance'] == 'good':
+    if globals.AIRFLOW.preferences['general']['performance'] == 'good':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*3,75)),endpoint=True)
 
@@ -152,3 +153,107 @@ def find_t_for_x(desired_x, tck):
     if not result.converged:
         raise ValueError(f"Could not find t for X = {desired_x}")
     return result.root
+
+def load_airfoil_from_json(self, fileName):
+    """load the airfoil data from a JSON format file."""
+    import obj
+    Airfoil = obj.aero.Airfoil()
+
+    if fileName:
+        try:
+            with open(f"{fileName}", "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            print("ERROR: File not found!")
+        except json.JSONDecodeError:
+            print("ERROR: During decoding JSON!")
+
+    if data:
+        try:
+            program_version = data["program version"]
+            airfoil = data["airfoil"]
+        except KeyError as e:
+            print(f"ERROR: Missing key in ARF data - {e}")
+            print("File may not load properly or is not compatible with AirFLOW")
+            return None
+
+        if program_version != globals.AIRFLOW.program_version:
+            print("WARNING: Program version mismatch. Import may not be compatible.")
+
+        try:
+            # Handle version match if necessary
+            Airfoil.chord = airfoil["chord"]
+            Airfoil.origin_X = airfoil["origin_X"]
+            Airfoil.origin_Y = airfoil["origin_Y"]
+            Airfoil.le_thickness = airfoil["le_thickness"]
+            Airfoil.le_depth = airfoil["le_depth"]
+            Airfoil.le_offset = airfoil["le_offset"]
+            Airfoil.le_angle = airfoil["le_angle"]
+            Airfoil.te_thickness = airfoil["te_thickness"]
+            Airfoil.te_depth = airfoil["te_depth"]
+            Airfoil.te_offset = airfoil["te_offset"]
+            Airfoil.te_angle = airfoil["te_angle"]
+            Airfoil.ps_fwd_angle = airfoil["ps_fwd_angle"]
+            Airfoil.ps_rwd_angle = airfoil["ps_rwd_angle"]
+            Airfoil.ps_fwd_accel = airfoil["ps_fwd_accel"]
+            Airfoil.ps_rwd_accel = airfoil["ps_rwd_accel"]
+            Airfoil.ss_fwd_angle = airfoil["ss_fwd_angle"]
+            Airfoil.ss_rwd_angle = airfoil["ss_rwd_angle"]
+            Airfoil.ss_fwd_accel = airfoil["ss_fwd_accel"]
+            Airfoil.ss_rwd_accel = airfoil["ss_rwd_accel"]
+            Airfoil.infos = {
+                "name": airfoil["infos"]["name"],
+                "creation_date": airfoil["infos"]["creation_date"],
+                "modification_date": airfoil["infos"]["modification_date"],
+                "description": airfoil["infos"]["description"]
+            }
+        except KeyError as e:
+            print(f"ERROR: Missing key in ARF data - {e}")
+            return None
+        
+        print("Append Airfoil: Success!")
+
+        return Airfoil
+
+def save_airfoil_to_json(self, airfoil_idx=None):
+        """Save the airfoil data to a JSON format file."""
+ 
+        current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
+
+        data = {
+            "program name": globals.AIRFLOW.program_name,
+            "program version": globals.AIRFLOW.program_version,
+            "airfoil": {
+                "infos": {
+                    **current_airfoil.infos,
+                    "name": str(current_airfoil.infos.get("name", "")),
+                    "creation_date": str(current_airfoil.infos.get("creation_date", "")),
+                    "modification_date": str(current_airfoil.infos.get("modification_date", "")),
+                    "description": str(current_airfoil.infos.get("description", ""))
+                },
+                "chord": current_airfoil.params["chord"],
+                "origin_X": current_airfoil.params["origin_X"],
+                "origin_Y": current_airfoil.params["origin_Y"],
+                "le_thickness": current_airfoil.params["le_thickness"],
+                "le_depth": current_airfoil.params["le_depth"],
+                "le_offset": current_airfoil.params["le_offset"],
+                "le_angle": current_airfoil.params["le_angle"],
+                "te_thickness": current_airfoil.params["te_thickness"],
+                "te_depth": current_airfoil.params["te_depth"],
+                "te_offset": current_airfoil.params["te_offset"],
+                "te_angle": current_airfoil.params["te_angle"],
+                "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
+                "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
+                "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
+                "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
+                "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
+                "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
+                "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
+                "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
+            }
+        }
+ 
+        json_object = json.dumps(data, indent=1)
+
+        return json_object
+

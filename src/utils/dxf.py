@@ -3,6 +3,7 @@ import ezdxf.layouts
 from ezdxf.math import ConstructionArc, Vec3, BSpline
 import numpy as np
 import math
+import globals
 
 
 
@@ -287,55 +288,60 @@ paperspace.add_viewport(
 )
 '''
 
-def ExportToDXF(export_airfoil):
+def export_airfoil_to_dxf(airfoil_idx, file_name=None):
 
     Z = 0
     
     doc = ezdxf.new()
     msp = doc.modelspace()
+
+    airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
+    print(f"Exporting airfoil {airfoil_idx} to DXF...")
     
-    for idx, airfoil in enumerate(export_airfoil):
-        
-        if airfoil is not None and hasattr(airfoil, 'le') and airfoil.le is not None and len(airfoil.le) > 0:
-            
-            # Sprawdzenie, czy wszystkie tablice mają wystarczającą ilość danych
-            if len(airfoil.le[0]) > 0 and len(airfoil.le[1]) > 0:
-                exp_le = airfoil.le
-            else:
-                print(f"Airfoil {idx} has an empty or insufficient LE array.")
+    #for idx, airfoil in enumerate(export_airfoil):
 
-            if len(airfoil.ps[0]) > 0 and len(airfoil.ps[1]) > 0:
-                exp_ps = airfoil.ps
-            else:
-                print(f"Airfoil {idx} has an empty or insufficient PS array.")
+    if airfoil is not None and hasattr(airfoil, 'constr') and airfoil.constr['le'] is not None and len(airfoil.constr['le']) > 0:
 
-            if len(airfoil.ss[0]) > 0 and len(airfoil.ss[1]) > 0:
-                exp_ss = airfoil.ss
-            else:
-                print(f"Airfoil {idx} has an empty or insufficient SS array.")
+        # Sprawdzenie, czy wszystkie tablice mają wystarczającą ilość danych
+        if len(airfoil.constr['le'][0]) > 0 and len(airfoil.constr['le'][1]) > 0:
+            exp_le = airfoil.constr['le']
+        else:
+            print(f"Airfoil {airfoil_idx} has an empty or insufficient LE array.")
 
-            if len(airfoil.te[0]) > 0 and len(airfoil.te[1]) > 0:
-                exp_te = airfoil.te
-            else:
-                print(f"Airfoil {idx} has an empty or insufficient TE array.")
+        if len(airfoil.constr['ps'][0]) > 0 and len(airfoil.constr['ps'][1]) > 0:
+            exp_ps = airfoil.constr['ps']
+        else:
+            print(f"Airfoil {airfoil_idx} has an empty or insufficient PS array.")
+
+        if len(airfoil.constr['ss'][0]) > 0 and len(airfoil.constr['ss'][1]) > 0:
+            exp_ss = airfoil.constr['ss']
+        else:
+            print(f"Airfoil {airfoil_idx} has an empty or insufficient SS array.")
+
+        if len(airfoil.constr['te'][0]) > 0 and len(airfoil.constr['te'][1]) > 0:
+            exp_te = airfoil.constr['te']
+        else:
+            print(f"Airfoil {airfoil_idx} has an empty or insufficient TE array.")
 
 
-        ps_Z_row = np.full((1, exp_ps.shape[1]), Z)
-        ps = np.vstack((exp_ps, ps_Z_row)).T
-        ps_spline = msp.add_spline(ps)
-        
-        ss_Z_row = np.full((1, exp_ss.shape[1]), Z)
-        ss = np.vstack((exp_ss, ss_Z_row)).T
-        ss_spline = msp.add_spline(ss)
-        
-        le_Z_row = np.full((1, exp_le.shape[1]), Z)
-        le = np.vstack((exp_le, le_Z_row)).T
-        le_spline = msp.add_spline(le)
-        
-        te_Z_row = np.full((1, exp_te.shape[1]), Z)
-        te = np.vstack((exp_te, te_Z_row)).T
-        te_spline = msp.add_spline(te)
+    ps_Z_row = np.full((1, exp_ps.shape[1]), Z)
+    ps = np.vstack((exp_ps, ps_Z_row)).T
+    #ps_spline = msp.add_spline(ps)
+    ps_spline = msp.add_open_spline(ps)
+    
+    ss_Z_row = np.full((1, exp_ss.shape[1]), Z)
+    ss = np.vstack((exp_ss, ss_Z_row)).T
+    #ss_spline = msp.add_spline(ss)
+    ss_spline = msp.add_open_spline(ss)
 
-    print('Saving file as...')
-    file_name = str(input(': '))
-    doc.saveas("{}.dxf".format(file_name))
+    le_Z_row = np.full((1, exp_le.shape[1]), Z)
+    le = np.vstack((exp_le, le_Z_row)).T
+    #le_spline = msp.add_spline(le)
+    le_spline = msp.add_open_spline(le)
+
+    te_Z_row = np.full((1, exp_te.shape[1]), Z)
+    te = np.vstack((exp_te, te_Z_row)).T
+    #te_spline = msp.add_spline(te)
+    te_spline = msp.add_open_spline(te)
+
+    doc.saveas("{}".format(file_name))

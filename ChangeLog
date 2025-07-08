@@ -2,15 +2,42 @@ ChangeLog:
 
 ToDo:
 1. Stabilize GUI in Wing Workbench. The widgets float around sometimes
-2. Adress deleting all airfoil in Airfoil Designer
-3. Provide .STL export
+2. Reopening of Airfoil Designer from Wing Designer causes problems
+3. Provide .STEP export
 4. Transformation of Component, Wing, Section
 5. Display of the background in OpenGL - Of the lines that stack
 
 
 
-
-v0.1.0dev
+v0.1.1dev
 Creation of GUI for both Airfoil Designer and Wing Workbench.
 On reopening of Wing Workbench Project Tree is refreshed
 Repaired floating number display problem by limiting decimals to 5 digits
+
+
+Currently stable elements and functions are listed below:
+
+Main:
+ 1. Preferences are now being saved and loaded when program is opening
+
+Airfoil designer:
+ 1. File:
+    a. New - now tree menu is cleared and project resets
+    b. Preferences - opens preferences window
+ 2. Edit menu now have working functions of:
+    a. Create - creates new airfoil
+    b. Append - appends airfoil from exising .arf file
+    c. Delete - deletes selected airfoil
+    d. Save - saves airfoil to .arf file
+    e. Export - exports airfoil to .dxf file
+    f. Rename - renames airfoil
+    g. Edit description - edits description of an airfoil
+ 3. View:
+    a. Show reference - Shows reference of airfoil in SELIG format
+ 4. Module:
+    a. Wing module - open Wing Workbench
+ 5. Help:
+    a. About - shows not so useful about
+
+Wing designer:
+ 1. Probably nothing :/

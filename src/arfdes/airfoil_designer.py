@@ -108,7 +108,7 @@ class AirfoilDesigner(QMainWindow):
         # Connect tree widget selection to display function
         self.tree_menu.itemClicked.connect(self.table.display_selected_airfoil)
 
-        if not project.project_airfoils:
+        if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
             self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
     
@@ -144,7 +144,7 @@ class AirfoilDesigner(QMainWindow):
         self.tree_menu.setColumnCount(4)  # Adjust the number of columns
         self.tree_menu.setHeaderLabels(["Name", "Last modification", "Creation Date", "Description"])  # Set column headers
 
-        for airfoil in self.project.project_airfoils:
+        for airfoil in globals.PROJECT.project_airfoils:
             # Assuming airfoil_list contains objects with 'infos' dictionary
             name = airfoil.infos.get('name', 'Unknown')
             modification_date = airfoil.infos.get('modification_date', 'Unknown')

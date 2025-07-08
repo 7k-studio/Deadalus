@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
+import utils.dxf
+import arfdes.tools_airfoil as tools_airfoil
 from arfdes.tools_airfoil import Reference_load
 from obj.aero import Airfoil
 from arfdes.tools_airfoil import add_airfoil_to_tree
@@ -100,7 +102,6 @@ class MenuBar(QMenuBar):
 
         viewMenu.addAction(referenceAction)
 
-
         moduleMenu = self.addMenu('Module')
         WingModule = QAction('Wing Module', self)
         WingModule.triggered.connect(self.open_wing_module)
@@ -116,6 +117,7 @@ class MenuBar(QMenuBar):
         if msg == QMessageBox.Yes:
             print("Creating new project...")
             # Reset the project components
+            self.tree_menu.clear()  # Clear the tree menu
             globals.PROJECT.newProject()
 
     def openProject(self):
@@ -127,7 +129,9 @@ class MenuBar(QMenuBar):
         print("Saving project")
         if self.main_window:
             pass
-
+    
+    """Airfoil menu actions"""
+    
     def newAirfoil(self):
         print("Creating new airfoil")
         if self.main_window:  # Ensure main_window is set
@@ -136,70 +140,18 @@ class MenuBar(QMenuBar):
 
     def appendAirfoil(self):
         """load the airfoil data from a JSON format file."""
-        # Use self.program_info to access program details
-        if not self.program_info:
-            print("Program info not available.")
-            return
-        
-        Airfoil = Airfoil()
 
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Airfoil Format (*.arf);;All Files (*)", options=options)
+
         if fileName:
-            print(f"Opened file: {fileName}")
-
-            try:
-                with open(f"{fileName}.arf", "r") as file:
-                    data = json.load(file)
-                    print("File load: Success!")
-            except FileNotFoundError:
-                print("File not found!")
-            except json.JSONDecodeError:
-                print("Error decoding JSON!")
-
-        if data:
-            program_version = data["program version"]
-            airfoil_designer_version = data["airfoil designer version"]
-            component = data["component"]
-
-
-            if airfoil_designer_version != self.program_info.airfoil_designer_verison:
-                print("Warning: Airfoil Designer version mismatch.")
-                # Handle version mismatch if necessary
-            if program_version != self.program_info.program_version:
-                print("Warning: Program version mismatch.")
-                # Handle version mismatch if necessary
-
-            if airfoil_designer_version == self.program_info.airfoil_designer_verison:
-                print("Airfoil Designer version match.")
-                # Handle version match if necessary
-                Airfoil.chord = component["airfoil"]["chord"]
-                Airfoil.origin_X = component["airfoil"]["origin_X"]
-                Airfoil.origin_Y = component["airfoil"]["origin_Y"]
-                Airfoil.le_thickness = component["airfoil"]["le_thickness"]
-                Airfoil.le_depth = component["airfoil"]["le_depth"]
-                Airfoil.le_offset = component["airfoil"]["le_offset"]
-                Airfoil.le_angle = component["airfoil"]["le_angle"]
-                Airfoil.te_thickness = component["airfoil"]["te_thickness"]
-                Airfoil.te_depth = component["airfoil"]["te_depth"]
-                Airfoil.te_offset = component["airfoil"]["te_offset"]
-                Airfoil.te_angle = component["airfoil"]["te_angle"]
-                Airfoil.ps_fwd_angle = component["airfoil"]["ps_fwd_angle"]
-                Airfoil.ps_rwd_angle = component["airfoil"]["ps_rwd_angle"]
-                Airfoil.ps_fwd_accel = component["airfoil"]["ps_fwd_accel"]
-                Airfoil.ps_rwd_accel = component["airfoil"]["ps_rwd_accel"]
-                Airfoil.ss_fwd_angle = component["airfoil"]["ss_fwd_angle"]
-                Airfoil.ss_rwd_angle = component["airfoil"]["ss_rwd_angle"]
-                Airfoil.ss_fwd_accel = component["airfoil"]["ss_fwd_accel"]
-                Airfoil.ss_rwd_accel = component["airfoil"]["ss_rwd_accel"]
-                Airfoil.infos = {
-                    "name": component["airfoil"]["infos"]["name"],
-                    "creation_date": component["airfoil"]["infos"]["creation_date"],
-                    "modification_date": component["airfoil"]["infos"]["modification_date"],
-                    "description": component["airfoil"]["infos"]["description"]
-                }
-                # Add the airfoil to the tree menu
-                self.main_window.add_airfoil(Airfoil)
+            airfoil_obj = tools_airfoil.load_airfoil_from_json(self.main_window, fileName)
+            # Add the airfoil to the tree menu
+            self.PROJECT.project_airfoils.append(airfoil_obj)
+            if airfoil_obj:
+                add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
+            else:
+                print("ERROR: Airfoil import failed!")
 
 
     def deleteAirfoil(self):
@@ -225,10 +177,6 @@ class MenuBar(QMenuBar):
             
     def saveAirfoil(self):
         """Save the airfoil data to a JSON format file."""
-        # Use self.program_info to access program details
-        if not self.program_info:
-            print("Program info not available.")
-            return
 
         selected_item = self.main_window.tree_menu.currentItem()
         if not selected_item:
@@ -238,48 +186,8 @@ class MenuBar(QMenuBar):
         airfoil_index = self.main_window.tree_menu.indexOfTopLevelItem(selected_item)
         if airfoil_index == -1:
             return  # Invalid selection
- 
-        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
 
-        component = {}
-
-        component['airfoil'] = {
-            "infos": {
-                **current_airfoil.infos,
-                "name": str(current_airfoil.infos.get("name", "")),
-                "creation_date": str(current_airfoil.infos.get("creation_date", "")),
-                "modification_date": str(current_airfoil.infos.get("modification_date", "")),
-                "description": str(current_airfoil.infos.get("description", ""))
-            },
-            "chord": current_airfoil.chord,
-            "origin_X": current_airfoil.origin_X,
-            "origin_Y": current_airfoil.origin_Y,
-            "le_thickness": current_airfoil.le_thickness,
-            "le_depth": current_airfoil.le_depth,
-            "le_offset": current_airfoil.le_offset,
-            "le_angle": current_airfoil.le_angle,
-            "te_thickness": current_airfoil.te_thickness,
-            "te_depth": current_airfoil.te_depth,
-            "te_offset": current_airfoil.te_offset,
-            "te_angle": current_airfoil.te_angle,
-            "ps_fwd_angle": current_airfoil.ps_fwd_angle,
-            "ps_rwd_angle": current_airfoil.ps_rwd_angle,
-            "ps_fwd_accel": current_airfoil.ps_fwd_accel,
-            "ps_rwd_accel": current_airfoil.ps_rwd_accel,
-            "ss_fwd_angle": current_airfoil.ss_fwd_angle,
-            "ss_rwd_angle": current_airfoil.ss_rwd_angle,
-            "ss_fwd_accel": current_airfoil.ss_fwd_accel,
-            "ss_rwd_accel": current_airfoil.ss_rwd_accel
-        }
- 
-        data = {
-            "program name": self.program_info.program_name,
-            "program version": self.program_info.program_version,
-            "airfoil designer version": self.program_info.airfoil_designer_verison,
-            "component": component,
-        }
- 
-        json_object = json.dumps(data, indent=1)
+        json_object = tools_airfoil.save_airfoil_to_json(self.main_window, airfoil_index)
 
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.arf)", options=options)
@@ -289,12 +197,21 @@ class MenuBar(QMenuBar):
                 print(f"Saved file: {fileName}")
  
     def exportAirfoil(self):
+        """Export the airfoil data to a DXF format file."""
+        selected_item = self.main_window.tree_menu.currentItem()
+        if not selected_item:
+            return  # No airfoil selected
+ 
+        # Find the corresponding airfoil object
+        airfoil_index = self.main_window.tree_menu.indexOfTopLevelItem(selected_item)
+        if airfoil_index == -1:
+            return  # Invalid selection
+        
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Export File", "", "All Files (*);;Text Files (*.txt)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Export File to DXF format", "", "DXF Format (*.dxf);;All Files (*)", options=options)
         if fileName:
+            utils.dxf.export_airfoil_to_dxf(airfoil_index, fileName)
             print(f"Exported file: {fileName}")
-
-    #Edit menu actions
 
     def renameAirfoil(self):
         """Rename currently selected airfoil."""
@@ -365,6 +282,7 @@ class MenuBar(QMenuBar):
 
     def fit2ref(self):
         print("Fit2Ref action triggered")
+        #tools_airfoil.calculate_error
 
     def preferencesWindow(self):        
         """Open the preferences dialog."""
@@ -403,8 +321,7 @@ class MenuBar(QMenuBar):
     def showAbout(self):
         msg = QMessageBox(self)
         msg.setWindowTitle("About")
-        msg.setText("Airfoil Designer\nVersion: 1.0\nAuthor: Jakub Kamyk")
+        msg.setText(f"{globals.AIRFLOW.program_name}\nVersion: {globals.AIRFLOW.program_version}")
         msg.setIcon(QMessageBox.Information)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
-        

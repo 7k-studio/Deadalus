@@ -35,11 +35,23 @@ class PlotCanvas(FigureCanvasQTAgg):
         Current_Airfoil.update_airfoil()
 
         # Plot
-        if self.AIRFLOW.airfoil_designer['show_construction'] == True:
+        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == True and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == True:
             self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], 'b--', marker='o', label='LE Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], 'g--', marker='o', label='PS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], 'r--', marker='o', label='SS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['te'][0], Current_Airfoil.constr['te'][1], 'y--', marker='o', label='TE Control Polygon')
+
+        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == True and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == False:
+            self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], 'b--', label='LE Control Polygon')
+            self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], 'g--', label='PS Control Polygon')
+            self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], 'r--', label='SS Control Polygon')
+            self.ax.plot(Current_Airfoil.constr['te'][0], Current_Airfoil.constr['te'][1], 'y--', label='TE Control Polygon')
+
+        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == False and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == True:
+            self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], linestyle='None', marker='o', color='b', label='LE Control Points')
+            self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], linestyle='None', marker='o', color='g', label='PS Control Points')
+            self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], linestyle='None', marker='o', color='r', label='SS Control Points')
+            self.ax.plot(Current_Airfoil.constr['te'][0], Current_Airfoil.constr['te'][1], linestyle='None', marker='o', color='y', label='TE Control Points')
 
         self.ax.plot(Current_Airfoil.geom['le'][0],Current_Airfoil.geom['le'][1],'b',linewidth=2.0,label='LE B-spline curve')
         self.ax.plot(Current_Airfoil.geom['ps'][0],Current_Airfoil.geom['ps'][1],'g',linewidth=2.0,label='PS B-spline curve')
@@ -51,7 +63,8 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.set_title("Airfoil Designer")
         self.ax.axis('equal')
         self.ax.set_aspect("equal")
-        self.ax.grid(True)
+        if self.AIRFLOW.preferences['airfoil_designer']['show_grid'] == True:
+            self.ax.grid(True)
 
         self.draw()
 
