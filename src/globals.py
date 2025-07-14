@@ -8,7 +8,8 @@ class Program:
 
         self.preferences = {
             'general': {
-                "performance": "normal",  # Options: "normal", "fast", "slow" 
+                "performance": "normal",  # Options: "normal", "fast", "slow"
+                "beta_features": False,  # Enable beta features
             },
             'airfoil_designer': {
                 "show_grid": True,

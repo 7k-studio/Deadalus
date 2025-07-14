@@ -7,9 +7,8 @@ from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
 from tqdm import tqdm
 import json
-
-import globals  # Import from globals.py
-
+import src.obj as obj
+import src.globals as globals  # Import from globals.py
 
 def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
     """Add an airfoil to the list and tree menu."""
@@ -21,6 +20,7 @@ def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
     print(f"Airfoil '{name}' added to the tree menu.")
 
 def Reference_load(file):
+    """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
     UP_points = []
     DW_points = []
@@ -58,8 +58,17 @@ def Reference_load(file):
     UP_points = UP_points.T
     
     DW_points = np.array(DW_points).T
+
+    print(UP_points)
+    print(DW_points)
     
-    return UP_points, DW_points, airfoil_name
+    airfoil = obj.aero.Airfoil_selig_format()
+    #airfoil.full_curve = np.vstack([UP_points, DW_points])
+    airfoil.top_curve = UP_points
+    airfoil.dwn_curve = DW_points
+    airfoil.infos['name'] = airfoil_name
+    
+    return airfoil
 
 def CreateBSpline(const_points):
 
@@ -156,8 +165,8 @@ def find_t_for_x(desired_x, tck):
 
 def load_airfoil_from_json(self, fileName):
     """load the airfoil data from a JSON format file."""
-    import obj
-    Airfoil = obj.aero.Airfoil()
+    import src.obj.aero as aero
+    Airfoil = aero.Airfoil()
 
     if fileName:
         try:
@@ -181,26 +190,28 @@ def load_airfoil_from_json(self, fileName):
             print("WARNING: Program version mismatch. Import may not be compatible.")
 
         try:
-            # Handle version match if necessary
-            Airfoil.chord = airfoil["chord"]
-            Airfoil.origin_X = airfoil["origin_X"]
-            Airfoil.origin_Y = airfoil["origin_Y"]
-            Airfoil.le_thickness = airfoil["le_thickness"]
-            Airfoil.le_depth = airfoil["le_depth"]
-            Airfoil.le_offset = airfoil["le_offset"]
-            Airfoil.le_angle = airfoil["le_angle"]
-            Airfoil.te_thickness = airfoil["te_thickness"]
-            Airfoil.te_depth = airfoil["te_depth"]
-            Airfoil.te_offset = airfoil["te_offset"]
-            Airfoil.te_angle = airfoil["te_angle"]
-            Airfoil.ps_fwd_angle = airfoil["ps_fwd_angle"]
-            Airfoil.ps_rwd_angle = airfoil["ps_rwd_angle"]
-            Airfoil.ps_fwd_accel = airfoil["ps_fwd_accel"]
-            Airfoil.ps_rwd_accel = airfoil["ps_rwd_accel"]
-            Airfoil.ss_fwd_angle = airfoil["ss_fwd_angle"]
-            Airfoil.ss_rwd_angle = airfoil["ss_rwd_angle"]
-            Airfoil.ss_fwd_accel = airfoil["ss_fwd_accel"]
-            Airfoil.ss_rwd_accel = airfoil["ss_rwd_accel"]
+            # Set parameters in Airfoil.params dictionary
+            Airfoil.params = {
+                "chord": airfoil["chord"],
+                "origin_X": airfoil["origin_X"],
+                "origin_Y": airfoil["origin_Y"],
+                "le_thickness": airfoil["le_thickness"],
+                "le_depth": airfoil["le_depth"],
+                "le_offset": airfoil["le_offset"],
+                "le_angle": airfoil["le_angle"],
+                "te_thickness": airfoil["te_thickness"],
+                "te_depth": airfoil["te_depth"],
+                "te_offset": airfoil["te_offset"],
+                "te_angle": airfoil["te_angle"],
+                "ps_fwd_angle": airfoil["ps_fwd_angle"],
+                "ps_rwd_angle": airfoil["ps_rwd_angle"],
+                "ps_fwd_accel": airfoil["ps_fwd_accel"],
+                "ps_rwd_accel": airfoil["ps_rwd_accel"],
+                "ss_fwd_angle": airfoil["ss_fwd_angle"],
+                "ss_rwd_angle": airfoil["ss_rwd_angle"],
+                "ss_fwd_accel": airfoil["ss_fwd_accel"],
+                "ss_rwd_accel": airfoil["ss_rwd_accel"]
+            }
             Airfoil.infos = {
                 "name": airfoil["infos"]["name"],
                 "creation_date": airfoil["infos"]["creation_date"],
@@ -216,44 +227,71 @@ def load_airfoil_from_json(self, fileName):
         return Airfoil
 
 def save_airfoil_to_json(self, airfoil_idx=None):
-        """Save the airfoil data to a JSON format file."""
+    """Save the airfoil data to a JSON format file."""
  
-        current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
+    current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
 
-        data = {
-            "program name": globals.AIRFLOW.program_name,
-            "program version": globals.AIRFLOW.program_version,
-            "airfoil": {
-                "infos": {
-                    **current_airfoil.infos,
-                    "name": str(current_airfoil.infos.get("name", "")),
-                    "creation_date": str(current_airfoil.infos.get("creation_date", "")),
-                    "modification_date": str(current_airfoil.infos.get("modification_date", "")),
-                    "description": str(current_airfoil.infos.get("description", ""))
-                },
-                "chord": current_airfoil.params["chord"],
-                "origin_X": current_airfoil.params["origin_X"],
-                "origin_Y": current_airfoil.params["origin_Y"],
-                "le_thickness": current_airfoil.params["le_thickness"],
-                "le_depth": current_airfoil.params["le_depth"],
-                "le_offset": current_airfoil.params["le_offset"],
-                "le_angle": current_airfoil.params["le_angle"],
-                "te_thickness": current_airfoil.params["te_thickness"],
-                "te_depth": current_airfoil.params["te_depth"],
-                "te_offset": current_airfoil.params["te_offset"],
-                "te_angle": current_airfoil.params["te_angle"],
-                "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
-                "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
-                "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
-                "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
-                "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
-                "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
-                "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
-                "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
-            }
+    data = {
+        "program name": globals.AIRFLOW.program_name,
+        "program version": globals.AIRFLOW.program_version,
+        "airfoil": {
+            "infos": {
+                **current_airfoil.infos,
+                "name": str(current_airfoil.infos.get("name", "")),
+                "creation_date": str(current_airfoil.infos.get("creation_date", "")),
+                "modification_date": str(current_airfoil.infos.get("modification_date", "")),
+                "description": str(current_airfoil.infos.get("description", ""))
+            },
+            "chord": current_airfoil.params["chord"],
+            "origin_X": current_airfoil.params["origin_X"],
+            "origin_Y": current_airfoil.params["origin_Y"],
+            "le_thickness": current_airfoil.params["le_thickness"],
+            "le_depth": current_airfoil.params["le_depth"],
+            "le_offset": current_airfoil.params["le_offset"],
+            "le_angle": current_airfoil.params["le_angle"],
+            "te_thickness": current_airfoil.params["te_thickness"],
+            "te_depth": current_airfoil.params["te_depth"],
+            "te_offset": current_airfoil.params["te_offset"],
+            "te_angle": current_airfoil.params["te_angle"],
+            "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
+            "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
+            "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
+            "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
+            "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
+            "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
+            "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
+            "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
         }
+    }
  
-        json_object = json.dumps(data, indent=1)
+    json_object = json.dumps(data, indent=1)
 
-        return json_object
+    return json_object
 
+def flip_airfoil_horizontally(airfoil):
+    """Flip the airfoil horizontally."""
+    flipped_airfoil = obj.aero.Airfoil()
+    flipped_airfoil.infos = airfoil.infos.copy()
+    flipped_airfoil.params = airfoil.params.copy()
+
+    flipped_airfoil.params['chord'] = airfoil.params['chord']
+    flipped_airfoil.params['origin_X'] = airfoil.params['origin_X']
+    flipped_airfoil.params['origin_Y'] = airfoil.params['origin_Y']
+    flipped_airfoil.params['le_thickness'] = airfoil.params['le_thickness']
+    flipped_airfoil.params['le_depth'] = airfoil.params['le_depth']
+    flipped_airfoil.params['le_offset'] = -airfoil.params['le_offset']
+    flipped_airfoil.params['le_angle'] = -airfoil.params['le_angle']
+    flipped_airfoil.params['te_thickness'] = airfoil.params['te_thickness']
+    flipped_airfoil.params['te_depth'] = airfoil.params['te_depth']
+    flipped_airfoil.params['te_offset'] = -airfoil.params['te_offset']
+    flipped_airfoil.params['te_angle'] = -airfoil.params['te_angle']
+    flipped_airfoil.params['ps_fwd_angle'] = -airfoil.params['ss_fwd_angle']
+    flipped_airfoil.params['ps_rwd_angle'] = -airfoil.params['ss_rwd_angle']
+    flipped_airfoil.params['ps_fwd_accel'] = airfoil.params['ss_fwd_accel']
+    flipped_airfoil.params['ps_rwd_accel'] = airfoil.params['ss_rwd_accel']
+    flipped_airfoil.params['ss_fwd_angle'] = -airfoil.params['ps_fwd_angle']
+    flipped_airfoil.params['ss_rwd_angle'] = -airfoil.params['ps_rwd_angle']
+    flipped_airfoil.params['ss_fwd_accel'] = airfoil.params['ps_fwd_accel']
+    flipped_airfoil.params['ss_rwd_accel'] = airfoil.params['ps_rwd_accel']
+
+    return flipped_airfoil

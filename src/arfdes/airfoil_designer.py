@@ -28,18 +28,18 @@ from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
 
 #Self imports
-import obj
-import wngwb.tools_wing
-import utils.dxf
-from arfdes.widget_tabele import Tabele
+import src.obj as obj
+import src.wngwb.tools_wing
+import src.utils.dxf
+from src.arfdes.widget_tabele import Tabele
 from .menu_bar import MenuBar
-from obj.aero import Airfoil
-from arfdes.tools_airfoil import Reference_load
-from arfdes.tools_airfoil import CreateBSpline
-from arfdes.tools_airfoil import add_airfoil_to_tree
-import globals
+from src.obj.aero import Airfoil
+from src.arfdes.tools_airfoil import Reference_load
+from src.arfdes.tools_airfoil import CreateBSpline
+from src.arfdes.tools_airfoil import add_airfoil_to_tree
+import src.globals as globals
 
-from arfdes.plot_canvas import PlotCanvas
+from src.arfdes.plot_canvas import PlotCanvas
 
 Airfoil_0 = obj.aero.Airfoil()
 
@@ -88,7 +88,6 @@ class AirfoilDesigner(QMainWindow):
         # Create the menu bar
         self.menu_bar = MenuBar(self, project=self.project, parent=self, canvas=self.canvas, tree_menu=self.tree_menu)  # Use the MenuBar class
         self.setMenuBar(self.menu_bar)
-        self.menu_bar.referenceStatus.connect(self.handleReferenceToggle)
 
         # Add canvas to the horizontal layout
         content_layout.addWidget(self.canvas, 2)
@@ -106,6 +105,7 @@ class AirfoilDesigner(QMainWindow):
         self.setCentralWidget(central_widget)
 
         # Connect tree widget selection to display function
+        self.menu_bar.referenceStatus.connect(self.handleReferenceToggle)
         self.tree_menu.itemClicked.connect(self.table.display_selected_airfoil)
 
         if not globals.PROJECT.project_airfoils:
@@ -123,18 +123,30 @@ class AirfoilDesigner(QMainWindow):
         #self.update_tree_menu()
 
     def handleReferenceToggle(self, state, filename):
+
+        selected_item = self.tree_menu.currentItem()
+        if not selected_item:
+            return  # No airfoil selected
+
+        # Find the corresponding airfoil object
+        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+        if airfoil_index == -1:
+            return  # Invalid selection
+
+        current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
+
         if state:
             print(f"Reference enabled with file: {filename}")
             self.canvas.ax.clear()  # Clear the plot
-            self.canvas.plot_airfoil(Airfoil_0)
-            Up_ref_points, Dwn_ref_points, ref_name = Reference_load(filename)
-            self.table.set_reference_points(Up_ref_points, Dwn_ref_points)  # Pass reference points to the table
-            self.canvas.plot_reference(Up_ref_points, Dwn_ref_points)
+            self.canvas.plot_airfoil(current_airfoil)
+            self.reference_airfoil = Reference_load(filename)
+            self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
+            self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
         else:
             print("Reference disabled")
             self.canvas.ax.clear()  # Clear the plot
             self.table.set_reference_points(None, None)  # Clear reference points in the table
-            self.canvas.plot_airfoil(Airfoil_0)  # Re-plot the airfoil
+            self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil
 
     def update_tree_menu(self):
         """Update the tree menu based on the current self.project.project_airfoils."""

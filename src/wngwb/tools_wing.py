@@ -1,6 +1,6 @@
 import math
 import sys
-import obj.aero
+import src.obj.aero as aero
 import json
 import os
 import numpy as np
@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-import globals
+import src.globals as globals
 
 
 #import sympy as sym

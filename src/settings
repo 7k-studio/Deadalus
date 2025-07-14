@@ -1,6 +1,7 @@
 {
  "general": {
-  "performance": "good"
+  "performance": "good",
+  "beta_features": true
  },
  "airfoil_designer": {
   "show_grid": true,

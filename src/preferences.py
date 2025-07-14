@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox
 )
-from globals import AIRFLOW
+from src.globals import AIRFLOW
 import json
 
 class PreferencesWindow(QDialog):
@@ -49,11 +49,14 @@ class PreferencesWindow(QDialog):
         self.general_performance.currentTextChanged.connect(self.on_performance_changed)
         # Fix: Ensure AIRFLOW.preferences['general'] is a dict, not a list
         self.general_performance.setCurrentText(AIRFLOW.preferences['general'].get('performance', 'normal'))
+        self.general_beta_features = QCheckBox("Beta Features")
+        self.general_beta_features.setChecked(AIRFLOW.preferences['general']['beta_features'])
 
         perf_layout.addWidget(perf_text)
         perf_layout.addWidget(self.general_performance)
-
+        
         layout.addLayout(perf_layout)
+        layout.addWidget(self.general_beta_features)
         layout.addStretch()
         self.general_tab.setLayout(layout)
 
@@ -87,6 +90,7 @@ class PreferencesWindow(QDialog):
         self.wing_tab.setLayout(layout)
 
     def save_preferences(self):
+        AIRFLOW.preferences['general']["beta_features"] = self.general_beta_features.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_grid"] = self.airfoil_show_grid.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_control_points"] = self.airfoil_show_control_points.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_construction"] = self.airfoil_show_construction.isChecked()
@@ -102,6 +106,7 @@ class PreferencesWindow(QDialog):
         # Fix: Remove trailing comma so this is a dict, not a tuple
         preferences['general'] = {
             "performance": str(AIRFLOW.preferences['general'].get("performance", "")),
+            "beta_features": AIRFLOW.preferences['general'].get("beta_features", False),
         }
         preferences['airfoil_designer'] = {
             "show_grid": AIRFLOW.preferences['airfoil_designer'].get("show_grid", True),

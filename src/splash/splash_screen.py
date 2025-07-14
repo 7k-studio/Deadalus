@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QApplication, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
-from arfdes.airfoil_designer import AirfoilDesigner  # Import the AirfoilDesigner class from the correct module
-from wngwb.main_window import MainWindow
-import globals
+from src.arfdes.airfoil_designer import AirfoilDesigner  # Import the AirfoilDesigner class from the correct module
+from src.wngwb.main_window import MainWindow
+import src.globals as globals
 
 
 class SplashScreen(QWidget):

@@ -3,7 +3,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
 import math
 
-from obj.car import Wheels
+from src.obj.car import Wheels
 
 def draw_tube(self, origin_x, origin_y, origin_z, diameter, width, quality=32):
     """Draw a tube from given origin."""

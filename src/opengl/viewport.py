@@ -12,9 +12,9 @@ import math
 from . import shapes  # Import the shapes module
 from . import bckgrd
 
-import globals
+import src.globals as globals
 
-from obj.car import Wheels
+from src.obj.car import Wheels
 
 Wheels = Wheels()
 
@@ -87,11 +87,6 @@ class ViewportOpenGL(QGLWidget):
                             print(f"OpenGL Error after airfoil: {(error)}") #gluErrorString
                     except IndexError:
                         print("No airfoil data available to draw.")
-
-        #if self.show_dot:
-        #    self.draw_cor(self.CoR)
-        #self.draw_cube()  # Call the method to draw the cube
-        #shapes.draw_object_from_file("data\\E168.txt", extrusion=1.0)
 
         shapes.draw_tube(self, Wheels.wheel_front_X, Wheels.wheel_front_Y, Wheels.wheel_front_Z, Wheels.diameter, Wheels.width, quality=32)
         shapes.draw_tube(self, Wheels.wheel_rear_X, Wheels.wheel_rear_Y, Wheels.wheel_rear_Z, Wheels.diameter, Wheels.width, quality=32)

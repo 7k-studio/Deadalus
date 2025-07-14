@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
-import obj.aero
-from wngwb.tools_wing import add_component_to_tree
+import src.obj.aero as aero
+from src.wngwb.tools_wing import add_component_to_tree
 from datetime import date
-import globals  # Import from globals.py
+import src.globals as globals
 
 class TreeMenu(QTreeWidget):
     def __init__(self, parent=None):

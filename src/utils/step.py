@@ -2,7 +2,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import globals
+import src.globals as globals
 
 def HEADER(file):
     file.write("ISO-10303-21;\n")

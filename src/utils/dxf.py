@@ -3,7 +3,7 @@ import ezdxf.layouts
 from ezdxf.math import ConstructionArc, Vec3, BSpline
 import numpy as np
 import math
-import globals
+import src.globals as globals
 
 
 

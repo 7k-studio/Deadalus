@@ -21,17 +21,17 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
-from opengl.viewport import ViewportOpenGL
+from src.opengl.viewport import ViewportOpenGL
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
-from arfdes.airfoil_designer import AirfoilDesigner
-import globals  # Import from globals.py
+from src.arfdes.airfoil_designer import AirfoilDesigner
+import src.globals as globals
 
-from wngwb import tools_wing  # Import add_component_to_tree
+from src.wngwb import tools_wing  # Import add_component_to_tree
 
 from datetime import date
 
-import obj
+import src.obj as obj
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):

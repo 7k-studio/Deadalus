@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
-    QPushButton, QLineEdit, QHeaderView
+    QPushButton, QLineEdit, QHeaderView, QApplication
 )
 from PyQt5.QtCore import Qt, pyqtSignal
-from arfdes.tools_airfoil import add_airfoil_to_tree
+from src.arfdes.tools_airfoil import add_airfoil_to_tree
 
-import globals  # Import from globals.py
+import src.globals as globals  # Import from globals.py
 
 
 class Tabele(QTableWidget):
@@ -45,7 +45,7 @@ class Tabele(QTableWidget):
         layout = QHBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
         # Input field for direct keyboard input
-        value = format(value, '.5f')  # Format value to 2 decimal places
+        value = format(value, '.4f')  # Format value to 4 decimal places
         value_input = QLineEdit(str(value))
         value_input.setAlignment(Qt.AlignCenter)
         #value_input.setFixedWidth(70)
@@ -53,17 +53,19 @@ class Tabele(QTableWidget):
         # Up button
         up_button = QPushButton("▲")
         up_button.setFixedSize(20, 20)
-        up_button.clicked.connect(lambda: self.adjust_value(row, 0.1))
+        up_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, 1))
+
         # Down button
         down_button = QPushButton("▼")
         down_button.setFixedSize(20, 20)
-        down_button.clicked.connect(lambda: self.adjust_value(row, -0.1))
+        down_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, -1))
+            
         # Add widgets to layout
         layout.addWidget(down_button)
         layout.addWidget(value_input)
         layout.addWidget(up_button)
         self.setCellWidget(row, 1, container)
-    
+
     def update_value_from_input(self, row, value_input):
         # Update parameter from the input field
         param_name = self.item(row, 0).text()
@@ -147,4 +149,14 @@ class Tabele(QTableWidget):
         self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
+
+    def _adjust_value_with_modifiers(self, row, direction):
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers & Qt.ShiftModifier:
+            delta = 1.0
+        elif modifiers & Qt.ControlModifier:
+            delta = 0.01
+        else:
+            delta = 0.1
+        self.adjust_value(row, direction * delta)
 

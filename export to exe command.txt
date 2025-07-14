@@ -1,0 +1,1 @@
+pyinstaller --onefile  main.py  --add-data "src/arfdes;src/arfdes"  --add-data "src/data;src/data"  --add-data "src/obj;src/obj"  --add-data "src/opengl;src/opengl"  --add-data "src/splash;src/splash"  --add-data "src/utils;src/utils"  --add-data "src/wngwb;src/wngwb"  --add-data "src/globals.py;src"  --add-data "src/preferences.py;src"

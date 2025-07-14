@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLa
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
-import globals  # Import from globals.py
+import src.globals as globals  # Import from globals.py
 
 
 class Tabele(QTableWidget):

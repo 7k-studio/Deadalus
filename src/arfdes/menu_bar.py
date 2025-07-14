@@ -14,19 +14,19 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
-import utils.dxf
-import arfdes.tools_airfoil as tools_airfoil
-from arfdes.tools_airfoil import Reference_load
-from obj.aero import Airfoil
-from arfdes.tools_airfoil import add_airfoil_to_tree
+import src.utils.dxf as dxf
+import src.arfdes.tools_airfoil as tools_airfoil
+from src.arfdes.tools_airfoil import Reference_load
+from src.obj.aero import Airfoil
+from src.arfdes.tools_airfoil import add_airfoil_to_tree
 
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
     QPushButton, QLineEdit, QHeaderView
 )
 from datetime import date
-
-import globals  # Import from globals.py
+import src.arfdes.fit_2_reference as fit_2_reference  # Import the fitting module
+import src.globals as globals  # Import from globals.py
 
 class MenuBar(QMenuBar):
     referenceStatus = pyqtSignal(bool, str)
@@ -56,12 +56,13 @@ class MenuBar(QMenuBar):
         preferencesFileAction.triggered.connect(self.preferencesWindow)
 
         fileMenu.addAction(newFileAction)
-        fileMenu.addAction(openFileAction)
-        fileMenu.addAction(saveFileAction)
+        if globals.AIRFLOW.preferences['general']['beta_features']:
+            fileMenu.addAction(openFileAction)
+            fileMenu.addAction(saveFileAction)
         fileMenu.addSeparator()
         fileMenu.addAction(preferencesFileAction)
 
-
+        """Edit menu creation"""
         editMenu = self.addMenu('Edit')
 
         newAction = QAction('Create', self)
@@ -69,6 +70,7 @@ class MenuBar(QMenuBar):
         deleteAction = QAction('Delete', self)
         saveAction = QAction('Save', self)
         exportAction = QAction('Export', self)
+        flipAction = QAction('Flip Airfoil', self)
         renameArfAction = QAction('Rename', self)
         editDescriptionAction = QAction('Edit Description', self)
         fit2refAction = QAction('Fit2Reference', self)
@@ -78,6 +80,7 @@ class MenuBar(QMenuBar):
         deleteAction.triggered.connect(self.deleteAirfoil)  
         saveAction.triggered.connect(self.saveAirfoil)
         exportAction.triggered.connect(self.exportAirfoil)
+        flipAction.triggered.connect(self.flipAirfoil)
         renameArfAction.triggered.connect(self.renameAirfoil)
         editDescriptionAction.triggered.connect(self.editDescriptionAirfoil)
         fit2refAction.triggered.connect(self.fit2ref)
@@ -87,12 +90,14 @@ class MenuBar(QMenuBar):
         editMenu.addAction(deleteAction)
         editMenu.addAction(saveAction)
         editMenu.addAction(exportAction)
+        editMenu.addAction(flipAction)
         editMenu.addSeparator()
         editMenu.addAction(renameArfAction)
         editMenu.addAction(editDescriptionAction)
-        editMenu.addAction(fit2refAction)
+        if globals.AIRFLOW.preferences['general']['beta_features']:
+            editMenu.addAction(fit2refAction)
 
-
+        """View menu creation"""
         viewMenu = self.addMenu('View')
 
         referenceAction = QAction('Show reference', self)
@@ -102,11 +107,14 @@ class MenuBar(QMenuBar):
 
         viewMenu.addAction(referenceAction)
 
+        """Module menu creation"""
         moduleMenu = self.addMenu('Module')
         WingModule = QAction('Wing Module', self)
         WingModule.triggered.connect(self.open_wing_module)
-        moduleMenu.addAction(WingModule)
+        if globals.AIRFLOW.preferences['general']['beta_features']:
+            moduleMenu.addAction(WingModule)
 
+        """Help menu creation"""
         helpMenu = self.addMenu('Help')
         aboutAction = QAction('About', self)
         aboutAction.triggered.connect(self.showAbout)
@@ -190,7 +198,7 @@ class MenuBar(QMenuBar):
         json_object = tools_airfoil.save_airfoil_to_json(self.main_window, airfoil_index)
 
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.arf)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "AirFLOW Airfoil Format (*.arf);;All Files (*)", options=options)
         if fileName:
             with open(f"{fileName}", "w") as outfile:
                 outfile.write(json_object)
@@ -210,7 +218,7 @@ class MenuBar(QMenuBar):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Export File to DXF format", "", "DXF Format (*.dxf);;All Files (*)", options=options)
         if fileName:
-            utils.dxf.export_airfoil_to_dxf(airfoil_index, fileName)
+            dxf.export_airfoil_to_dxf(airfoil_index, fileName)
             print(f"Exported file: {fileName}")
 
     def renameAirfoil(self):
@@ -238,6 +246,24 @@ class MenuBar(QMenuBar):
             
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
+    
+    def flipAirfoil(self):
+        """Flip the currently selected airfoil."""
+        selected_item = self.tree_menu.currentItem()
+        if not selected_item:
+            return  # No airfoil selected
+
+        # Find the corresponding airfoil object
+        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+        if airfoil_index == -1:
+            return  # Invalid selection
+
+        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
+
+        flipped_airfoil = tools_airfoil.flip_airfoil_horizontally(current_airfoil)
+
+        if flipped_airfoil:
+            self.PROJECT.project_airfoils[airfoil_index] = flipped_airfoil
 
     def editDescriptionAirfoil(self):
         """Edit the description of an airfoil."""
@@ -281,14 +307,39 @@ class MenuBar(QMenuBar):
             selected_item.setText(0, f"{current_airfoil.infos['name']}*")
 
     def fit2ref(self):
-        print("Fit2Ref action triggered")
-        #tools_airfoil.calculate_error
+        """Fit the currently selected airfoil in tree_menu to the reference_airfoil by optimizing its parameters."""
+        # Get selected item and corresponding airfoil object
+        selected_items = self.tree_menu.selectedItems()
+        if not selected_items:
+            print("No airfoil selected in the tree menu.")
+            return None
+        selected_item = selected_items[0]
+        airfoil_name = selected_item.text(0)
+        # Find airfoil object by name
+        current_airfoil = None
+        for af in globals.PROJECT.project_airfoils:
+            if af.infos.get('name', '') == airfoil_name:
+                current_airfoil = af
+                break
+        if current_airfoil is None:
+            print("Selected airfoil object not found.")
+            return None
+
+        # Open the Fit2RefWindow dialog
+        dlg = fit_2_reference.Fit2RefWindow(parent=self.main_window, current_airfoil=current_airfoil, reference_airfoil=self.main_window.reference_airfoil)
+        dlg.exec_()
 
     def preferencesWindow(self):        
         """Open the preferences dialog."""
-        from preferences import PreferencesWindow
+        from src.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
+        msg = QMessageBox(self)
+        msg.setWindowTitle("WARNING!")
+        msg.setText(f"If you changed the preferences, you need to restart the application for the changes to take effect.")
+        msg.setIcon(QMessageBox.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def toggleReference(self):
         sender = self.sender()
@@ -308,13 +359,7 @@ class MenuBar(QMenuBar):
                 self.referenceStatus.emit(referenceState, None)
 
     def open_wing_module(self):
-        from wngwb.main_window import MainWindow  # Late import to avoid circular dependency
-        #msg = QMessageBox(self)
-        #msg.setWindowTitle("Wing Module")
-        #msg.setText("Wing Module functionality is under development.")
-        #msg.setIcon(QMessageBox.Information)
-        #msg.setStandardButtons(QMessageBox.Ok)
-        #msg.exec_()
+        from src.wngwb.main_window import MainWindow  # Late import to avoid circular dependency
         self.airfoil_designer_window = MainWindow()  # Pass airfoil_list
         self.airfoil_designer_window.show()
 

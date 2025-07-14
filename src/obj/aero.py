@@ -1,39 +1,14 @@
 import math
 import numpy as np
 
-from arfdes.tools_airfoil import CreateBSpline
-import globals
+from src.arfdes.tools_airfoil import CreateBSpline
+import src.globals as globals
 
-class Airfoil_old:
+class Airfoil_selig_format:
     def __init__(self):
-        self.full_curve = []
+        self.infos = {'name': 'N/A'}
         self.top_curve = []
         self.dwn_curve = []
-        
-        self.le_org = []
-        self.ps_org = []
-        self.ss_org = []
-        self.te_org = []
-        
-        self.le = []
-        self.ps = []
-        self.ss = []
-        self.te = []
-        
-        self.infos = {'name': 'N/A'}
-
-        self.origin = []
-        #self.scale = [1, 1, 1]
-        self.scale = 1
-        self.incidence = 0
-
-        #if self.top_curve is not None:
-        #    self.chord = self.top_curve[0][len(self.top_curve)-1]-self.top_curve[0][0]
-        
-        self.le_type = 'spline' # Spline or Radius
-        self.le_value = 0.08 
-        self.te_type = 'spline' # Spline or Radius
-        self.te_value = 0.01
 
 class Airfoil:
     def __init__(self):
@@ -82,50 +57,52 @@ class Airfoil:
         }
 
     def construct_airfoil(self):
-        # Geometry parameters
-        p_le_start = [self.params['origin_X'], self.params['origin_Y']]
-        a0 = math.tan(np.radians(90+self.params['le_angle']))
-        
-        a1 = math.tan(np.radians(self.params['ps_fwd_angle']))
-        a2 = math.tan(np.radians(self.params['ss_fwd_angle']))
-        b0 = p_le_start[1]-math.tan(np.radians(90+self.params['le_angle']))*p_le_start[0]
-        b1 = p_le_start[1]+self.params['le_thickness']/2+self.params['le_offset']-math.tan(np.radians(self.params['ps_fwd_angle']))*(p_le_start[0]+self.params['le_depth'])
-        b2 = p_le_start[1]-self.params['le_thickness']/2+self.params['le_offset']-math.tan(np.radians(self.params['ss_fwd_angle']))*(p_le_start[0]+self.params['le_depth'])
-        p_le_t = [(b1-b0)/(a0-a1),a0*((b1-b0)/(a0-a1))+b0] # OK
-        p_le_d = [(b2-b0)/(a0-a2),a0*((b2-b0)/(a0-a2))+b0] # OK
-        p_le_ps = [self.params['origin_X']+self.params['le_depth'], self.params['origin_Y']+self.params['le_thickness']/2+self.params['le_offset']]
-        p_le_ss = [self.params['origin_X']+self.params['le_depth'], self.params['origin_Y']-self.params['le_thickness']/2+self.params['le_offset']]
+        # Leading Edge calculations
+        p_le_start = [self.params['origin_X'], self.params['origin_Y']+self.params['le_offset']]
+        p_le_end = [p_le_start[0]+self.params['le_depth']*math.cos(np.radians(self.params['le_angle'])),p_le_start[1]+(self.params['le_depth']*math.sin(np.radians(self.params['le_angle'])))]
 
-        #le_constr = np.vstack([p_le_ss, p_le_d, p_le_start, p_le_t, p_le_ps]).T
+        a0 = math.tan(np.radians(90+self.params['le_angle'])) # Directional param of the leading edge straight and the pararel one
+        a1 = math.tan(np.radians(self.params['ps_fwd_angle']+self.params['le_angle'])) # Directional param of the pressure side forward slope
+        a2 = math.tan(np.radians(self.params['ss_fwd_angle']+self.params['le_angle'])) # Directional param of the suction side forward slope
+
+        b0 = p_le_start[1]-a0*p_le_start[0] # Positional parameter of the leading edge straight 'Origin Point'
+        b0p = p_le_end[1]-a0*p_le_end[0]
+        b1 = p_le_end[1]+(self.params['le_thickness']/2*math.cos(np.radians(self.params['le_angle'])))-a1*(p_le_end[0]-self.params['le_thickness']/2*math.sin(np.radians(self.params['le_angle'])))
+        b2 = p_le_end[1]-(self.params['le_thickness']/2*math.cos(np.radians(self.params['le_angle'])))-a2*(p_le_end[0]+self.params['le_thickness']/2*math.sin(np.radians(self.params['le_angle'])))
+
+        p_le_t = [(b1-b0)/(a0-a1),a0*((b1-b0)/(a0-a1))+b0] # G1 upper point
+        p_le_d = [(b2-b0)/(a0-a2),a0*((b2-b0)/(a0-a2))+b0] # G1 lower point
+        p_le_ps = [(b1-b0p)/(a0-a1),a0*((b1-b0p)/(a0-a1))+b0p] # G0 with with the pressure side
+        p_le_ss = [(b2-b0p)/(a0-a2),a0*((b2-b0p)/(a0-a2))+b0p] # G0 with with the suction side
+
         le_constr = np.vstack([p_le_ss, p_le_d, p_le_t, p_le_ps]).T
 
-        p_te_start = [self.params['origin_X']+self.params['chord'], self.params['origin_Y']]
+        p_te_start = [self.params['origin_X']+self.params['chord'], self.params['origin_Y']+self.params['te_offset']]
+        p_te_end = [p_te_start[0]-self.params['te_depth']*math.cos(np.radians(self.params['te_angle'])), p_te_start[1]-(self.params['te_depth']*math.sin(np.radians(self.params['te_angle'])))]
         a3 = math.tan(np.radians(90+self.params['te_angle']))
-        a4 = math.tan(np.radians(self.params['ps_rwd_angle']))
-        a5 = math.tan(np.radians(self.params['ss_rwd_angle']))
+        a4 = math.tan(np.radians(self.params['ps_rwd_angle']+self.params['te_angle']))
+        a5 = math.tan(np.radians(self.params['ss_rwd_angle']+self.params['te_angle']))
         b3 = p_te_start[1]-a3*p_te_start[0]
-        b4 = p_te_start[1]+self.params['te_thickness']/2+self.params['te_offset']-a4*(p_te_start[0]-self.params['te_depth'])
-        b5 = p_te_start[1]-self.params['te_thickness']/2+self.params['te_offset']-a5*(p_te_start[0]-self.params['te_depth'])
-        p_te_t = [(b4-b3)/(a3-a4),a3*((b4-b3)/(a3-a4))+b3] # OK
-        p_te_d = [(b5-b3)/(a3-a5),a3*((b5-b3)/(a3-a5))+b3] # OK
-        p_te_ps = [self.params['origin_X']+self.params['chord']-self.params['te_depth'], self.params['origin_Y']+self.params['te_thickness']/2+self.params['te_offset']]
-        p_te_ss = [self.params['origin_X']+self.params['chord']-self.params['te_depth'], self.params['origin_Y']-self.params['te_thickness']/2+self.params['te_offset']]
+        b3p = p_te_end[1]-a3*p_te_end[0]
+        b4 = p_te_end[1]+(self.params['te_thickness']/2*math.cos(np.radians(self.params['te_angle'])))-a4*(p_te_end[0]-self.params['te_thickness']/2*math.sin(np.radians(self.params['te_angle'])))
+        b5 = p_te_end[1]-(self.params['te_thickness']/2*math.cos(np.radians(self.params['te_angle'])))-a5*(p_te_end[0]+self.params['te_thickness']/2*math.sin(np.radians(self.params['te_angle'])))
 
-        #te_constr = np.vstack([p_te_ss, p_te_d, p_te_start, p_te_t, p_te_ps]).T
+        p_te_t = [(b4-b3)/(a3-a4),a3*((b4-b3)/(a3-a4))+b3] # G1 upper point
+        p_te_d = [(b5-b3)/(a3-a5),a3*((b5-b3)/(a3-a5))+b3] # G1 lower point
+        p_te_ps = [(b4-b3p)/(a3-a4),a3*((b4-b3p)/(a3-a4))+b3p] # G0 with with the pressure side
+        p_te_ss = [(b5-b3p)/(a3-a5),a3*((b5-b3p)/(a3-a5))+b3p] # G0 with with the suction side
+
         te_constr = np.vstack([p_te_ss, p_te_d, p_te_t, p_te_ps]).T
 
         p_ps_le = p_le_ps
         p_ps_te = p_te_ps
         p_ps_1 = [self.params['origin_X']+self.params['ps_fwd_accel'], a1*(self.params['origin_X']+self.params['ps_fwd_accel'])+b1]
         p_ps_2 = [p_ps_te[0]-self.params['ps_rwd_accel'], a4*(p_ps_te[0]-self.params['ps_rwd_accel'])+b4]   
-
         ps_constr = np.vstack([p_ps_le, p_ps_1, p_ps_2, p_ps_te]).T
-
         p_ss_le = p_le_ss
         p_ss_te = p_te_ss
         p_ss_1 = [self.params['origin_X']+self.params['ss_fwd_accel'], a2*(self.params['origin_X']+self.params['ss_fwd_accel'])+b2]
         p_ss_2 = [p_ss_te[0]-self.params['ss_rwd_accel'], a5*(p_ss_te[0]-self.params['ss_rwd_accel'])+b5]   
-
         ss_constr = np.vstack([p_ss_le, p_ss_1, p_ss_2, p_ss_te]).T
 
         # Generate Splines

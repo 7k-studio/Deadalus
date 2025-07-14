@@ -8,32 +8,31 @@ from PyQt5.QtCore import Qt
 
 import numpy as np
 
-import obj.aero
-import wngwb.tools_wing
-import utils.dxf
+import src.obj.aero as aero
+import src.wngwb.tools_wing as tools_wing
+import src.utils.dxf as dxf
 import random
 
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton, QSizePolicy
 )
 
-from opengl.viewport import ViewportOpenGL
+from src.opengl.viewport import ViewportOpenGL
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 
-from wngwb.menu_bar import MenuBar
-from wngwb.widget_tree import TreeMenu
-from wngwb.widget_tabele import Tabele
-
-from wngwb.widget_tree import TreeMenu  # Import TreeMenu
+from src.wngwb.menu_bar import MenuBar
+from src.wngwb.widget_tree import TreeMenu
+from src.wngwb.widget_tabele import Tabele
+from src.wngwb.widget_tree import TreeMenu  # Import TreeMenu
 
 #from globals import airfoil_list  # Import from globals.py
-import globals  # Import from globals.py
+import src.globals as globals  # Import from globals.py
 #from designer.airfoil_designer import AirfoilDesigner  # Import AirfoilDesigner
-from wngwb import tools_wing  # Import add_component_to_tree
+#from wngwb import tools_wing  # Import add_component_to_tree
 from datetime import date
 
-Trans = wngwb.tools_wing
+Trans = tools_wing
 
 class MainWindow(QMainWindow):
 
