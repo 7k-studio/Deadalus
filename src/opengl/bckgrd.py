@@ -6,29 +6,118 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QFileDialog
 from PyQt5.QtOpenGL import QGLWidget
+import math
 
 #from .test_cube import draw_object_from_file  # Import the new function
 
-def draw_origin_arrows(self, linewidth, zoom, X, Y, Z):
-    glColor3f(1,0,0)
-    glLineWidth(linewidth)
-    glBegin(GL_LINES)
-    glVertex3f(X, Y, Z)
-    glVertex3f(X+0.05*(-zoom), Y, Z)
+def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
+    """Draw a tube from given origin."""
+    diameter = 0.008 * zoom
+    length = 0.075
+    arrow = length + 0.02
+
+    glLineWidth(2)
+    
+    # X Axis
+    glColor3f(1, 0, 0) # Set tube color to dark grey
+    angle_step = 2 * math.pi / quality
+
+    glBegin(GL_QUAD_STRIP)
+    for i in range(quality + 1):
+        angle = i * angle_step
+        y = origin_y + (diameter / 3) * math.cos(angle)
+        z = origin_z + (diameter / 3) * math.sin(angle)
+
+        # Draw the top and bottom vertices of the tube
+        glVertex3f(origin_x, y, z)
+        glVertex3f(origin_x-(length * zoom), y, z)
     glEnd()
 
-    glColor3f(0,1,0)
-    #glLineWidth(linewidth)
-    glBegin(GL_LINES)
-    glVertex3f(X, Y, Z)
-    glVertex3f(X, Y+0.05*(-zoom), Z)
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x-(arrow*zoom), origin_y, origin_z)
+    for i in range(quality + 1):
+        angle = i * angle_step
+        y = origin_y + (diameter) * math.cos(angle)
+        z = origin_z + (diameter) * math.sin(angle)
+        glVertex3f(origin_x-(length*zoom), y, z)
     glEnd()
 
-    glColor3f(0,0,1)
-    #glLineWidth(linewidth)
-    glBegin(GL_LINES)
-    glVertex3f(X, Y, Z)
-    glVertex3f(X, Y, Z+0.05*(-zoom))
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x-(length*zoom), origin_y, origin_z) 
+    for i in range(quality + 1):
+        angle = i * angle_step
+        y = origin_y + (diameter) * math.cos(angle)
+        z = origin_z + (diameter) * math.sin(angle)
+        glVertex3f(origin_x-(length*zoom), y, z)
+    glEnd()
+
+
+    # Y Axis
+    glColor3f(0, 1, 0) # Set tube color to dark grey
+    angle_step = 2 * math.pi / quality
+
+    glBegin(GL_QUAD_STRIP)
+    for i in range(quality + 1):
+        angle = i * angle_step
+        x = origin_x + (diameter / 3) * math.cos(angle)
+        z = origin_z + (diameter / 3) * math.sin(angle)
+
+        # Draw the top and bottom vertices of the tube
+        glVertex3f(x, origin_y, z)
+        glVertex3f(x, origin_y-(length * zoom), z)
+    glEnd()
+
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x, origin_y-(arrow*zoom), origin_z)  # Center of the base circle
+    for i in range(quality + 1):
+        angle = i * angle_step
+        x = origin_y + (diameter) * math.cos(angle)
+        z = origin_z + (diameter) * math.sin(angle)
+        glVertex3f(x, origin_y-(length*zoom), z)
+    glEnd()
+
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x, origin_y-(length*zoom), origin_z) 
+    for i in range(quality + 1):
+        angle = i * angle_step
+        x = origin_x + (diameter) * math.cos(angle)
+        z = origin_z + (diameter) * math.sin(angle)
+        glVertex3f(x, origin_y-(length*zoom), z)
+    glEnd()
+
+
+
+    # Z Axis
+    glColor3f(0, 0, 1) # Set tube color to dark grey
+    angle_step = 2 * math.pi / quality
+
+    glBegin(GL_QUAD_STRIP)
+    for i in range(quality + 1):
+        angle = i * angle_step
+        x = origin_x + (diameter / 3) * math.cos(angle)
+        y = origin_y + (diameter / 3) * math.sin(angle)
+
+        # Draw the top and bottom vertices of the tube
+        glVertex3f(x, y, origin_z)
+        glVertex3f(x, y, origin_z - (length * zoom))
+    glEnd()
+
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x, origin_y, origin_z-(arrow*zoom))  # Center of the base circle
+    for i in range(quality + 1):
+        angle = i * angle_step
+        y = origin_y + (diameter) * math.cos(angle)
+        z = origin_z + (diameter) * math.sin(angle)
+        glVertex3f(x, y, origin_z-(length*zoom))
+    glEnd()
+
+    glBegin(GL_TRIANGLE_FAN)
+    glVertex3f(origin_x, origin_y, origin_z-(length*zoom)) 
+    for i in range(quality + 1):
+        angle = i * angle_step
+        x = origin_x + (diameter) * math.cos(angle)
+        y = origin_y + (diameter) * math.sin(angle)
+        glVertex3f(x, y, origin_z-(length*zoom))
     glEnd()
 
 

@@ -42,18 +42,18 @@ class MainWindow(QMainWindow):
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
+        central_widget = QWidget(self)
+        main_layout = QHBoxLayout(central_widget)
+        content_layout = QHBoxLayout()
 
-        # Create the main layout with a splitter
-        main_layout = QVBoxLayout(self.central_widget)
+        self.setCentralWidget(central_widget)
 
-        # Set margins and spacing to zero for the main layout
-        main_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
-        #main_layout.setSpacing(0)  # Remove spacing between widgets
-
-        # Outer splitter to divide TreeMenu and the rest
-        self.outer_splitter = QSplitter(Qt.Horizontal)
+        # Add the OpenGL viewport to the inner splitter
+        self.viewport = QWidget()
+        self.open_gl = ViewportOpenGL(parent=self.viewport)
+        viewport_layout = QVBoxLayout(self.viewport)
+        viewport_layout.addWidget(self.open_gl)
+        #self.viewport.setMinimumWidth(500)
 
         # Create the menu bar
         self.menu_bar = MenuBar(self)  # Use the MenuBar class
@@ -61,46 +61,27 @@ class MainWindow(QMainWindow):
 
         # Use the TreeMenu class directly
         self.tree_menu = TreeMenu(self)
-        self.tree_menu.setMinimumWidth(50)  # Nie pozwól schować całkowicie
-        self.tree_menu.setMaximumWidth(300)
-        self.tree_menu.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.outer_splitter.addWidget(self.tree_menu)
+        self.tree_menu.setMinimumWidth(200)  # Nie pozwól schować całkowicie
+        self.tree_menu.setMaximumWidth(200)
 
-        # Inner splitter to divide Viewport and Tabele
-        self.inner_splitter = QSplitter(Qt.Horizontal)
-
-        # Add the OpenGL viewport to the inner splitter
-        self.viewport = QWidget()
-        self.open_gl = ViewportOpenGL(parent=self.viewport)
-        viewport_layout = QVBoxLayout(self.viewport)
-        viewport_layout.addWidget(self.open_gl)
-        self.viewport.setMinimumWidth(500)
-        self.viewport.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.inner_splitter.addWidget(self.viewport)
+        left_layout = QHBoxLayout()
+        left_layout.addWidget(self.tree_menu)
 
         # Add the Tabele module to the inner splitter
         self.tabele = Tabele(self, tree_menu=self.tree_menu, project=globals.PROJECT)
-        self.tabele.setMinimumWidth(200)
+        self.tabele.setMinimumWidth(300)
         self.tabele.setMaximumWidth(300)  # Opcjonalnie: ogranicz maksymalną szerokość
-        self.tabele.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
-        self.inner_splitter.addWidget(self.tabele)
+        
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.tabele)
 
-        # Add the inner splitter to the outer splitter
-        self.outer_splitter.addWidget(self.inner_splitter)
+        #content_layout.addWidget(self.tree_menu)
+        content_layout.addWidget(self.viewport, stretch=10)
+        #content_layout.addWidget(self.tabele)
 
-        # Set stretch factors for splitters to control resizing behavior
-        self.outer_splitter.setStretchFactor(0, 0)  # TreeMenu (fixed)
-        self.outer_splitter.setStretchFactor(1, 1)  # inner_splitter (main area)
-
-        self.inner_splitter.setStretchFactor(0, 10)  # Viewport (promoted)
-        self.inner_splitter.setStretchFactor(1, 0)   # Tabele (fixed)
-
-        # Add the outer splitter to the main layout
-        main_layout.addWidget(self.outer_splitter)
-
-        # Set the initial splitter sizes
-        self.outer_splitter.setSizes([300, 900])
-        self.inner_splitter.setSizes([700, 200])
+        main_layout.addLayout(left_layout)
+        main_layout.addLayout(content_layout)
+        main_layout.addLayout(right_layout)
 
         if not globals.PROJECT.project_components:
             # Initialize with a default airfoil
@@ -112,7 +93,7 @@ class MainWindow(QMainWindow):
     def initializeOpenGL(self):
         """Initialize OpenGL settings."""
         glEnable(GL_DEPTH_TEST)  # Enable depth testing
-        glClearColor(0.1, 0.1, 0.1, 1.0)  # Set background color
+        glClearColor(0.01, 0.01, 0.01, 1.0)  # Set background color
 
     def resizeGL(self, w, h):
         """Handle OpenGL viewport resizing."""

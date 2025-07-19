@@ -4,7 +4,7 @@ import json
 class Program:
     def __init__(self):
         self.program_name = "AirFLOW"
-        self.program_version = "0.1.0dev"
+        self.program_version = "0.1.0-beta"
 
         self.preferences = {
             'general': {
@@ -21,7 +21,6 @@ class Program:
                 "show_ruler": True,
             }
         }
-        
         self.readPreferences()  # Load preferences from file
 
     def readPreferences(self):

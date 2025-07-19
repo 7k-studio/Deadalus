@@ -117,7 +117,7 @@ class Tabele(QTableWidget):
         self.params[param_name] = new_value
 
         # Update the input field display
-        new_value = format(new_value, '.5f')  # Format value to 5 decimal places
+        new_value = format(new_value, '.4f')  # Format value to 5 decimal places
         cell_widget = self.cellWidget(row, 1)
         value_input = cell_widget.findChild(QLineEdit)
         value_input.setText(str(new_value))

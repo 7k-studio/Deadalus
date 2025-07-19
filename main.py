@@ -1,12 +1,13 @@
 import sys
 # Redirect stdout and stderr to a log file
-log_file = open("toolout.log", "w")
-sys.stdout = log_file
-sys.stderr = log_file
+#log_file = open("toolout.log", "w")
+#sys.stdout = log_file
+#sys.stderr = log_file
 
 from PyQt5.QtWidgets import QApplication
 from src.splash.splash_screen import SplashScreen
 import src.globals as globals
+import datetime
 
 def main():
     app = QApplication(sys.argv)
@@ -16,5 +17,23 @@ def main():
     
     sys.exit(app.exec_())
 
+def header():
+    print("      ____________     ___                 _________    ___          ___________     ___           ___  ")
+    print("     /  ______   /\   /__/\               /  ______/\  /  /\        /  _____   /\   /  /\         /  /\ ")
+    print("    /  /\____/  / /   \__\/  _______     /  /\_____\/ /  / /       /  /\___/  / /  /  / /        /  / / ")
+    print("   /  /_/___/  / /  ___     /  ____/\   /  /_/___    /  / /       /  / /  /  / /  /  / / ___    /  / /  ")
+    print("  /  ______   / /  /  /\   /  /\___\/  /  ______/\  /  / /       /  / /  /  / /  /  / / /  /\  /  / /   ")
+    print(" /  /\____/  / /  /  / /  /  / /      /  /\_____\/ /  /_/____   /  /_/__/  / /  /  /_/_/  /_/_/  / /    ")
+    print("/__/ /   /__/ /  /__/ /  /__/ /      /__/ /       /_________/\ /__________/ /  /________________/ /     ")
+    print("\__\/    \__\/   \__\/   \__\/       \__\/        \_________\/ \__________\/   \________________\/      ")
+    print(" ")
+    print(f"Program version: {globals.AIRFLOW.program_version}")
+    print("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/|")
+    print("")
+    print(f"Program opend on: {datetime.date.today()} at {datetime.time.fromisoformat('04:23:01+04:00')}")
+    
+
 if __name__ == "__main__":
+    header()
     main()
+

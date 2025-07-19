@@ -79,6 +79,16 @@ class Tabele(QTableWidget):
             # Restore the last valid value if input is invalid
             print("WARNING: Invalid input, restoring last valid value.")
             value_input.setText(str(self.airfoil['params'][param_name]))
+    
+    def _adjust_value_with_modifiers(self, row, direction):
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers & Qt.ShiftModifier:
+            delta = 1.0
+        elif modifiers & Qt.ControlModifier:
+            delta = 0.01
+        else:
+            delta = 0.1
+        self.adjust_value(row, direction * delta)
 
     def adjust_value(self, row, delta):
         # Adjust parameter value by delta
@@ -90,7 +100,7 @@ class Tabele(QTableWidget):
         # Update the input field display
         cell_widget = self.cellWidget(row, 1)
         value_input = cell_widget.findChild(QLineEdit)
-        new_value = format(new_value, '.5f')  # Format value to 2 decimal places
+        new_value = format(new_value, '.4f')  # Format value to 2 decimal places
         value_input.setText(str(new_value))
         # Pass reference points to update_plot
         #self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)
@@ -149,14 +159,4 @@ class Tabele(QTableWidget):
         self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-
-    def _adjust_value_with_modifiers(self, row, direction):
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers & Qt.ShiftModifier:
-            delta = 1.0
-        elif modifiers & Qt.ControlModifier:
-            delta = 0.01
-        else:
-            delta = 0.1
-        self.adjust_value(row, direction * delta)
 

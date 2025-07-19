@@ -66,13 +66,13 @@ class ViewportOpenGL(QGLWidget):
         # Drawing objects
         for i in range(len(globals.PROJECT.project_components)):
 
-            bckgrd.draw_origin_arrows(self, linewidth=3, zoom=self.zoom, X=globals.PROJECT.project_components[i].params['origin_X'], Y=globals.PROJECT.project_components[i].params['origin_Y'], Z=globals.PROJECT.project_components[i].params['origin_Z'])
-            print(f"Drawing component {i+1}/{len(globals.PROJECT.project_components)}")
+            bckgrd.draw_origin_arrows(self, zoom=self.zoom, origin_x=globals.PROJECT.project_components[i].params['origin_X'], origin_y=globals.PROJECT.project_components[i].params['origin_Y'], origin_z=globals.PROJECT.project_components[i].params['origin_Z'])
+            #print(f"Drawing component {i+1}/{len(globals.PROJECT.project_components)}")
 
             for j in range(len(globals.PROJECT.project_components[i].wings)):
-                print(f"  Drawing wing {j+1}/{len(globals.PROJECT.project_components[i].wings)}")
+                #print(f"  Drawing wing {j+1}/{len(globals.PROJECT.project_components[i].wings)}")
                 for k in range(len(globals.PROJECT.project_components[i].wings[j].segments)):
-                    print(f"    Drawing segment {k+1}/{len(globals.PROJECT.project_components[i].wings[j].segments)}")
+                    #print(f"    Drawing segment {k+1}/{len(globals.PROJECT.project_components[i].wings[j].segments)}")
                     try:
                         # Check for errors before drawing
                         error = glGetError()

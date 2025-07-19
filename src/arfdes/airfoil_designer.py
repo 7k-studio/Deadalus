@@ -54,9 +54,6 @@ class AirfoilDesigner(QMainWindow):
         self.setWindowTitle("AirFLOW: Airfoil Designer")
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
-
-        # Store a reference to the shared airfoil_list
-        self.airfoils_origin = []
         
         # Initial Parameters
         self.params = {}

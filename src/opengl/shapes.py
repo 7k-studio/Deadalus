@@ -89,6 +89,7 @@ def draw_cube():
     glVertex3f(1, -1, -1)
     # Add other faces...
     glEnd()
+    
 
 def draw_object_from_file(filepath, extrusion=1.0):
     """Draw an object using coordinates from a file, extruded along the z-axis."""
