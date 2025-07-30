@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 
 import numpy as np
 
-import src.obj.aero as aero
+import src.obj.airfoil as airfoil
 import src.wngwb.tools_wing as tools_wing
 import src.utils.dxf as dxf
 import random
@@ -16,8 +16,9 @@ import random
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton, QSizePolicy
 )
+from PyQt5.QtGui import QIcon
 
-from src.opengl.viewport import ViewportOpenGL
+from src.opengl.viewport3d import ViewportOpenGL
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 
@@ -38,7 +39,9 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None, flags=Qt.WindowFlags()):
         super(MainWindow, self).__init__(parent, flags)
+        print("Opening Wing Workbench")
         self.setWindowTitle(globals.AIRFLOW.program_name)
+        self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
 
@@ -110,7 +113,4 @@ class MainWindow(QMainWindow):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
         # Add rendering logic here
-
-    def show_tree_menu(self):
-        self.outer_splitter.setSizes([200, self.width() - 200])
 

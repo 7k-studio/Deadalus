@@ -1,0 +1,31 @@
+{
+ "program name": "AirFLOW",
+ "program version": "0.1.0-beta",
+ "airfoil": {
+  "infos": {
+   "name": "E168",
+   "creation_date": "2025-07-09",
+   "modification_date": "2025-07-09",
+   "description": "Eppler E168 low Reynolds number airfoil Max thickness 12.4% at 26.7% chord Max camber 0% at 0% chord"
+  },
+  "chord": 0.9975,
+  "origin_X": -0.0087,
+  "origin_Y": 0,
+  "le_thickness": 0.05,
+  "le_depth": 0.035,
+  "le_offset": 0.0,
+  "le_angle": 0.0001,
+  "te_thickness": 0.002,
+  "te_depth": 0.0015,
+  "te_offset": 0.0,
+  "te_angle": 0.0001,
+  "ps_fwd_angle": 26.8,
+  "ps_rwd_angle": -4.85,
+  "ps_fwd_accel": 0.19,
+  "ps_rwd_accel": 0.453,
+  "ss_fwd_angle": -26.8,
+  "ss_rwd_angle": 4.85,
+  "ss_fwd_accel": 0.19,
+  "ss_rwd_accel": 0.453
+ }
+}

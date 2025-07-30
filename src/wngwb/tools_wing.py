@@ -1,6 +1,6 @@
 import math
 import sys
-import src.obj.aero as aero
+import src.obj.airfoil as airfoil
 import json
 import os
 import numpy as np
@@ -23,6 +23,7 @@ from matplotlib.figure import Figure
 
 import src.globals as globals
 
+import datetime
 
 #import sympy as sym
 def DataBase_info(default_loc):
@@ -79,131 +80,6 @@ def DataBase_load(file, default_loc):
     DW_points = np.array(DW_points).T
     
     return AirfoilCoord, UP_points, DW_points, airfoil_name
-
-def Save(program_info, component, airfoil_count, arf_lst):
-
-    desiged_component = {
-            "component name": component,
-            "element count": airfoil_count
-        }
-    
-    for i in range(0, airfoil_count):
-        desiged_component[f"airfoil_{i}"] = {
-                    "position": i,
-                    "name": arf_lst[i].name,
-                    "origin": arf_lst[i].origin,
-                    "length": arf_lst[i].scale,
-                    "incidence": arf_lst[i].incidence,
-                    "full curve": np.array(arf_lst[i].full_curve).T.tolist(),
-                    "top curve": np.array(arf_lst[i].top_curve).tolist(),
-                    "dwn curve": np.array(arf_lst[i].dwn_curve).tolist(),
-                    "le org": np.array(arf_lst[i].le_org).tolist(),
-                    "ps org": np.array(arf_lst[i].ps_org).tolist(),
-                    "ss org": np.array(arf_lst[i].ss_org).tolist(),
-                    "te org": np.array(arf_lst[i].te_org).tolist(),
-                    "le type": arf_lst[i].le_type,
-                    "le value":arf_lst[i].le_value,
-                    "te type": arf_lst[i].te_type,
-                    "te value": arf_lst[i].le_value
-                }
-
-    data = {
-        "program name": program_info.name,
-        "program version": program_info.version,
-        "file name": program_info.file_name,
-        "designed component": desiged_component
-    }
-
-    json_object = json.dumps(data, indent=1)
-
-    with open(f"{program_info.file_name}.paf", "w") as outfile:
-        outfile.write(json_object)
-
-    print("File write: Success!")
-
-def SaveAs(program_info, component, airfoil_count, arf_lst):
-
-    save_as = input("Save file as: ")
-
-    desiged_component = {
-            "component name": component,
-            "element count": airfoil_count
-        }
-    
-    for i in range(0, airfoil_count):
-        desiged_component[f"airfoil_{i}"] = {
-                    "position": i,
-                    "name": arf_lst[i].name,
-                    "origin": arf_lst[i].origin,
-                    "length": arf_lst[i].scale,
-                    "incidence": arf_lst[i].incidence,
-                    "full curve": np.array(arf_lst[i].full_curve).T.tolist(),
-                    "top curve": np.array(arf_lst[i].top_curve).tolist(),
-                    "dwn curve": np.array(arf_lst[i].dwn_curve).tolist(),
-                    "le org": np.array(arf_lst[i].le_org).tolist(),
-                    "ps org": np.array(arf_lst[i].ps_org).tolist(),
-                    "ss org": np.array(arf_lst[i].ss_org).tolist(),
-                    "te org": np.array(arf_lst[i].te_org).tolist(),
-                    "le type": arf_lst[i].le_type,
-                    "le value":arf_lst[i].le_value,
-                    "te type": arf_lst[i].te_type,
-                    "te value": arf_lst[i].le_value
-                }
-
-    data = {
-        "program name": program_info.name,
-        "program version": program_info.version,
-        "file name": save_as,
-        "designed component": desiged_component
-    }
-
-    json_object = json.dumps(data, indent=1)
-
-    with open(f"{save_as}.paf", "w") as outfile:
-        outfile.write(json_object)
-
-    print("File write: Success!")
-
-    return save_as
-
-def Load(arf_lst):
-
-    file_name = input("Input file name: ")
-
-    try:
-        with open(f"{file_name}.paf", "r") as file:
-            data = json.load(file)
-            print("File load: Success!")
-    except FileNotFoundError:
-        print("File not found!")
-    except json.JSONDecodeError:
-        print("Error decoding JSON!")
-
-    file_name = data["program name"]
-    component = data["designed component"]["component name"]
-    airfoil_count = data["designed component"]["element count"]
-
-    for i in range (0, airfoil_count):
-
-        arf_dt = data["designed component"][f"airfoil_{i}"]
-
-        arf_lst[i].full_curve = arf_dt["full curve"]
-        arf_lst[i].top_curve =  arf_dt["top curve"]
-        arf_lst[i].dwn_curve =  arf_dt["dwn curve"]
-        arf_lst[i].le_org = arf_dt["le org"]
-        arf_lst[i].ps_org = arf_dt["ps org"]
-        arf_lst[i].ss_org = arf_dt["ss org"]
-        arf_lst[i].te_org = arf_dt["te org"]
-        arf_lst[i].name = arf_dt["name"]
-        arf_lst[i].origin = arf_dt["origin"]
-        arf_lst[i].scale = arf_dt["length"]
-        arf_lst[i].incidence = arf_dt["incidence"]
-        arf_lst[i].le_type = arf_dt["le type"]
-        arf_lst[i].le_value = arf_dt["le value"]
-        arf_lst[i].te_type = arf_dt["te type"]
-        arf_lst[i].te_value = arf_dt["te type"]
-
-    return file_name, component, airfoil_count, arf_lst
 
 def Convert(le_depth, te_depth, UP_points, DW_points):
     airfoil_chord = DW_points[0][len(DW_points[0])-1]

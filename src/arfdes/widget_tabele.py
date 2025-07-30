@@ -40,6 +40,7 @@ class Tabele(QTableWidget):
         self.Dwn_ref_points = dwn_ref_points
 
     def add_editable_row(self, row, value):
+        """Add an editable row with up/down buttons and input field."""
         # Create a custom widget for editing with up/down buttons and input
         container = QWidget()
         layout = QHBoxLayout(container)

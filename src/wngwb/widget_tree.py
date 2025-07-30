@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
-import src.obj.aero as aero
+import src.obj.airfoil as airfoil
 from src.wngwb.tools_wing import add_component_to_tree
 from datetime import date
 import src.globals as globals
@@ -8,7 +8,7 @@ class TreeMenu(QTreeWidget):
     def __init__(self, parent=None):
         super(TreeMenu, self).__init__(parent)
         self.main_window = parent
-        self.setHeaderLabel("Project Name")
+        self.setHeaderLabel(f"{globals.PROJECT.project_name}")
         self.init_tree()
 
     def init_tree(self):

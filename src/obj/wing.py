@@ -12,51 +12,39 @@ class Segment:
                       'modification_date': ''}
         
         self.airfoil = src.obj.airfoil.Airfoil()
-        self.anchor = 'G0' # G1 or G2
+        self.anchor = 'G0' # G1 or G2 later add 'segment'
 
-        if self.anchor == 'G0':
-            self.params = {
-                'origin_X': 0,
-                'origin_Y': 0,
-                'origin_Z': 0,
-                'incidence': 0,
-                'scale': 1,  
-            }
+        self.params = {
+            'origin_X': 0,
+            'origin_Y': 0,
+            'origin_Z': 0,
+            'incidence': 0,
+            'scale': 1,
+            'tan_accel': 0.1,
+            #'curv_accel': 0.1,
+            #'curv_theta': 0   
+        }
 
-        if self.anchor == 'G1':
-            self.params = {
-                'origin_X': 0,
-                'origin_Y': 0,
-                'origin_Z': 0,
-                'incidence': 0,
-                'scale': 1,
-                'tan_accel': 1,  
-            }
-
-        if self.anchor == 'G2':
-            self.params = {
-                'origin_X': 0,
-                'origin_Y': 0,
-                'origin_Z': 0,
-                'incidence': 0,
-                'scale': 1,
-                'tan_accel': 1,
-                'curv_accel': 1,
-                'curv_theta': 0   
-            }
-
-        self.points = {
+        self.control_points = {
             'le': [],
             'ps': [],
             'ss': [],
-            'te': []
+            'te': [],
+            'le_ps': [],
+            'te_ps': [],
+            'le_ss': [],
+            'te_ss': []
         }
 
         self.geom = {
             'le': [],
             'ps': [],
             'ss': [],
-            'te': []
+            'te': [],
+            'le_ps': [],
+            'te_ps': [],
+            'le_ss': [],
+            'te_ss': []
         }
 
     def move_airfoil(self, cmp_X:float, cmp_Y:float, wng_X:float, wng_Y:float, seg_X:float, seg_Y:float):
@@ -67,14 +55,14 @@ class Segment:
         print(f"> Moving airfoil geometry by X:{move_X}, Y:{move_Y}...")
 
         tmp_le = np.vstack([self.geom['le'][0] + move_X, self.geom['le'][1] + move_Y])
-        tmp_ss = np.vstack([self.geom['ps'][0] + move_X, self.geom['ps'][1] + move_Y])
-        tmp_ps = np.vstack([self.geom['ss'][0] + move_X, self.geom['ss'][1] + move_Y])
+        tmp_ps = np.vstack([self.geom['ps'][0] + move_X, self.geom['ps'][1] + move_Y])
+        tmp_ss = np.vstack([self.geom['ss'][0] + move_X, self.geom['ss'][1] + move_Y])
         tmp_te = np.vstack([self.geom['te'][0] + move_X, self.geom['te'][1] + move_Y])
 
-        tmp_c_le = np.vstack([self.points['le'][0] + move_X, self.points['le'][1] + move_Y])
-        tmp_c_ss = np.vstack([self.points['ps'][0] + move_X, self.points['ps'][1] + move_Y])
-        tmp_c_ps = np.vstack([self.points['ss'][0] + move_X, self.points['ss'][1] + move_Y])
-        tmp_c_te = np.vstack([self.points['te'][0] + move_X, self.points['te'][1] + move_Y])
+        tmp_c_le = np.vstack([self.control_points['le'][0] + move_X, self.control_points['le'][1] + move_Y])
+        tmp_c_ps = np.vstack([self.control_points['ps'][0] + move_X, self.control_points['ps'][1] + move_Y])
+        tmp_c_ss = np.vstack([self.control_points['ss'][0] + move_X, self.control_points['ss'][1] + move_Y])
+        tmp_c_te = np.vstack([self.control_points['te'][0] + move_X, self.control_points['te'][1] + move_Y])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
 
@@ -87,10 +75,10 @@ class Segment:
         tmp_ss = scale * np.array(self.geom['ss'])
         tmp_te = scale * np.array(self.geom['te'])
 
-        tmp_c_le = scale * np.array(self.points['le'])
-        tmp_c_ps = scale * np.array(self.points['ps'])
-        tmp_c_ss = scale * np.array(self.points['ss'])
-        tmp_c_te = scale * np.array(self.points['te'])
+        tmp_c_le = scale * np.array(self.control_points['le'])
+        tmp_c_ps = scale * np.array(self.control_points['ps'])
+        tmp_c_ss = scale * np.array(self.control_points['ss'])
+        tmp_c_te = scale * np.array(self.control_points['te'])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
 
@@ -107,10 +95,10 @@ class Segment:
         tmp_ss = np.dot(rotation_matrix, self.geom['ss'])
         tmp_te = np.dot(rotation_matrix, self.geom['te'])
 
-        tmp_c_le = np.dot(rotation_matrix, self.points['le'])
-        tmp_c_ps = np.dot(rotation_matrix, self.points['ps'])
-        tmp_c_ss = np.dot(rotation_matrix, self.points['ss'])
-        tmp_c_te = np.dot(rotation_matrix, self.points['te'])
+        tmp_c_le = np.dot(rotation_matrix, self.control_points['le'])
+        tmp_c_ps = np.dot(rotation_matrix, self.control_points['ps'])
+        tmp_c_ss = np.dot(rotation_matrix, self.control_points['ss'])
+        tmp_c_te = np.dot(rotation_matrix, self.control_points['te'])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
     
@@ -121,22 +109,22 @@ class Segment:
         self.geom['ss'] = self.airfoil.geom['ss']
         self.geom['te'] = self.airfoil.geom['te']
 
-        self.points['le'] = self.airfoil.constr['le']
-        self.points['ps'] = self.airfoil.constr['ps']
-        self.points['ss'] = self.airfoil.constr['ss']
-        self.points['te'] = self.airfoil.constr['te']
+        self.control_points['le'] = self.airfoil.constr['le']
+        self.control_points['ps'] = self.airfoil.constr['ps']
+        self.control_points['ss'] = self.airfoil.constr['ss']
+        self.control_points['te'] = self.airfoil.constr['te']
 
     def transform_airfoil(self, grandparent_index, parent_index, item_index):
 
         self.update_airfoil()
 
-        cmp_X = globals.PROJECT.project_components[grandparent_index].origin_X
-        cmp_Y = globals.PROJECT.project_components[grandparent_index].origin_Y
-        cmp_Z = globals.PROJECT.project_components[grandparent_index].origin_Z
+        cmp_X = globals.PROJECT.project_components[grandparent_index].params['origin_X']
+        cmp_Y = globals.PROJECT.project_components[grandparent_index].params['origin_Y']
+        cmp_Z = globals.PROJECT.project_components[grandparent_index].params['origin_Z']
 
-        wng_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].origin_X
-        wng_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].origin_Y
-        wng_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].origin_Z
+        wng_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_X']
+        wng_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Y']
+        wng_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Z']
 
         seg_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_X']
         seg_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Y']
@@ -145,16 +133,12 @@ class Segment:
         incidence = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['incidence']
 
         print("Transforming airfoil geometry...")
-        print(f"> {cmp_X}, {cmp_Y}, {cmp_Z}")
-        print(f"> > {wng_X}, {wng_Y}, {wng_Z}")
-        print(f"> > > {seg_X}, {seg_Y}, {seg_Z}, {scale}, {incidence}")
-
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.scale_airfoil(scale)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.scale_airfoil(scale)
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.move_airfoil(cmp_X, cmp_Y, wng_X, wng_Y, seg_X, seg_Y)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.move_airfoil(cmp_X, cmp_Y, wng_X, wng_Y, seg_X, seg_Y)
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.rotate_airfoil(incidence)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.rotate_airfoil(incidence)
         print(".")
         print("Done!")
 
@@ -170,6 +154,13 @@ class Wing:
             'origin_Z': 0,   
         }
 
+        self.geom = {
+            'le': [],
+            'ps': [],
+            'ss': [],
+            'te': []
+        }
+
         self.segments = []
     
     def move_wing(self, wng_X:float, wng_Y:float):
@@ -180,14 +171,14 @@ class Wing:
         print(f"> Moving wing geometry by X:{move_X}, Y:{move_Y}...")
 
         tmp_le = np.vstack([self.geom['le'][0] + move_X, self.geom['le'][1] + move_Y])
-        tmp_ss = np.vstack([self.geom['ps'][0] + move_X, self.geom['ps'][1] + move_Y])
-        tmp_ps = np.vstack([self.geom['ss'][0] + move_X, self.geom['ss'][1] + move_Y])
+        tmp_ps = np.vstack([self.geom['ps'][0] + move_X, self.geom['ps'][1] + move_Y])
+        tmp_ss = np.vstack([self.geom['ss'][0] + move_X, self.geom['ss'][1] + move_Y])
         tmp_te = np.vstack([self.geom['te'][0] + move_X, self.geom['te'][1] + move_Y])
 
-        tmp_c_le = np.vstack([self.points['le'][0] + move_X, self.points['le'][1] + move_Y])
-        tmp_c_ss = np.vstack([self.points['ps'][0] + move_X, self.points['ps'][1] + move_Y])
-        tmp_c_ps = np.vstack([self.points['ss'][0] + move_X, self.points['ss'][1] + move_Y])
-        tmp_c_te = np.vstack([self.points['te'][0] + move_X, self.points['te'][1] + move_Y])
+        tmp_c_le = np.vstack([self.control_points['le'][0] + move_X, self.control_points['le'][1] + move_Y])
+        tmp_c_ps = np.vstack([self.control_points['ps'][0] + move_X, self.control_points['ps'][1] + move_Y])
+        tmp_c_ss = np.vstack([self.control_points['ss'][0] + move_X, self.control_points['ss'][1] + move_Y])
+        tmp_c_te = np.vstack([self.control_points['te'][0] + move_X, self.control_points['te'][1] + move_Y])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
 
@@ -200,10 +191,10 @@ class Wing:
         tmp_ss = scale * np.array(self.geom['ss'])
         tmp_te = scale * np.array(self.geom['te'])
 
-        tmp_c_le = scale * np.array(self.points['le'])
-        tmp_c_ps = scale * np.array(self.points['ps'])
-        tmp_c_ss = scale * np.array(self.points['ss'])
-        tmp_c_te = scale * np.array(self.points['te'])
+        tmp_c_le = scale * np.array(self.control_points['le'])
+        tmp_c_ps = scale * np.array(self.control_points['ps'])
+        tmp_c_ss = scale * np.array(self.control_points['ss'])
+        tmp_c_te = scale * np.array(self.control_points['te'])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
 
@@ -220,10 +211,10 @@ class Wing:
         tmp_ss = np.dot(rotation_matrix, self.geom['ss'])
         tmp_te = np.dot(rotation_matrix, self.geom['te'])
 
-        tmp_c_le = np.dot(rotation_matrix, self.points['le'])
-        tmp_c_ps = np.dot(rotation_matrix, self.points['ps'])
-        tmp_c_ss = np.dot(rotation_matrix, self.points['ss'])
-        tmp_c_te = np.dot(rotation_matrix, self.points['te'])
+        tmp_c_le = np.dot(rotation_matrix, self.control_points['le'])
+        tmp_c_ps = np.dot(rotation_matrix, self.control_points['ps'])
+        tmp_c_ss = np.dot(rotation_matrix, self.control_points['ss'])
+        tmp_c_te = np.dot(rotation_matrix, self.control_points['te'])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
     
@@ -234,10 +225,10 @@ class Wing:
         self.geom['ss'] = self.airfoil.geom['ss']
         self.geom['te'] = self.airfoil.geom['te']
 
-        self.points['le'] = self.airfoil.constr['le']
-        self.points['ps'] = self.airfoil.constr['ps']
-        self.points['ss'] = self.airfoil.constr['ss']
-        self.points['te'] = self.airfoil.constr['te']
+        self.control_points['le'] = self.airfoil.constr['le']
+        self.control_points['ps'] = self.airfoil.constr['ps']
+        self.control_points['ss'] = self.airfoil.constr['ss']
+        self.control_points['te'] = self.airfoil.constr['te']
 
     def transform_airfoil(self, grandparent_index, parent_index, item_index):
 
@@ -258,18 +249,96 @@ class Wing:
         incidence = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['incidence']
 
         print("Transforming airfoil geometry...")
-        print(f"> {cmp_X}, {cmp_Y}, {cmp_Z}")
-        print(f"> > {wng_X}, {wng_Y}, {wng_Z}")
-        print(f"> > > {seg_X}, {seg_Y}, {seg_Z}, {scale}, {incidence}")
-
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.scale_airfoil(scale)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.scale_airfoil(scale)
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.move_airfoil(cmp_X, cmp_Y, wng_X, wng_Y, seg_X, seg_Y)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.move_airfoil(cmp_X, cmp_Y, wng_X, wng_Y, seg_X, seg_Y)
         print(".")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.points['le'], self.points['ps'], self.points['ss'], self.points['te'] = self.rotate_airfoil(incidence)
+        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.control_points['le'], self.control_points['ps'], self.control_points['ss'], self.control_points['te'] = self.rotate_airfoil(incidence)
         print(".")
         print("Done!")
+
+    def build_connection(self):
+        if len(self.segments) > 1:
+            for i in range(len(self.segments)-1):
+
+                parent_le_ps_seg_anchor = np.array(self.segments[i].control_points['ps'])[:,0]
+                parent_le_ps_seg_anchor = np.hstack((parent_le_ps_seg_anchor, self.segments[i].params['origin_Z'] ))
+
+                child_le_ps_seg_anchor = np.array(self.segments[i+1].control_points['ps'])[:,0]
+                child_le_ps_seg_anchor = np.hstack((child_le_ps_seg_anchor, self.segments[i+1].params['origin_Z'] ))
+
+                parent_te_ps_seg_anchor = np.array(self.segments[i].control_points['ps'])[:,-1]
+                parent_te_ps_seg_anchor = np.hstack((parent_te_ps_seg_anchor, self.segments[i].params['origin_Z'] ))
+
+                child_te_ps_seg_anchor = np.array(self.segments[i+1].control_points['ps'])[:,-1]
+                child_te_ps_seg_anchor = np.hstack((child_te_ps_seg_anchor, self.segments[i+1].params['origin_Z'] ))
+
+                parent_le_ss_seg_anchor = np.array(self.segments[i].control_points['ss'])[:,0]
+                parent_le_ss_seg_anchor = np.hstack((parent_le_ss_seg_anchor, self.segments[i].params['origin_Z'] ))
+
+                child_le_ss_seg_anchor = np.array(self.segments[i+1].control_points['ss'])[:,0]
+                child_le_ss_seg_anchor = np.hstack((child_le_ss_seg_anchor, self.segments[i+1].params['origin_Z'] ))
+
+                parent_te_ss_seg_anchor = np.array(self.segments[i].control_points['ss'])[:,-1]
+                parent_te_ss_seg_anchor = np.hstack((parent_te_ss_seg_anchor, self.segments[i].params['origin_Z'] ))
+
+                child_te_ss_seg_anchor = np.array(self.segments[i+1].control_points['ss'])[:,-1]
+                child_te_ss_seg_anchor = np.hstack((child_te_ss_seg_anchor, self.segments[i+1].params['origin_Z'] ))
+
+                if self.segments[i].anchor == 'G0':
+
+                    parent_le_ps_tan_cp = None
+                    parent_le_ss_tan_cp = None
+                    parent_te_ss_tan_cp = None
+                    parent_te_ps_tan_cp = None
+
+                if self.segments[i+1].anchor == 'G0':
+
+                    child_le_ps_tan_cp = None
+                    child_le_ss_tan_cp = None
+                    child_te_ss_tan_cp = None
+                    child_te_ps_tan_cp = None
+
+                if self.segments[i].anchor == 'G1':
+
+                    parent_le_ps_tan_cp = np.array([parent_le_ps_seg_anchor[0] , parent_le_ps_seg_anchor[1], (parent_le_ps_seg_anchor[2] + self.segments[i].params['tan_accel'])])
+                    parent_le_ss_tan_cp = np.array([parent_le_ss_seg_anchor[0], parent_le_ss_seg_anchor[1], (parent_le_ss_seg_anchor[2] + self.segments[i].params['tan_accel'])])
+                    parent_te_ss_tan_cp = np.array([parent_te_ss_seg_anchor[0], parent_te_ss_seg_anchor[1], (parent_te_ss_seg_anchor[2] + self.segments[i].params['tan_accel'])])
+                    parent_te_ps_tan_cp = np.array([parent_te_ps_seg_anchor[0] , parent_te_ps_seg_anchor[1], (parent_te_ps_seg_anchor[2] + self.segments[i].params['tan_accel'])])
+                
+                if self.segments[i+1].anchor == 'G1':
+
+                    child_le_ps_tan_cp = np.array([child_le_ps_seg_anchor[0] , child_le_ps_seg_anchor[1], (child_le_ps_seg_anchor[2] - self.segments[i+1].params['tan_accel'])])
+                    child_le_ss_tan_cp = np.array([child_le_ss_seg_anchor[0], child_le_ss_seg_anchor[1], (child_le_ss_seg_anchor[2] - self.segments[i+1].params['tan_accel'])])
+                    child_te_ps_tan_cp = np.array([child_te_ps_seg_anchor[0] , child_te_ps_seg_anchor[1], (child_te_ps_seg_anchor[2] - self.segments[i+1].params['tan_accel'])])
+                    child_te_ss_tan_cp = np.array([child_te_ss_seg_anchor[0], child_te_ss_seg_anchor[1], (child_te_ss_seg_anchor[2] - self.segments[i+1].params['tan_accel'])])
+
+                if self.segments[i].anchor == 'G2':
+                    factor = (parent_le_ps_seg_anchor[0] - child_le_ps_seg_anchor[0]) / 10
+
+                tmp_le_ps = [p for p in (parent_le_ps_seg_anchor,parent_le_ps_tan_cp,child_le_ps_tan_cp,child_le_ps_seg_anchor) if p is not None]
+                tmp_te_ps = [p for p in (parent_te_ps_seg_anchor,parent_te_ps_tan_cp,child_te_ps_tan_cp,child_te_ps_seg_anchor) if p is not None]
+                tmp_le_ss = [p for p in (parent_le_ss_seg_anchor,parent_le_ss_tan_cp,child_le_ss_tan_cp,child_le_ss_seg_anchor) if p is not None]
+                tmp_te_ss = [p for p in (parent_te_ss_seg_anchor,parent_te_ss_tan_cp,child_te_ss_tan_cp,child_te_ss_seg_anchor) if p is not None]
+
+                if tmp_le_ps: 
+                    #print("tmp_le_ps:", tmp_le_ps)
+                    self.segments[i].control_points['le_ps'] = np.vstack(tmp_le_ps).T
+
+                if tmp_te_ps:
+                    #print("tmp_te_ps:", tmp_te_ps)
+                    self.segments[i].control_points['te_ps'] = np.vstack(tmp_te_ps).T
+
+                if tmp_le_ss:
+                    #print("tmp_le_ss:", tmp_le_ss)
+                    self.segments[i].control_points['le_ss'] = np.vstack(tmp_le_ss).T
+
+                if tmp_te_ss:
+                    #print("tmp_te_ss:", tmp_te_ss)
+                    self.segments[i].control_points['te_ss'] = np.vstack(tmp_te_ss).T
+
+        #print(f'WNGWB > Wing > build_connection > Connection between two segments established')
 
 class Component:
     def __init__(self):
@@ -286,7 +355,7 @@ class Component:
 
     def move_component(self, cmp_X:float, cmp_Y:float, cmp_Z:float):
 
-        print(f"> Moving component geometry by X:{cmp_X}, Y:{cmp_Y}, Z:{cmp_Z}...")
+        print(f"WNGWB > Moving component geometry by X:{cmp_X}, Y:{cmp_Y}, Z:{cmp_Z}...")
 
         tmp_X = self.params['origin_X'] + cmp_X
         tmp_Y = self.params['origin_Y'] + cmp_Y
@@ -300,7 +369,7 @@ class Component:
         self.params['origin_Y'] = 0
         self.params['origin_Z'] = 0
 
-    def transform_airfoil(self, grandparent_index, parent_index, item_index):
+    def transform_component(self, grandparent_index):
 
         self.restore_component()
 
@@ -309,8 +378,6 @@ class Component:
         cmp_Z = globals.PROJECT.project_components[grandparent_index].origin_Z
 
         print("Transforming component...")
-        print(f"> {cmp_X}, {cmp_Y}, {cmp_Z}")
-
         print(".")
         self.params['origin_X'], self.params['origin_Y'], self.params['origin_Z'] = self.move_component(cmp_X, cmp_Y, cmp_Z)
         print(".")

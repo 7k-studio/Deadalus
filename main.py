@@ -5,12 +5,16 @@ import sys
 #sys.stderr = log_file
 
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
 from src.splash.splash_screen import SplashScreen
 import src.globals as globals
 import datetime
 
 def main():
     app = QApplication(sys.argv)
+
+    icon = QIcon("src/assets/logo.png")
+    app.setWindowIcon(icon)
 
     splash = SplashScreen(globals.AIRFLOW)
     splash.show()
@@ -30,7 +34,7 @@ def header():
     print(f"Program version: {globals.AIRFLOW.program_version}")
     print("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/|")
     print("")
-    print(f"Program opend on: {datetime.date.today()} at {datetime.time.fromisoformat('04:23:01+04:00')}")
+    print(f"Program opened on: {datetime.datetime.now()}")
     
 
 if __name__ == "__main__":

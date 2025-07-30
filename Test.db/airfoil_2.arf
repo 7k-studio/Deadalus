@@ -1,0 +1,31 @@
+{
+ "program name": "AirFLOW",
+ "program version": "0.1.0-beta",
+ "airfoil": {
+  "infos": {
+   "name": "S1223",
+   "creation_date": "2025-07-12",
+   "modification_date": "2025-07-12",
+   "description": "Almost achieved; Selig S1223 high lift low Reynolds number airfoil Max thickness 12.1% at 19.8% chord. Max camber 8.1% at 49% chord"
+  },
+  "chord": 0.9955,
+  "origin_X": -0.006,
+  "origin_Y": 0.0,
+  "le_thickness": 0.036,
+  "le_depth": 0.019999999999999997,
+  "le_offset": -0.0085,
+  "le_angle": 26.32,
+  "te_thickness": 0.0027,
+  "te_depth": 0.0015,
+  "te_offset": 0.0085,
+  "te_angle": -16.18,
+  "ps_fwd_angle": 44.0,
+  "ps_rwd_angle": -24.0,
+  "ps_fwd_accel": 0.095,
+  "ps_rwd_accel": 0.07000000000000002,
+  "ss_fwd_angle": -30.0,
+  "ss_rwd_angle": -12.959999999999997,
+  "ss_fwd_accel": 0.16,
+  "ss_rwd_accel": 0.245
+ }
+}

@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QApplication, QMessageBox
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
+from PyQt5.QtWidgets import QFileDialog
 from src.arfdes.airfoil_designer import AirfoilDesigner  # Import the AirfoilDesigner class from the correct module
 from src.wngwb.main_window import MainWindow
 import src.globals as globals
@@ -21,7 +22,7 @@ class SplashScreen(QWidget):
 
         # Add splash image
         splash_label = QLabel(self)
-        pixmap = QPixmap("src/splash/splash.png")
+        pixmap = QPixmap("src/assets/splash.png")
         if pixmap.isNull():
             print("Error: 'splash.png' not found or invalid path.")
         splash_label.setPixmap(pixmap)
@@ -40,12 +41,12 @@ class SplashScreen(QWidget):
         button_layout = QHBoxLayout()
         button1 = QPushButton("New Project")
         button1.setStyleSheet("background-color: lightblue;")
-        button1.clicked.connect(self.open_airfoil_designer)
+        button1.clicked.connect(self.new_project)
         button1.setFixedSize(220, 30)  # Set fixed size for the button
 
         button2 = QPushButton("Open Project")
         button2.setStyleSheet("background-color: lightgreen;")
-        button2.clicked.connect(self.open_wing_designer)
+        button2.clicked.connect(self.open_project)
         button2.setFixedSize(220, 30)  # Set fixed size for the button
 
         button_layout.addWidget(button1)
@@ -57,7 +58,7 @@ class SplashScreen(QWidget):
 
         # Add close button
         close_button = QPushButton(self)
-        icon = QIcon("src/splash/cross.png")
+        icon = QIcon("src/assets/cross.png")
         if icon.isNull():
             print("Error: 'cross.png' not found or invalid path.")
         close_button.setIcon(icon)
@@ -71,33 +72,19 @@ class SplashScreen(QWidget):
         close_layout.setAlignment(Qt.AlignRight)
         layout.insertLayout(0, close_layout)  # Insert at the top of the main layout
 
-    def open_airfoil_designer(self):
-        """Open the AirfoilDesigner window."""
+    def new_project(self):
+        """Create new AirFLOW project and open the AirfoilDesigner window."""
         self.PROJECT = globals.PROJECT.newProject()
         self.airfoil_designer_window = AirfoilDesigner(globals.AIRFLOW, globals.PROJECT)  # Pass airfoil_list
         self.airfoil_designer_window.show()
         self.close()
 
-    def open_wing_designer(self):
-        """Open the WingDesigner window."""
-        
-        #msg = QMessageBox(self)
-        #msg.setWindowTitle("Wing Module")
-        #msg.setText("Wing Module functionality is under development.")
-        #msg.setIcon(QMessageBox.Information)
-        #msg.setStandardButtons(QMessageBox.Ok)
-        #msg.exec_()
-        self.PROJECT = globals.newProject()
-        self.airfoil_designer_window = MainWindow()  # Pass airfoil_list
-        self.airfoil_designer_window.show()
-        self.close()
-
-        # Add a button or menu action to open the AirfoilDesigner
-        #self.open_airfoil_designer_action = QAction("Open Airfoil Designer", self)
-        #self.open_airfoil_designer_action.triggered.connect(self.open_airfoil_designer)
-        #self.menu_bar.addAction(self.open_airfoil_designer_action)
-
-    #def open_airfoil_designer(self):
-        """Open the AirfoilDesigner window."""
-        #self.airfoil_designer = AirfoilDesigner(airfoil_list)  # Pass airfoil_list
-        #self.airfoil_designer.show()
+    def open_project(self):
+        """Load AirFLOW project and open the AirfoilDesigner window."""
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
+        if fileName:
+            self.PROJECT = globals.loadProject(fileName)
+            self.airfoil_designer_window = AirfoilDesigner(globals.AIRFLOW, globals.PROJECT)  # Pass airfoil_list
+            self.airfoil_designer_window.show()
+            self.close()

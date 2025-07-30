@@ -71,7 +71,7 @@ def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
     glVertex3f(origin_x, origin_y-(arrow*zoom), origin_z)  # Center of the base circle
     for i in range(quality + 1):
         angle = i * angle_step
-        x = origin_y + (diameter) * math.cos(angle)
+        x = origin_x + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
         glVertex3f(x, origin_y-(length*zoom), z)
     glEnd()

@@ -3,12 +3,6 @@ import sys
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox
 from PyQt5.QtCore import Qt
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Rectangle
 import numpy as np
 import math
 import os
@@ -21,7 +15,8 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
-from src.opengl.viewport import ViewportOpenGL
+import src.obj.wing
+from src.opengl.viewport3d import ViewportOpenGL
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 from src.arfdes.airfoil_designer import AirfoilDesigner
@@ -30,8 +25,7 @@ import src.globals as globals
 from src.wngwb import tools_wing  # Import add_component_to_tree
 
 from datetime import date
-
-import src.obj as obj
+import src.obj
 
 class MenuBar(QMenuBar):
     def __init__(self, parent=None):
@@ -104,6 +98,19 @@ class MenuBar(QMenuBar):
 
         moduleMenu.addAction(AirfoilModule)
 
+        """Program menu creation"""
+        programMenu = self.addMenu('Program')
+
+        aboutAction = QAction('About', self)
+        preferencesAction = QAction('Preferences', self)
+
+        aboutAction.triggered.connect(self.showAbout)
+        preferencesAction.triggered.connect(self.preferencesWindow)
+
+        programMenu.addAction(aboutAction)
+        programMenu.addSeparator()
+        programMenu.addAction(preferencesAction)
+
     def newFile(self):
         msg = QMessageBox.question(self, "New Project", "Do you want to create a new project?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
@@ -113,24 +120,27 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
         if fileName:
+            globals.loadProject(fileName)
             print(f"Opened file: {fileName}")
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "All Files (*);;Text Files (*.txt)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Database Files (*.db) ;; All Files (*)", options=options)
         if fileName:
+            globals.saveProject(fileName)
             print(f"Saved file: {fileName}")
 
     def exportFile(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Export File", "", "STEP AP203 (*.step;*.stp);", options=options)
         if fileName:
-            import utils.step as step
-            step.export_simple_wing(fileName)
+            import src.utils.step as step
+            #step.export_only_control_points(fileName)
+            base_name = os.path.basename(fileName)
+            step.export_3d_segment_wing(fileName, base_name)
             print(f"Exported file: {fileName}")
-
 
     def quitApp(self):
         QApplication.quit()
@@ -143,15 +153,15 @@ class MenuBar(QMenuBar):
 
     def addComponent(self, name='Component'):
         """Add a new component to the tree menu."""
-        component_obj = obj.aero.Component()
+        component_obj = src.obj.wing.Component()
         component_obj.infos['name'] = name  # Ensure the name is set in infos
-        component_obj.infos['creation_date'] = date.today()
-        component_obj.infos['modification_date'] = date.today()
+        component_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
+        component_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
         tools_wing.add_component_to_tree(self.main_window.tree_menu, name, component_obj)
         
     def addWing(self):
         """Add a new wing to the selected component."""
-        wing_obj = obj.aero.Wing()
+        wing_obj = src.obj.wing.Wing()
         #wing_obj.infos['creation_date'] = date.today()
         #wing_obj.infos['modification_date'] = date.today()
 
@@ -187,7 +197,7 @@ class MenuBar(QMenuBar):
 
     def addSection(self):
         """Add a new section to the selected wing."""
-        segment_obj = obj.aero.Segment()
+        segment_obj = src.obj.wing.Segment()
         segment_obj.airfoil = globals.PROJECT.project_airfoils[0]  # Ensure the name is set in infos
         #wing_obj.infos['creation_date'] = date.today()
         #wing_obj.infos['modification_date'] = date.today()

@@ -11,6 +11,8 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItem, QTextEdit, QStackedWidget, QHeaderView,
     QTableWidget, QTableWidgetItem, QPushButton
 )
+from PyQt5.QtGui import QIcon
+
 #MatPlotLib imports
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -33,7 +35,7 @@ import src.wngwb.tools_wing
 import src.utils.dxf
 from src.arfdes.widget_tabele import Tabele
 from .menu_bar import MenuBar
-from src.obj.aero import Airfoil
+from src.obj.airfoil import Airfoil
 from src.arfdes.tools_airfoil import Reference_load
 from src.arfdes.tools_airfoil import CreateBSpline
 from src.arfdes.tools_airfoil import add_airfoil_to_tree
@@ -41,7 +43,7 @@ import src.globals as globals
 
 from src.arfdes.plot_canvas import PlotCanvas
 
-Airfoil_0 = obj.aero.Airfoil()
+Airfoil_0 = src.obj.airfoil.Airfoil()
 
 class AirfoilDesigner(QMainWindow):
 
@@ -49,9 +51,11 @@ class AirfoilDesigner(QMainWindow):
 
     def __init__(self, program=None, project=None):
         super().__init__()
+        print("Opening: Airfoil Designer")
         self.program = program
         self.project = project
         self.setWindowTitle("AirFLOW: Airfoil Designer")
+        self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
         
@@ -110,7 +114,7 @@ class AirfoilDesigner(QMainWindow):
             self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
     
     def add_airfoil(self, name, dscr='designed from scratch in airfoil designer'):
-        airfoil_obj = obj.aero.Airfoil()
+        airfoil_obj = src.obj.airfoil.Airfoil()
         airfoil_obj.infos['name'] = name  # Ensure the name is set in infos
         airfoil_obj.infos['creation_date'] = date.today()
         airfoil_obj.infos['modification_date'] = date.today()
@@ -133,14 +137,14 @@ class AirfoilDesigner(QMainWindow):
         current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
 
         if state:
-            print(f"Reference enabled with file: {filename}")
+            print(f"ARFDES > Reference enabled with file: {filename}")
             self.canvas.ax.clear()  # Clear the plot
             self.canvas.plot_airfoil(current_airfoil)
             self.reference_airfoil = Reference_load(filename)
             self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
             self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
         else:
-            print("Reference disabled")
+            print("ARFDES > Reference disabled")
             self.canvas.ax.clear()  # Clear the plot
             self.table.set_reference_points(None, None)  # Clear reference points in the table
             self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil

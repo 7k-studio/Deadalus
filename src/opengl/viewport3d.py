@@ -9,7 +9,9 @@ from PyQt5.QtOpenGL import QGLWidget
 import math
 
 #from .test_cube import draw_object_from_file  # Import the new function
-from . import shapes  # Import the shapes module
+from . import construction
+from . import wireframe
+from . import solid
 from . import bckgrd
 
 import src.globals as globals
@@ -59,6 +61,7 @@ class ViewportOpenGL(QGLWidget):
         glRotatef(self.rotation[2], 0.0, 0.0, 1.0)
         glTranslatef(-self.CoR[0], -self.CoR[1], -self.CoR[2])
 
+
         #Drawing background elements
         bckgrd.draw_grid(self, linewidth=1, zoom=self.zoom)
         bckgrd.draw_ruller(self, zoom=self.zoom)
@@ -70,7 +73,10 @@ class ViewportOpenGL(QGLWidget):
             #print(f"Drawing component {i+1}/{len(globals.PROJECT.project_components)}")
 
             for j in range(len(globals.PROJECT.project_components[i].wings)):
+                solid.draw_cube(globals.PROJECT.project_components[i].wings[j].params['origin_X'],globals.PROJECT.project_components[i].wings[j].params['origin_Y'],globals.PROJECT.project_components[i].wings[j].params['origin_Z'],0.2)
+                construction.draw_cp_net(globals.PROJECT.project_components[i].wings[j], self.zoom)
                 #print(f"  Drawing wing {j+1}/{len(globals.PROJECT.project_components[i].wings)}")
+                
                 for k in range(len(globals.PROJECT.project_components[i].wings[j].segments)):
                     #print(f"    Drawing segment {k+1}/{len(globals.PROJECT.project_components[i].wings[j].segments)}")
                     try:
@@ -79,8 +85,9 @@ class ViewportOpenGL(QGLWidget):
                         if error != GL_NO_ERROR:
                             print(f"OpenGL Error before airfoil: {(error)}") #gluErrorString
 
-                        shapes.draw_airfoil(self, globals.PROJECT.project_components[i].wings[j].segments[k])
-                        shapes.draw_wing(self, globals.PROJECT.project_components[i].wings[j], len(globals.PROJECT.project_components[i].wings[j].segments))
+                        wireframe.draw_airfoil_wireframe(self, globals.PROJECT.project_components[i].wings[j].segments[k])
+                        globals.PROJECT.project_components[i].wings[j].build_connection()
+                        #shapes.draw_wing(self, globals.PROJECT.project_components[i].wings[j], len(globals.PROJECT.project_components[i].wings[j].segments))
                         # Check for errors after drawing
                         error = glGetError()
                         if error != GL_NO_ERROR:
@@ -88,8 +95,8 @@ class ViewportOpenGL(QGLWidget):
                     except IndexError:
                         print("No airfoil data available to draw.")
 
-        shapes.draw_tube(self, Wheels.wheel_front_X, Wheels.wheel_front_Y, Wheels.wheel_front_Z, Wheels.diameter, Wheels.width, quality=32)
-        shapes.draw_tube(self, Wheels.wheel_rear_X, Wheels.wheel_rear_Y, Wheels.wheel_rear_Z, Wheels.diameter, Wheels.width, quality=32)
+        #solid.draw_tube(self, Wheels.wheel_front_X, Wheels.wheel_front_Y, Wheels.wheel_front_Z, Wheels.diameter, Wheels.width, quality=32)
+        #solid.draw_tube(self, Wheels.wheel_rear_X, Wheels.wheel_rear_Y, Wheels.wheel_rear_Z, Wheels.diameter, Wheels.width, quality=32)
 
     def draw_cor(self, position, size=5):
         glPointSize(size)

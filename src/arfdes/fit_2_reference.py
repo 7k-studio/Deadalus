@@ -177,7 +177,7 @@ class Fit2RefWindow(QDialog):
         for label_text, box_attr in self.param_defs:
             label = QLabel(label_text)
             combo = QComboBox()
-            combo.addItems(["Dynamic", "Passive"])
+            combo.addItems(["Variable", "Restrained", "Fixed"])
             input_min = QLineEdit()
             input_max = QLineEdit()
             input_min.setPlaceholderText("Min")
@@ -219,14 +219,17 @@ class Fit2RefWindow(QDialog):
             combo = self.combo_boxes[self.param_defs[i][1]]
             min_edit = self.input_mins[self.param_defs[i][1]]
             max_edit = self.input_maxs[self.param_defs[i][1]]
-            if combo.currentText() == "Passive":
+            if combo.currentText() == "Restrain":
                 min_val = min_edit.text().strip()
                 max_val = max_edit.text().strip()
                 min_bound = float(min_val) if min_val else None
                 max_bound = float(max_val) if max_val else None
+                bounds.append((min_bound, max_bound))
                 # For chord, if max is empty, use params["chord"] as default
+            if combo.currentText() == "Fixed":
                 #if key == "chord" and max_val == "":
-                #    max_bound = params.get("chord", None)
+                min_bound = params.get(param_keys[i], None)
+                max_bound = params.get(param_keys[i], None)
                 bounds.append((min_bound, max_bound))
             else:
                 bounds.append((None, None))

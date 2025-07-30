@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QLineEdit
+from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QLineEdit, QApplication
 from PyQt5.QtCore import Qt
 from PyQt5 import QtWidgets
 
@@ -14,10 +14,8 @@ class Tabele(QTableWidget):
         self.init_tabele()
     
     def init_tabele(self, params=None):
-
         # Initial Parameters
         self.params = {}
-
         # Parameter Table
         self.setRowCount(len(self.params))
         self.setColumnCount(3)
@@ -33,7 +31,6 @@ class Tabele(QTableWidget):
         container = QWidget()
         layout = QHBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
-
         # Input field for direct keyboard input
         try:
             value = format(value, '.4f')  # Format value to 4 decimal places
@@ -47,31 +44,43 @@ class Tabele(QTableWidget):
         # Up button
         up_button = QPushButton("▲")
         up_button.setFixedSize(20, 20)
-        up_button.clicked.connect(lambda: self.adjust_value(row, 0.1))
+        up_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, 1))
 
         # Down button
         down_button = QPushButton("▼")
         down_button.setFixedSize(20, 20)
-        down_button.clicked.connect(lambda: self.adjust_value(row, -0.1))
+        down_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, -1))
 
         # Add widgets to layout
         layout.addWidget(down_button)
         layout.addWidget(value_input)
         layout.addWidget(up_button)
-
         self.setCellWidget(row, 1, container)
 
         self.save_current_element_state()
 
-    def update_airfoil_value(self, row, new_name):
+    def _adjust_value_with_modifiers(self, row, direction):
+            modifiers = QApplication.keyboardModifiers()
+            if modifiers & Qt.ShiftModifier:
+                delta = 1.0
+            elif modifiers & Qt.ControlModifier:
+                delta = 0.01
+            else:
+                delta = 0.1
+            self.adjust_value(row, direction * delta)
+
+    def update_value_from_input(self, row, value_input):
+        # Update parameter from the input field
+        param_name = self.item(row, 0).text()
+
         # Find the Airfoil object by name
         for airfoil in globals.PROJECT.project_airfoils:
-            if airfoil.infos['name'] == new_name:
+            if airfoil.infos['name'] == value_input:
                 selected_airfoil = airfoil
                 break
-        else:
-            print("Airfoil not found!")
-            return
+            else:
+                print("ERROR: Selected airfoil was not found!")
+                return
 
         selected_item = self.tree_menu.currentItem()
         parent_item = selected_item.parent()
@@ -89,19 +98,42 @@ class Tabele(QTableWidget):
 
                 element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
 
-        element_item.airfoil = selected_airfoil
+                element_item.airfoil = selected_airfoil
+                self.save_current_element_state()
+            
+            if parent_item and not grandparent_item:
 
-        # Optionally, update the UI or trigger a redraw
-        print(f"Changed airfoil for segment {row} to {selected_airfoil.infos['name']}")
+                item_index = parent_item.indexOfChild(selected_item)
+                parent_index = self.tree_menu.indexOfTopLevelItem(parent_item)
 
-    def update_value_from_input(self, row, value_input):
-        # Update parameter from the input field
-        param_name = self.item(row, 0).text()
+                element_item = globals.PROJECT.project_components[parent_index].wings[item_index]
+
+            if not parent_item and not grandparent_item:
+
+                item_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+
+                element_item = globals.PROJECT.project_components[item_index]
+        
         try:
             new_value = float(value_input.text())
             self.params[param_name] = new_value
             self.save_current_element_state()
-            
+        except ValueError:
+            # Restore the last valid value if input is invalid
+            print("WARNING: Invalid input, restoring last valid value.")
+            value_input.setText(str(self.params[param_name]))
+
+        # Optionally, update the UI or trigger a redraw
+        
+        print(f"Changed airfoil for segment {row} to {selected_airfoil.infos['name']}")
+
+    def update_airfoil_value(self, row, value_input):
+        # Update parameter from the input field
+        param_name = self.item(row, 0).text()
+        try:
+            new_value = str(value_input)
+            self.params[param_name] = new_value
+            self.save_current_element_state()
         except ValueError:
             # Restore the last valid value if input is invalid
             print("WARNING: Invalid input, restoring last valid value.")
@@ -109,8 +141,9 @@ class Tabele(QTableWidget):
 
     def adjust_value(self, row, delta):
         # Adjust parameter value by delta
+        print(self.params)
         param_name = self.item(row, 0).text()
-        current_value = self.params[param_name]
+        current_value = self.params['params'][param_name]
         new_value = current_value + delta
 
         # Update value
@@ -124,7 +157,6 @@ class Tabele(QTableWidget):
 
         # Update element
         self.save_current_element_state()  # Save changes to the airfoil list
-
 
     def populate_table(self, element_obj):
         """Populate the table with data from an element object."""
@@ -157,7 +189,7 @@ class Tabele(QTableWidget):
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem('anchor'))
             anchor_dropdown = QtWidgets.QComboBox(self)  # <-- przekazanie self jako parent
-            anchor_names = ['G0', 'G1', 'G2']
+            anchor_names = ['G0', 'G1']
             anchor_dropdown.addItems(anchor_names)
             current_name = getattr(element_obj, 'anchor', '')
             if current_name in anchor_names:
@@ -250,7 +282,7 @@ class Tabele(QTableWidget):
                     parent_index = grandparent_item.indexOfChild(parent_item)
                     grandparent_index = self.tree_menu.indexOfTopLevelItem(grandparent_item)
 
-                    print(f'Segment at index: {grandparent_index} >>> {parent_index} >>> {item_index}')
+                    print(f'WNGWB > Save_state > Segment at index: {grandparent_index} >>> {parent_index} >>> {item_index}')
 
                     element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
 
@@ -259,7 +291,7 @@ class Tabele(QTableWidget):
                     item_index = parent_item.indexOfChild(selected_item)
                     parent_index = self.tree_menu.indexOfTopLevelItem(parent_item)
 
-                    print(f'Wing at index: {parent_index} >>> {item_index}')
+                    print(f'WNGWB > Save_state > Wing at index: {parent_index} >>> {item_index}')
 
                     element_item = globals.PROJECT.project_components[parent_index].wings[item_index]
 
@@ -267,7 +299,7 @@ class Tabele(QTableWidget):
 
                     item_index = self.tree_menu.indexOfTopLevelItem(selected_item)
 
-                    print(f'Component at index: {item_index}')
+                    print(f'WNGWB > Save_state > Component at index: {item_index}')
 
                     element_item = globals.PROJECT.project_components[item_index]
 
@@ -277,13 +309,41 @@ class Tabele(QTableWidget):
                     # Retrieve the value from the QLineEdit inside the custom widget
                     cell_widget = self.cellWidget(row, 1)
                     if cell_widget:
-                        value_input = cell_widget.findChild(QLineEdit)
-                        if value_input:
+                        combo_box = self.cellWidget(row, 1) if isinstance(self.cellWidget(row, 1), QtWidgets.QComboBox) else None
+                        line_edit = cell_widget.findChild(QLineEdit)
+
+                        #print(f'Combobox: {combo_box}')
+
+                        if combo_box:
+                            value = combo_box.currentText()
+                            if key == "anchor":
+                                element_item.anchor = value
+                                print(f"WNGWB > Save_state > Saved anchor: {value}")
+                            if key == "airfoil":
+                                selected_name = combo_box.currentText()
+                                matched_airfoil = next(
+                                    (a for a in globals.PROJECT.project_airfoils if a.infos["name"] == selected_name),
+                                    None
+                                )
+                                if matched_airfoil:
+                                    element_item.airfoil = matched_airfoil
+                                    print(f"WNGWB > Save_state > Set airfoil: {matched_airfoil.infos['name']}")
+                                else:
+                                    print(f"WNGWB > Save_state > WARNING: Airfoil '{selected_name}' not found!")
+                            else:
+                                print(f"WNGWB > Save_state > Skipped unknown ComboBox: {key}")
+
+                        elif line_edit:
                             try:
-                                value = float(value_input.text())
-                                setattr(element_item, key, value)
+                                value = float(line_edit.text())
+                                if hasattr(element_item, "params") and key in element_item.params:
+                                    element_item.params[key] = value
+                                else:
+                                    setattr(element_item, key, value)
                             except ValueError:
-                                print(f"Invalid value for parameter '{key}', skipping update.")
+                                print(f"WNGWB > Save_state > Invalid value for parameter '{key}', skipping update.")
+                
+                print(f"WNGWB > Save_state > Saved params of: {element_item.infos['name']}")
                 try:
                     globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].transform_airfoil(grandparent_index, parent_index, item_index)
                 except:

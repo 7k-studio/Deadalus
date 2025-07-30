@@ -7,7 +7,7 @@ from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
 from tqdm import tqdm
 import json
-import src.obj as obj
+import src.obj
 import src.globals as globals  # Import from globals.py
 
 def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
@@ -62,7 +62,7 @@ def Reference_load(file):
     print(UP_points)
     print(DW_points)
     
-    airfoil = obj.aero.Airfoil_selig_format()
+    airfoil = src.obj.airfoil.Airfoil_selig_format()
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
@@ -163,10 +163,10 @@ def find_t_for_x(desired_x, tck):
         raise ValueError(f"Could not find t for X = {desired_x}")
     return result.root
 
-def load_airfoil_from_json(self, fileName):
+def load_airfoil_from_json(fileName):
     """load the airfoil data from a JSON format file."""
-    import src.obj.aero as aero
-    Airfoil = aero.Airfoil()
+    import src.obj.airfoil as airfoil
+    Airfoil = airfoil.Airfoil()
 
     if fileName:
         try:
@@ -226,7 +226,7 @@ def load_airfoil_from_json(self, fileName):
 
         return Airfoil
 
-def save_airfoil_to_json(self, airfoil_idx=None):
+def save_airfoil_to_json(airfoil_idx=None):
     """Save the airfoil data to a JSON format file."""
  
     current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
@@ -270,7 +270,7 @@ def save_airfoil_to_json(self, airfoil_idx=None):
 
 def flip_airfoil_horizontally(airfoil):
     """Flip the airfoil horizontally."""
-    flipped_airfoil = obj.aero.Airfoil()
+    flipped_airfoil = src.obj.airfoil.Airfoil()
     flipped_airfoil.infos = airfoil.infos.copy()
     flipped_airfoil.params = airfoil.params.copy()
 
