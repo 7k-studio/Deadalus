@@ -274,3 +274,11 @@ class MenuBar(QMenuBar):
         from preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
+
+    def showAbout(self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle("About")
+        msg.setText(f"{globals.AIRFLOW.program_name}\nVersion: {globals.AIRFLOW.program_version}")
+        msg.setIcon(QMessageBox.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AirFLOW User Manual</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+    }
+
+    header img {
+      margin-right: 15px;
+      margin-bottom: 0;
+    }
+
+    .section-menu {
+      background-color: #34495e;
+      color: white;
+      display: flex;
+      justify-content: flex-start;
+      padding: 10px 20px;
+    }
+
+    .section-menu button {
+      background: none;
+      border: none;
+      color: white;
+      margin-right: 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .section-menu button:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 100px);
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #ecf0f1;
+      padding: 20px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .sidebar li {
+      margin-bottom: 10px;
+    }
+
+    .sidebar a {
+      color: #2c3e50;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover {
+      text-decoration: underline;
+    }
+
+    .content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .page-section {
+      display: none;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    details { 
+      background: #ddd; 
+      border: 1px solid #ccc; 
+      border-radius: 5px; 
+      margin-bottom: 1em; 
+      padding: 1em; 
+    }
+
+    .highlight { background: #e1f5fe;
+       padding: 0.2em; 
+       border-radius: 1px; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+      <img src="logo.png" alt="Program Logo" height="40"/>
+      <img src="text_logo.png" alt="Program Text Logo" height="100"/>
+      <!-- <pre> <p style="margin: 0;">Welcome to the AirFLOW User Manual</p> </pre> -->
+  </header>
+
+  <!-- Top Navigation Menu -->
+  <div class="section-menu">
+    <button onclick="showSection('airflow')">AirFLOW</button>
+    <button onclick="showSection('designer')">Airfoil Designer</button>
+    <button onclick="showSection('wing')">Wing Workbench</button>
+    <button onclick="showSection('changelog')">Changelog</button>
+  </div>
+
+  <!-- Main App Area -->
+  <div class="container">
+    <!-- Sidebar Menu -->
+    <nav class="sidebar">
+      <h3>Contents</h3>
+
+      <ul id="menu-airflow" class="context-menu">
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#airflow">AirFLOW</a></li>
+        <li><a href="#FileMenu">File Menu</a></li>
+        <li><a href="#ProgramMenu">Program Menu</a></li>
+        <li><a href="#todo">ToDo</a></li>
+      </ul>
+
+      <ul id="menu-designer" class="context-menu" style="display: none;">
+        <li><a href="#create">Create Airfoil</a></li>
+        <li><a href="#edit">Edit Geometry</a></li>
+        <li><a href="#export">Export</a></li>
+      </ul>
+
+      <ul id="menu-wing" class="context-menu" style="display: none;">
+        <li><a href="#assemble">Assemble Wing</a></li>
+        <li><a href="#settings">Settings</a></li>
+        <li><a href="#analyze">Analyze</a></li>
+      </ul>
+
+      <ul id="menu-changelog" class="context-menu" style="display: none;">
+        <li><a href="#notes">Release Notes</a></li>
+        <li><a href="#0.2.X beta">0.2.X beta</a></li>
+        <li><a href="#0.1.X beta">0.1.X beta</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- AirFLOW Section -->
+      <div id="airflow" class="page-section active">
+          <h2>Introduction</h2>
+          <p>
+              Welcome to the AirFLOW user manual. AirFLOW is a program for designing, editing, and analyzing airfoils and wings. This manual will guide you through the main features and help you get started with your projects.
+          </p>
+          <ul>
+              <li>Design and modify airfoils with intuitive tools.</li>
+              <li>Import/export airfoil files in various formats.</li>
+              <li>Use the Wing Workbench for advanced wing design (beta).</li>
+          </ul>
+
+          <h2>AirFLOW</h2>
+          <p>AirFLOW consists of two modules: 2D airfoil design and 3D wing design.
+            Each AirFLOW module is equipped with the <span class="highlight">File</span>, <span class="highlight">Edit</span>, <span class="highlight">View</span>, <span class="highlight">Module</span>, and <span class="highlight">About</span> menus.
+            Global program interactions can be made through the File and About menus.
+          </p>
+          <img src="airflow.png" alt="Splash Screen" height="500"/>
+
+          <h3>Splash Screen</h3>
+          <ul>
+              <li><b>Create new project:</b> Start a new project.</li>
+              <li><b>Open existing project:</b> Load an existing project file.</li>
+          </ul>
+          <img src="splashscreen.png" alt="Splash Screen"/>
+
+
+          <h3>File Menu</h3>
+          <p> Allows user to interact with <span class="highlight">PROJECT</span> itself. Basic interactions are:</p>
+          <ul>
+              <li><b>New:</b> Start a new project.</li>
+              <li><b>Open:</b> Load an existing project file.</li>
+              <li><b>Save:</b> Save your current project.</li>
+          </ul>
+
+          <h3>About Menu</h3>
+          <p> Allows user to interact with <span class="highlight">PROGRAM</span> itself. Basic interactions are:</p>
+          <ul>
+              <li><b>Preferences:</b> Adjust program settings.</li>
+              <li><b>About:</b> Show information about the program.</li>
+          </ul>
+
+          <h4>Preferences</h4>
+          <p>Preferences window allows you to customize the program settings according to your needs.
+            <h5>General performance</h5>
+            Allows a user to choose the details level in graphics rendering. user can choose between three options:
+            <ul>
+              <li><b>Fast:</b> Lowest graphical setting.</li>
+              <li><b>Normal:</b> Default graphical setting.</li>
+              <li><b>Good:</b> Highest graphical setting.</li>
+            </ul>
+            <img src="preferences_general_performance.png" alt="preferences general performance"/>
+            <h5>Beta features</h5>
+            Unlocks functions that are not well tested or stable. Used at user's own risk!
+          </p>
+          
+          <h2>ToDo</h2>
+          <ul>
+              <li>Reopening of Airfoil Designer from Wing Designer causes problems</li>
+              <li>Provide .STEP export</li>
+              <li>Transformation of Component, Wing, Section</li>
+          </ul>
+          <img src="STEP_export.jpg" alt="Wing Workbench" height="500"/>
+      </div>
+
+      <!-- Airfoil Designer Section -->
+      <div id="designer" class="page-section">
+        <h2>Airfoil Designer</h2>
+        <p>Design and modify airfoils using control points and geometry tools.</p>
+        <img src="airfoil_designer.png" alt="Airfoil Designer" height="500"/>
+
+        <h3 id="create">Edit menu</h3>
+        <p>Allows user to interact with Airfoil Designer. Contains basic functinality required to create, recreate, reload an airfoils</p>
+          <ul>
+              <li><b>Create:</b> Add a new airfoil to your project.</li>
+              <li><b>Append:</b> Import an airfoil from a file.</li>
+              <li><b>Delete:</b> Remove the selected airfoil.</li>
+              <li><b>Save:</b> Save the selected airfoil to a file.</li>
+              <li><b>Export:</b> Export the airfoil as a DXF file.</li>
+              <li><b>Flip Airfoil:</b> Flip the selected airfoil horizontally.</li>
+              <li><b>Rename:</b> Change the name of the selected airfoil.</li>
+              <li><b>Edit Description:</b> Edit the airfoil's description.</li>
+              <li><b>Fit2Reference:</b> Fit the airfoil to a reference (beta feature).</li>
+          </ul>
+
+        <h3 id="edit">View menu</h3>
+        <p>Allows user to add elements to displayed airfoil preview</p>
+          <ul>
+              <li><b>Show Reference:</b> Toggle display of a reference airfoil.</li>
+          </ul>
+      </div>
+      <!-- Wing Workbench Section -->
+      <div id="wing" class="page-section">
+        <h2>Wing Workbench</h2>
+        <p>Assemble full wings from created / established in Airfoil Designer profiles.</p>
+        <img src="wing_workbench.png" alt="Wing Workbench" height="500"/>
+        <h3>Edit menu</h3>
+            <p>
+                Allows user to interact with Wing Workbench. Contains basic functinality required to create, objects representing airfoil:
+                <li><b>Components:</b> Primary object consits of wing (representation of e.g. Rear Wing in racecar )</li>
+                <li><b>Wings:</b> Secondary object consits of segments (representation of e.g. 1st Wing of Rear Wing )</li>
+                <li><b>Segments:</b> Constructional element of the wing. Give Wing a shape (representation of e.g. Ribs inside Wing )</li>
+            </p>
+
+            <h3>Module Menu</h3>
+            <ul>
+                <li><b>Wing Module:</b> Open the wing design module (beta feature).</li>
+            </ul>
+      </div>
+
+      <!-- Change Log Page -->
+      <div id="changelog" class="page-section">
+        <h2>Change Log</h2>
+        <h3 id="notes">Release Notes</h3>
+        <p>Details of the latest updates and fixes.</p>
+        <details open>
+                <summary>v0.2.X beta</summary>
+                <ul>
+                    <li>Introduction of project/file save and load functionality.</li>
+                    <li>Displaying of the overlapping OpenGL elements has been resolved. Objects don't stack up anymore and colors and viewport looks more stable.</li>
+                    <li>GUI was stabilized in Wing Workbench at the cost of widgets adjustability. Change positively affected ComboBox in 'Parameters Table'</li>
+                </ul>
+                <p><b>Currently available elements and functions are listed below:</b></p>
+                <ul>
+                    <li><b>Airfoil designer:</b>
+                        <ul>
+                            <li><b>File:</b>
+                                <ul>
+                                    <li>New - now tree menu is cleared and project resets</li>
+                                    <li>Open - opens existing project from db.tgz database</li>
+                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                                </ul>
+                            </li>
+                            <li><b>Edit menu:</b>
+                                <ul>
+                                    <li>Create - creates new airfoil</li>
+                                    <li>Append - appends airfoil from existing .arf file</li>
+                                    <li>Delete - deletes selected airfoil</li>
+                                    <li>Save - saves airfoil to .arf file</li>
+                                    <li>Export - exports airfoil to .dxf file</li>
+                                    <li>Rename - renames airfoil</li>
+                                    <li>Edit description - edits description of an airfoil</li>
+                                    <li>Fit2Reference - fits airfoil to reference airfoil (beta feature)</li>
+                                </ul>
+                            </li>
+                            <li><b>View:</b>
+                                <ul>
+                                    <li>Show reference - Shows reference of airfoil in SELIG format</li>
+                                </ul>
+                            </li>
+                            <li><b>Module:</b>
+                                <ul>
+                                    <li>Wing module - open Wing Workbench</li>
+                                </ul>
+                            </li>
+                            <li><b>Program:</b>
+                                <ul>
+                                    <li>About - shows not so useful about</li>
+                                    <li>Preferences - opens preferences window. Allows user to change settings</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><b>Wing designer:</b>
+                        <ul>
+                            <li>New - now tree menu is cleared and project resets</li>
+                            <li>Open - opens existing project from db.tgz database</li>
+                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                        </ul>
+                    </li>
+                </ul>
+        </details>
+        <details open>
+            <summary>v0.1.X beta</summary>
+            <ul>
+                <li>Creation of GUI for both Airfoil Designer and Wing Workbench.</li>
+                <li>On reopening of Wing Workbench Project Tree is refreshed.</li>
+                <li>Repaired floating number display problem by limiting decimals to 5 digits.</li>
+                <li>Preferences are now being saved and loaded when program is opening</li>
+            </ul>
+            <p><b>Currently stable elements and functions are listed below:</b></p>
+            <ul>
+                <li><b>Airfoil designer:</b>
+                    <ul>
+                        <li><b>File:</b>
+                            <ul>
+                                <li>New - now tree menu is cleared and project resets</li>
+                                <li>Preferences - opens preferences window</li>
+                            </ul>
+                        </li>
+                        <li><b>Edit menu:</b>
+                            <ul>
+                                <li>Create - creates new airfoil</li>
+                                <li>Append - appends airfoil from existing .arf file</li>
+                                <li>Delete - deletes selected airfoil</li>
+                                <li>Save - saves airfoil to .arf file</li>
+                                <li>Export - exports airfoil to .dxf file</li>
+                                <li>Rename - renames airfoil</li>
+                                <li>Edit description - edits description of an airfoil</li>
+                            </ul>
+                        </li>
+                        <li><b>View:</b>
+                            <ul>
+                                <li>Show reference - Shows reference of airfoil in SELIG format</li>
+                            </ul>
+                        </li>
+                        <li><b>Module:</b>
+                            <ul>
+                                <li>Wing module - open Wing Workbench</li>
+                            </ul>
+                        </li>
+                        <li><b>Help:</b>
+                            <ul>
+                                <li>About - shows not so useful about</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li><b>Wing designer:</b>
+                    <ul>
+                        <li>Probably nothing :/</li>
+                    </ul>
+                </li>
+            </ul>
+        </details>
+      </div>
+    </main>
+  </div>
+
+  <!-- JavaScript for switching sections -->
+  <script>
+    function showSection(sectionId) {
+      // Hide all sections
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+      // Show selected section
+      document.getElementById(sectionId).classList.add('active');
+
+      // Hide all context menus
+      document.querySelectorAll('.context-menu').forEach(el => el.style.display = 'none');
+
+      // Show relevant context menu
+      const menu = document.getElementById(`menu-${sectionId}`);
+      if (menu) menu.style.display = 'block';
+    }
+
+    // Default to AirFLOW section on load
+    window.onload = () => showSection('airflow');
+  </script>
+
+</body>
+</html>
