@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication
 import sys
 from PyQt5 import QtWidgets, QtCore
@@ -23,6 +44,7 @@ from src.arfdes.airfoil_designer import AirfoilDesigner
 import src.globals as globals
 
 from src.wngwb import tools_wing  # Import add_component_to_tree
+from src.wngwb import widget_tree
 
 from datetime import date
 import src.obj
@@ -64,22 +86,24 @@ class MenuBar(QMenuBar):
         copyWingAction = QAction('Copy Wing', self)
         renameWingAction = QAction('Rename Wing', self)
         deleteWingAction = QAction('Delete Wing', self)
-        addSectionAction = QAction('Add Section', self)
-        appendSectionAction = QAction('Append Section', self)
-        copySectionAction = QAction('Copy Section', self)
-        renameSectionAction = QAction('Rename Section', self)
-        deleteSectionAction = QAction('Delete Section', self)
-        preferencesAction = QAction('Preferences', self)
+        addSectionAction = QAction('Add Segment', self)
+        appendSectionAction = QAction('Append Segment', self)
+        copySectionAction = QAction('Copy Segment', self)
+        renameSectionAction = QAction('Rename Segment', self)
+        deleteSectionAction = QAction('Delete Segment', self)
 
         addComponentAction.triggered.connect(self.addComponent)
+        deleteComponentAction.triggered.connect(self.deleteComponent)
+
         addWingAction.triggered.connect(self.addWing)
-        addSectionAction.triggered.connect(self.addSection)
-        preferencesAction.triggered.connect(self.preferencesWindow)
+
+        addSectionAction.triggered.connect(self.addSegment)
+
 
         editMenu.addAction(addComponentAction)
+        editMenu.addAction(deleteComponentAction)
         editMenu.addAction(addWingAction)
         editMenu.addAction(addSectionAction)
-        editMenu.addAction(preferencesAction)
 
         viewMenu = self.addMenu('View')
 
@@ -101,12 +125,15 @@ class MenuBar(QMenuBar):
         """Program menu creation"""
         programMenu = self.addMenu('Program')
 
+        manualAction = QAction('User Manual', self)
         aboutAction = QAction('About', self)
         preferencesAction = QAction('Preferences', self)
 
+        manualAction.triggered.connect(self.showManual)
         aboutAction.triggered.connect(self.showAbout)
         preferencesAction.triggered.connect(self.preferencesWindow)
 
+        programMenu.addAction(manualAction)
         programMenu.addAction(aboutAction)
         programMenu.addSeparator()
         programMenu.addAction(preferencesAction)
@@ -117,12 +144,14 @@ class MenuBar(QMenuBar):
             print("Creating new project...")
             # Reset the project components
             globals.PROJECT.newProject()
+            self.main_window.tree_menu.init_tree()
 
     def openFile(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
+            self.main_window.tree_menu.init_tree()
             print(f"Opened file: {fileName}")
 
     def saveFile(self):
@@ -158,6 +187,38 @@ class MenuBar(QMenuBar):
         component_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
         component_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
         tools_wing.add_component_to_tree(self.main_window.tree_menu, name, component_obj)
+
+    def deleteComponent(self):
+        """Add a new wing to the selected component."""
+        # Ensure main_window is set
+        if self.main_window:
+            selected_item = self.main_window.tree_menu.currentItem()
+            if selected_item:
+
+                # Find the index of the selected item
+                index = self.main_window.tree_menu.indexOfTopLevelItem(selected_item)
+                if index != -1:
+
+                    # Add the wing as a child of the selected component
+                    wing_name = f'Wing {selected_item.childCount()+1}'
+                    wing_obj.infos['name'] = wing_name  # Ensure the name is set in infos
+                    wing_item = QTreeWidgetItem([wing_name])
+                    selected_item.addChild(wing_item)
+
+                    # Expand the parent item to show the new child
+                    selected_item.setExpanded(True)
+
+                    selected_item = globals.PROJECT.project_components[index]
+                    #print(f"Found component at index {index}.")
+                    tools_wing.add_wing_to_tree(selected_item, wing_name, wing_obj, selected_item)
+                    print(f"Added {wing_name} under {selected_item}.")
+                else:
+                    print("Cannot set wing to selected item!")
+            else:
+                print("Component NOT selected!")
+        
+        #self.airfoil_list.append({"name": name, "data": airfoil_obj.to_dict()})  # Update shared list
+
         
     def addWing(self):
         """Add a new wing to the selected component."""
@@ -195,7 +256,7 @@ class MenuBar(QMenuBar):
         
         #self.airfoil_list.append({"name": name, "data": airfoil_obj.to_dict()})  # Update shared list
 
-    def addSection(self):
+    def addSegment(self):
         """Add a new section to the selected wing."""
         segment_obj = src.obj.wing.Segment()
         segment_obj.airfoil = globals.PROJECT.project_airfoils[0]  # Ensure the name is set in infos
@@ -276,9 +337,7 @@ class MenuBar(QMenuBar):
         self.preferences_dialog.show()
 
     def showAbout(self):
-        msg = QMessageBox(self)
-        msg.setWindowTitle("About")
-        msg.setText(f"{globals.AIRFLOW.program_name}\nVersion: {globals.AIRFLOW.program_version}")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        dialog = globals.AIRFLOW.showAboutDialog(self)
+
+    def showManual(self):
+        manual = globals.AIRFLOW.showUserManual()

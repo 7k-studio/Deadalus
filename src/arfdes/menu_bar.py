@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication, QLabel, QInputDialog, QDialog, QVBoxLayout, QTextEdit, QDialogButtonBox
 import sys
 from PyQt5 import QtWidgets, QtCore
@@ -18,7 +39,7 @@ import src.utils.dxf as dxf
 import src.arfdes.tools_airfoil as tools_airfoil
 from src.arfdes.tools_airfoil import Reference_load
 from src.obj.airfoil import Airfoil
-from src.arfdes.tools_airfoil import add_airfoil_to_tree
+from src.arfdes.widget_tree import add_airfoil_to_tree
 
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
@@ -27,6 +48,7 @@ from PyQt5.QtWidgets import (
 from datetime import date
 import src.arfdes.fit_2_reference as fit_2_reference  # Import the fitting module
 import src.globals as globals  # Import from globals.py
+import src.arfdes.widget_tree as widget_tree
 
 class MenuBar(QMenuBar):
     referenceStatus = pyqtSignal(bool, str)
@@ -116,12 +138,15 @@ class MenuBar(QMenuBar):
         """Program menu creation"""
         programMenu = self.addMenu('Program')
 
+        manualAction = QAction('User Manual', self)
         aboutAction = QAction('About', self)
         preferencesAction = QAction('Preferences', self)
 
+        manualAction.triggered.connect(self.showManual)
         aboutAction.triggered.connect(self.showAbout)
         preferencesAction.triggered.connect(self.preferencesWindow)
 
+        programMenu.addAction(manualAction)
         programMenu.addAction(aboutAction)
         programMenu.addSeparator()
         programMenu.addAction(preferencesAction)
@@ -129,16 +154,18 @@ class MenuBar(QMenuBar):
     def newFile(self):
         msg = QMessageBox.question(self, "New Project", "Do you want to create a new project?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("Creating new project...")
+            print("AirFLOW: Creating new project...")
             # Reset the project components
             globals.PROJECT.newProject()
+            widget_tree.refresh_tree(self.tree_menu)
 
     def openFile(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
-            print(f"Opened file: {fileName}")
+            print(f"AirFLOW: opened file '{fileName}'")
+            widget_tree.refresh_tree(self.tree_menu)
 
     def saveFile(self):
         options = QFileDialog.Options()
@@ -382,9 +409,7 @@ class MenuBar(QMenuBar):
         self.airfoil_designer_window.show()
 
     def showAbout(self):
-        msg = QMessageBox(self)
-        msg.setWindowTitle("About")
-        msg.setText(f"{globals.AIRFLOW.program_name}\nVersion: {globals.AIRFLOW.program_version}")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        dialog = globals.AIRFLOW.showAboutDialog(self)
+    
+    def showManual(self):
+        manual = globals.AIRFLOW.showUserManual()

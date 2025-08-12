@@ -1,4 +1,24 @@
-# filepath: d:\Programy\AirFLOW\0.1.0\src\utils\step.py
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -342,20 +362,20 @@ class BSplineSurfaceWithKnots:
         self.knots_v = knots_v
 
     def export(self):
-        spline1 = ', '.join([f'#{i}' for i in self.spline_1])
-        spline2 = ', '.join([f'#{i}' for i in self.spline_2])
-        spline3 = ', '.join([f'#{i}' for i in self.spline_3])
-        spline4 = ', '.join([f'#{i}' for i in self.spline_4])
+        spline1 = ', '.join([f'#{idx}' for idx in self.spline_1.points_indexes])
+        spline2 = ', '.join([f'#{idx}' for idx in self.spline_2.points_indexes])
+        spline3 = ', '.join([f'#{idx}' for idx in self.spline_3.points_indexes])
+        spline4 = ', '.join([f'#{idx}' for idx in self.spline_4.points_indexes])
         
         return (
-            f"#{self.idx} = B_SPLINE_SURFACE_WITH_KNOTS ( '{self.desc}', {self.u_degree}, {self.v_degree}, ( \n"
-            f"( {spline1} ),\n"
-            f"( {spline2} ),\n"
-            f"( {spline3} ),\n"
-            f"( {spline4} )\n),\n.UNSPECIFIED., .F., .F., .F.,\n"
-            f"( 4, 4 ),\n( 4, 4 ),\n"
-            f"( {self.knots_u[0]}, {self.knots_u[1]} ),\n"
-            f"( {self.knots_v[0]}, {self.knots_v[1]} ),\n.UNSPECIFIED. );"
+            f"#{self.idx} = B_SPLINE_SURFACE_WITH_KNOTS ( '{self.desc}', {self.u_degree}, {self.v_degree}, ( "
+            f"( {spline1} ),"
+            f"( {spline2} ),"
+            f"( {spline3} ),"
+            f"( {spline4} )),.UNSPECIFIED., .F., .F., .F.,\n"
+            f"( 4, 4 ),\n( 4, 4 ),"
+            f"( {self.knots_u[0]}, {self.knots_u[1]} ),"
+            f"( {self.knots_v[0]}, {self.knots_v[1]} ),.UNSPECIFIED. );"
         )
 
 class GeometricSet:
@@ -396,6 +416,7 @@ def _write_control_points(current_idx, segment, key):
         cp = CartesianPoint(current_idx, desc='Control Point', X=coords[0], Y=coords[1], Z=coords[2])
         cp_store.append(cp)
         current_idx += 1
+        print(current_idx)
 
     return current_idx, cp_store
 
@@ -412,14 +433,17 @@ def _write_vertex_edge(current_idx, segment, key):
         cp = CartesianPoint(current_idx, desc='Control Point', X=coords[0], Y=coords[1], Z=coords[2])
         tmp.append(cp)
         current_idx += 1
+        print(current_idx)
         
     cp_store.append(tmp[0])
     cp_store.append(tmp[-1])
+    print("CP store:", cp_store)
 
-    for i in range(len(tmp)):  
-        ve = VertexPoint(current_idx, f"End point {key}", tmp[i].idx)
+    for i in range(len(cp_store)):  
+        ve = VertexPoint(current_idx, f"End point {key}", cp_store[i].idx)
         ve_store.append(ve)
         current_idx += 1
+        print(current_idx)
 
     return current_idx, cp_store, ve_store
 
@@ -469,7 +493,8 @@ def _write_b_spline_surface(current_idx, wing_elements_store, i, side_key, front
                                                   wing_elements_store[i-1][f'{front_key}_b_spline'], 
                                                   wing_elements_store[i-1][f'{rear_key}_b_spline'], 
                                                   wing_elements_store[i][f'{side_key}_b_spline'], 
-                                                  0, 1)
+                                                  [0, 1],
+                                                  [0, 1])
     current_idx += 1
 
     surface_edge_loop = EdgeLoop(current_idx, f'{side_key} surface', [wing_elements_store[i-1][f'{side_key}_oriented_edge'].idx,
@@ -736,7 +761,7 @@ def export_3d_segment_wing(filepath, base_name):
 
     all_elements_store = []
 
-    component_elements_store = []
+    component_elements_store = {}
     wing_elements_store = []
 
     solid_angle_unit = SolidAngleUnit(current_idx)
@@ -750,30 +775,27 @@ def export_3d_segment_wing(filepath, base_name):
     geometric_representation_context = GeometricRepresentationContext(current_idx, uncertainty_measure.idx, length_unit.idx, solid_angle_unit.idx, plane_angle_unit.idx)
     current_idx += 1
 
-    all_elements_store.extend([
+    measurement_store = [
         solid_angle_unit,
         plane_angle_unit,
         length_unit,
         uncertainty_measure,
         geometric_representation_context
-    ])
+    ]
 
     for component in project.project_components:
         print(f"WNGWB > STEP_export >> Exporting component: {component.infos['name']} with {len(component.wings)} wings.")
         for wing in component.wings:
             print(f"WNGWB > STEP_export >> Exporting wing: {wing.infos['name']} with {len(wing.segments)} segments.")
+            wing_elements_store = []
+            tmp_wing_store = []
             if len(wing.segments) > 1:
-                print('WNGWB > STEP_export >> Warning: Wing has more than 1 segment, exporting to 3D.')
+                print('WNGWB > STEP_export >> NOTE: Wing has more than 1 segment, exporting to 3D.')
                 for i in range(len(wing.segments)):
 
                     segment_elements_store = {}
 
                     segment = wing.segments[i]
-
-                    #print(f"ps: {segment.control_points['ps']}")
-                    #print(f"ss: {segment.control_points['ss']}")
-                    #print(f"le: {segment.control_points['le']}")
-                    #print(f"te: {segment.control_points['te']}")
 
                     # === PRESSURE SIDE ===
                     current_idx, ps_control_points = _write_control_points(current_idx, segment, 'ps')
@@ -951,16 +973,14 @@ def export_3d_segment_wing(filepath, base_name):
                     #segment_elements_store['open_shell'] = open_shell
                     #current_idx += 1
 
-                    wing_elements_store.append(segment_elements_store)
-
-                    #print('Segment Elements Store:', segment_elements_store)
-                    print('Wing Elements Store:', wing_elements_store)
+                    tmp_wing_store.append(segment_elements_store)
+                    print('Wing Elements Store:', tmp_wing_store)
 
                     if i > 0:
-                        current_idx, ps_b_spline_surface, ps_surface_edge_loop, ps_face_outer_bound, ps_advanced_face = _write_b_spline_surface(current_idx, wing_elements_store, i, 'ps', 'le_ps', 'te_ps')
-                        current_idx, ss_b_spline_surface, ss_surface_edge_loop, ss_face_outer_bound, ss_advanced_face = _write_b_spline_surface(current_idx, wing_elements_store, i, 'ss', 'le_ss', 'te_ss')
-                        current_idx, le_b_spline_surface, le_surface_edge_loop, le_face_outer_bound, le_advanced_face = _write_b_spline_surface(current_idx, wing_elements_store, i, 'le', 'le_ps', 'le_ss')
-                        current_idx, te_b_spline_surface, te_surface_edge_loop, te_face_outer_bound, te_advanced_face = _write_b_spline_surface(current_idx, wing_elements_store, i, 'te', 'te_ps', 'te_ss')
+                        current_idx, ps_b_spline_surface, ps_surface_edge_loop, ps_face_outer_bound, ps_advanced_face = _write_b_spline_surface(current_idx, tmp_wing_store, i, 'ps', 'le_ps', 'te_ps')
+                        current_idx, ss_b_spline_surface, ss_surface_edge_loop, ss_face_outer_bound, ss_advanced_face = _write_b_spline_surface(current_idx, tmp_wing_store, i, 'ss', 'le_ss', 'te_ss')
+                        current_idx, le_b_spline_surface, le_surface_edge_loop, le_face_outer_bound, le_advanced_face = _write_b_spline_surface(current_idx, tmp_wing_store, i, 'le', 'le_ps', 'le_ss')
+                        current_idx, te_b_spline_surface, te_surface_edge_loop, te_face_outer_bound, te_advanced_face = _write_b_spline_surface(current_idx, tmp_wing_store, i, 'te', 'te_ps', 'te_ss')
 
                         segment_elements_store['ps_b_spline_surface'] = ps_b_spline_surface
                         segment_elements_store['ps_surface_edge_loop'] = ps_surface_edge_loop
@@ -986,53 +1006,57 @@ def export_3d_segment_wing(filepath, base_name):
                         segment_elements_store['open_shell'] = open_shell
                         current_idx += 1
                     
-                wing_elements_store.append(segment_elements_store)
+                    wing_elements_store.append(segment_elements_store)
+                    print('Wing Elements Store:', wing_elements_store)
+
+            component_elements_store["wing"] = wing_elements_store
 
         shell_based_surface_model = ShellBasedSurfaceModel(current_idx, None, open_shell.idx)
-        component_elements_store.append(shell_based_surface_model)
+        component_elements_store["shell_based_surface_model"] = shell_based_surface_model
         current_idx += 1
 
         manifold_shape_surf_repersentation = ManifoldSurfaceShapeRepresentation(current_idx, f'{base_name}', shell_based_surface_model.idx, axis2_placement_3d.idx, geometric_representation_context.idx)
-        component_elements_store.append(manifold_shape_surf_repersentation)
+        component_elements_store["manifold_shape_surf_repersentation"] = manifold_shape_surf_repersentation
         current_idx += 1
 
         shape_definition_representation = ShapeDefinitionRepresentation(current_idx, manifold_shape_surf_repersentation.idx)
-        component_elements_store.append(shape_definition_representation)
+        component_elements_store["shape_definition_representation"] = shape_definition_representation
         current_idx += 1
     
     all_elements_store.append(component_elements_store)
     
-    write_a_step_file(filepath, base_name, all_elements_store)
+    write_a_step_file(filepath, base_name, measurement_store, all_elements_store)
 
-def write_a_step_file(filepath, base_name, all_elements_store):
+def write_a_step_file(filepath, base_name, measurement_store, all_elements_store):
+    def process_value(value, step_lines):
+        """Append export() output of value or its elements to step_lines."""
+        if isinstance(value, (list, tuple, np.ndarray)):
+            for item in value:
+                process_value(item, step_lines)
+        elif isinstance(value, dict):
+            for v in value.values():
+                process_value(v, step_lines)
+        else:
+            if hasattr(value, "export"):
+                step_lines.append(value.export())
+
     with open(filepath, "w") as file:
         HEADER(file, base_name)
         ENDSEC_OPEN(file)
 
         step_lines = []
-        for component in all_elements_store:
-            for segment_dict in component:
-                for key, value in segment_dict.items():
-                    if isinstance(value, (list, tuple, np.ndarray)):
-                        for item in value:
-                            if hasattr(item, "export"):
-                                step_lines.append(item.export())
-                    else:
-                        if hasattr(value, "export"):
-                            step_lines.append(value.export())
-                else:
-                    if hasattr(value, "export"):
-                        step_lines.append(value.export())
-            else:
-                if hasattr(value, "export"):
-                    step_lines.append(value.export())
-        else:
-            if hasattr(value, "export"):
-                step_lines.append(value.export())
 
-        for lines in step_lines:
-            print(lines)
-            file.write(lines + '\n')
+        # Process measurement store first
+        for element in measurement_store:
+            process_value(element, step_lines)
+
+        # Process all other elements
+        for component in all_elements_store:
+            process_value(component, step_lines)
+
+        # Write to file
+        for line in step_lines:
+            file.write(line + '\n')
 
         FOOTER(file)
 

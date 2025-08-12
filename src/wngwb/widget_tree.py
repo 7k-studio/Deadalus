@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 import src.obj.airfoil as airfoil
 from src.wngwb.tools_wing import add_component_to_tree
@@ -12,6 +33,7 @@ class TreeMenu(QTreeWidget):
         self.init_tree()
 
     def init_tree(self):
+        self.clear()
  
         for component in globals.PROJECT.project_components:
             name = component.infos.get('name', 'Unknown')

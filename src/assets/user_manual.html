@@ -1,3 +1,22 @@
+<!--
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -219,9 +238,14 @@
           
           <h2>ToDo</h2>
           <ul>
-              <li>Reopening of Airfoil Designer from Wing Designer causes problems</li>
-              <li>Provide .STEP export</li>
-              <li>Transformation of Component, Wing, Section</li>
+              <li>1. Improve .STEP export</li>
+              <li>2. Reopening of project from working AirFLOW instance causes problems</li>
+              <li>3. Improve transformation of Component, Wing, Section</li>
+              <li>4.a. Create ErrorOut file</li>
+              <li>4.b. Create better ToolOut file output</li>
+              <li>5.a. Additional Segment rotation options should be available</li>
+              <li>5.b. Improvement/Change of Airfoil Designer viewport from MatPlotLib to OpenGL</li>
+
           </ul>
           <img src="STEP_export.jpg" alt="Wing Workbench" height="500"/>
       </div>
@@ -276,6 +300,63 @@
         <h2>Change Log</h2>
         <h3 id="notes">Release Notes</h3>
         <p>Details of the latest updates and fixes.</p>
+        <details close>
+                <summary>v0.3.X beta</summary>
+                <ul>
+                    <li>Introduction of AirFLOW user manual, available under Program/Manual.</li>
+                    <li>Displaying of the overlapping OpenGL elements has been resolved. Objects don't stack up anymore and colors and viewport looks more stable.</li>
+                    <li>GUI was stabilized in Wing Workbench at the cost of widgets adjustability. Change positively affected ComboBox in 'Parameters Table'</li>
+                </ul>
+                <p><b>Currently available elements and functions are listed below:</b></p>
+                <ul>
+                    <li><b>Airfoil designer:</b>
+                        <ul>
+                            <li><b>File:</b>
+                                <ul>
+                                    <li>New - now tree menu is cleared and project resets</li>
+                                    <li>Open - opens existing project from db.tgz database</li>
+                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                                </ul>
+                            </li>
+                            <li><b>Edit menu:</b>
+                                <ul>
+                                    <li>Create - creates new airfoil</li>
+                                    <li>Append - appends airfoil from existing .arf file</li>
+                                    <li>Delete - deletes selected airfoil</li>
+                                    <li>Save - saves airfoil to .arf file</li>
+                                    <li>Export - exports airfoil to .dxf file</li>
+                                    <li>Rename - renames airfoil</li>
+                                    <li>Edit description - edits description of an airfoil</li>
+                                    <li>Fit2Reference - fits airfoil to reference airfoil (beta feature)</li>
+                                </ul>
+                            </li>
+                            <li><b>View:</b>
+                                <ul>
+                                    <li>Show reference - Shows reference of airfoil in SELIG format</li>
+                                </ul>
+                            </li>
+                            <li><b>Module:</b>
+                                <ul>
+                                    <li>Wing module - open Wing Workbench</li>
+                                </ul>
+                            </li>
+                            <li><b>Program:</b>
+                                <ul>
+                                    <li>About - shows not so useful about</li>
+                                    <li>Preferences - opens preferences window. Allows user to change settings</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><b>Wing designer:</b>
+                        <ul>
+                            <li>New - now tree menu is cleared and project resets</li>
+                            <li>Open - opens existing project from db.tgz database</li>
+                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                        </ul>
+                    </li>
+                </ul>
+        </details>
         <details open>
                 <summary>v0.2.X beta</summary>
                 <ul>
@@ -333,7 +414,7 @@
                     </li>
                 </ul>
         </details>
-        <details open>
+        <details close>
             <summary>v0.1.X beta</summary>
             <ul>
                 <li>Creation of GUI for both Airfoil Designer and Wing Workbench.</li>

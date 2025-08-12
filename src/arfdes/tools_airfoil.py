@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
@@ -9,15 +30,6 @@ from tqdm import tqdm
 import json
 import src.obj
 import src.globals as globals  # Import from globals.py
-
-def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
-    """Add an airfoil to the list and tree menu."""
-    modification_date = airfoil_obj.infos.get('modification_date', 'Unknown')
-    creation_date = airfoil_obj.infos.get('creation_date', 'Unknown')
-    description = airfoil_obj.infos.get('description', 'No description')
-    tree_item = QTreeWidgetItem([name, str(modification_date), str(creation_date), description])
-    tree_menu.addTopLevelItem(tree_item)
-    print(f"Airfoil '{name}' added to the tree menu.")
 
 def Reference_load(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
@@ -93,8 +105,8 @@ def CreateBSpline(const_points):
 
     return spline
 
-# Interpolate reference points to match the number of spline points
 def interpolate_reference(reference, spline_points):
+    """Interpolate reference points to match the number of spline points"""
     ref_length = len(reference[0])
     ref_spline_length = len(spline_points[0])
     interpolator_x = interp1d(np.linspace(0, 1, ref_length), reference[0], kind='linear')
@@ -103,8 +115,8 @@ def interpolate_reference(reference, spline_points):
     new_y = interpolator_y(np.linspace(0, 1, ref_spline_length))
     return np.array([new_x, new_y])
 
-# Define the function to calculate error
 def calculate_error(params, top_ref, dwn_ref):
+    """Define the function to calculate error"""
     # Extract parameters
     chord, origin_X, origin_Y, le_thickness, le_depth, le_offset, le_angle, te_thickness, te_depth, te_offset, te_angle, \
         ps_fwd_angle, ps_rwd_angle, ps_fwd_accel, ps_rwd_accel, ss_fwd_angle, ss_rwd_angle, ss_fwd_accel, ss_rwd_accel = params
@@ -165,6 +177,8 @@ def find_t_for_x(desired_x, tck):
 
 def load_airfoil_from_json(fileName):
     """load the airfoil data from a JSON format file."""
+    is_version_different =  False
+    error_count = 0
     import src.obj.airfoil as airfoil
     Airfoil = airfoil.Airfoil()
 
@@ -179,15 +193,21 @@ def load_airfoil_from_json(fileName):
 
     if data:
         try:
-            program_version = data["program version"]
+            airfoil_version = data["program version"]
             airfoil = data["airfoil"]
         except KeyError as e:
             print(f"ERROR: Missing key in ARF data - {e}")
             print("File may not load properly or is not compatible with AirFLOW")
             return None
+        
+        if airfoil_version:
+            airfoil_version = airfoil_version.split("-")[0].split(".")
+            program_version = globals.AIRFLOW.program_version
+            program_version = program_version.split("-")[0].split(".")
 
-        if program_version != globals.AIRFLOW.program_version:
-            print("WARNING: Program version mismatch. Import may not be compatible.")
+            if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
+                print("WARNING: Current program version is different from the saved airfoil version. Import may not be compatible.")
+                is_version_different = True
 
         try:
             # Set parameters in Airfoil.params dictionary
@@ -222,9 +242,14 @@ def load_airfoil_from_json(fileName):
             print(f"ERROR: Missing key in ARF data - {e}")
             return None
         
-        print("Append Airfoil: Success!")
+        if is_version_different == True:
+            print(f"AIRFLOW > Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
+            error_count += 1
+        else:
+            print(f"AIRFLOW > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
 
-        return Airfoil
+
+        return Airfoil, error_count
 
 def save_airfoil_to_json(airfoil_idx=None):
     """Save the airfoil data to a JSON format file."""

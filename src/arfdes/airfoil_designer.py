@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 #System imports
 import sys
 from datetime import date
@@ -38,7 +59,7 @@ from .menu_bar import MenuBar
 from src.obj.airfoil import Airfoil
 from src.arfdes.tools_airfoil import Reference_load
 from src.arfdes.tools_airfoil import CreateBSpline
-from src.arfdes.tools_airfoil import add_airfoil_to_tree
+from src.arfdes.widget_tree import add_airfoil_to_tree
 import src.globals as globals
 
 from src.arfdes.plot_canvas import PlotCanvas
@@ -51,7 +72,7 @@ class AirfoilDesigner(QMainWindow):
 
     def __init__(self, program=None, project=None):
         super().__init__()
-        print("Opening: Airfoil Designer")
+        print("AIRFLOW > module: Airfoil Designer")
         self.program = program
         self.project = project
         self.setWindowTitle("AirFLOW: Airfoil Designer")
@@ -121,10 +142,8 @@ class AirfoilDesigner(QMainWindow):
         airfoil_obj.infos['description'] = dscr
         self.project.project_airfoils.append(airfoil_obj)
         add_airfoil_to_tree(self.tree_menu, name, airfoil_obj)
-        #self.update_tree_menu()
 
     def handleReferenceToggle(self, state, filename):
-
         selected_item = self.tree_menu.currentItem()
         if not selected_item:
             return  # No airfoil selected
@@ -137,7 +156,7 @@ class AirfoilDesigner(QMainWindow):
         current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
 
         if state:
-            print(f"ARFDES > Reference enabled with file: {filename}")
+            print(f"ARFDES > Reference enabled with file: '{filename}'")
             self.canvas.ax.clear()  # Clear the plot
             self.canvas.plot_airfoil(current_airfoil)
             self.reference_airfoil = Reference_load(filename)

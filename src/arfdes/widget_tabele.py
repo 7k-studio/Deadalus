@@ -1,9 +1,30 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
     QPushButton, QLineEdit, QHeaderView, QApplication
 )
 from PyQt5.QtCore import Qt, pyqtSignal
-from src.arfdes.tools_airfoil import add_airfoil_to_tree
+from src.arfdes.widget_tree import add_airfoil_to_tree
 
 import src.globals as globals  # Import from globals.py
 
@@ -115,6 +136,7 @@ class Tabele(QTableWidget):
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem(key))
             self.add_editable_row(row, value)
+            value = format(value, '.4f')
             nominal_value = QTableWidgetItem(str(value))
             nominal_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
@@ -155,7 +177,7 @@ class Tabele(QTableWidget):
                             value = float(value_input.text())
                             self.params[key] = value
                         except ValueError:
-                            print(f"Invalid value for parameter '{key}', skipping update.")
+                            print(f"ARFDES > Invalid value for parameter '{key}', skipping update.")
         
         self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display

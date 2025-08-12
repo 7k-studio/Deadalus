@@ -1,3 +1,24 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of AirFLOW.
+
+AirFLOW is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+AirFLOW is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
 from datetime import date
 import json
 import tempfile
@@ -5,11 +26,15 @@ import tarfile
 import os
 import datetime
 import numpy as np  # Add this import for numpy
+from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
+from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtCore import Qt
+import webbrowser
 
 class Program:
     def __init__(self):
         self.program_name = "AirFLOW"
-        self.program_version = "0.2.4-beta"
+        self.program_version = "0.2.7-beta"
 
         self.preferences = {
             'general': {
@@ -42,11 +67,61 @@ class Program:
                 for section in self.preferences:
                     if section in loaded and isinstance(loaded[section], dict):
                         self.preferences[section].update(loaded[section])
-                print("Preferences loaded successfully.")
+                #print("Preferences loaded successfully.")
         except FileNotFoundError:
-            print("Preferences file not found. Using default settings.")
+            print("AIRFLOW > Preferences file not found. Using default settings.")
         except json.JSONDecodeError:
-            print("Error decoding preferences file. Using default settings.")
+            print("ERROR: decoding preferences file. Using default settings.")
+
+    def showAboutDialog(self, parent=None):
+        dialog = QDialog(parent)
+        dialog.setWindowTitle("About")
+        dialog.setFixedSize(400, 250)
+
+        # Logo
+        logo_label = QLabel(dialog)
+        pixmap = QPixmap("src/assets/text_logo.png")
+        logo_label.setPixmap(pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo_label.setAlignment(Qt.AlignCenter)
+
+        # Title and version
+        #title_label = QLabel(self.program_name)
+        #title_label.setFont(QFont("Arial", 14, QFont.Bold))
+        #title_label.setAlignment(Qt.AlignCenter)
+
+        version_label = QLabel(f"Version: {self.program_version}")
+        version_label.setFont(QFont("Arial", 10))
+        version_label.setAlignment(Qt.AlignCenter)
+
+        # Optional description
+        description_label = QLabel("AirFLOW is a program for parametricaly designing airfoils and wings.")
+        description_label.setAlignment(Qt.AlignCenter)
+        description_label.setWordWrap(True)
+
+        # Close button
+        close_button = QPushButton("Close")
+        close_button.clicked.connect(dialog.accept)
+        close_button.setFixedWidth(100)
+
+        # Layout
+        layout = QVBoxLayout()
+        layout.addWidget(logo_label)
+        #layout.addWidget(title_label)
+        layout.addWidget(version_label)
+        layout.addWidget(description_label)
+
+        bottom_layout = QHBoxLayout()
+        bottom_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        bottom_layout.addWidget(close_button)
+        bottom_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+
+        layout.addLayout(bottom_layout)
+        dialog.setLayout(layout)
+        dialog.exec_()
+    
+    def showUserManual(self):
+        file_path = os.path.abspath("src/assets/user_manual.html")
+        webbrowser.open(f"file://{file_path}")
 
 class Project:
     def __init__(self):
@@ -205,7 +280,7 @@ def saveProject(fileName):
             for airfoil_filename in airfoil_filenames:
                 tar.add(os.path.join(tmpdir, airfoil_filename), arcname=airfoil_filename)
 
-        print("AIRFLOW > Project archive successfully saved:", tgz_path)
+        print("AIRFLOW > Project archive successfully saved: ", tgz_path)
         return tgz_path
 
 def loadProject(fileName):
@@ -213,7 +288,10 @@ def loadProject(fileName):
     from src.arfdes.tools_airfoil import load_airfoil_from_json
     from src.utils.tools_program import convert_list_to_ndarray
     from src.obj.wing import Component, Wing, Segment  # Import the templates
+    base_name = os.path.basename(fileName)
+    warning_count = 0
 
+    print(f"AIRFLOW > open archive project: {base_name}")
     # Extract archive to a temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         with tarfile.open(fileName, "r:gz") as tar:
@@ -227,10 +305,15 @@ def loadProject(fileName):
         # Convert lists back to numpy arrays if needed
         data = convert_list_to_ndarray(data)
 
-        # Restore AIRFLOW info (optional, usually not needed)
         if "Program" in data:
-            if AIRFLOW.program_version != data["Program"].get("program version", AIRFLOW.program_version):
-                print("AirFLOW > WARNING: Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
+            if data["Program"].get("program version", AIRFLOW.program_version):
+                file_version = data["Program"].get("program version", AIRFLOW.program_version)
+                file_version = file_version.split("-")[0].split(".")
+                program_version = AIRFLOW.program_version
+                program_version = program_version.split("-")[0].split(".")
+                if program_version[1] != file_version[1] or program_version[0] != file_version[0]:
+                    print("WARNING: Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
+                    warning_count += 1
 
         # Restore PROJECT info
         if "Project" in data:
@@ -246,7 +329,8 @@ def loadProject(fileName):
             airfoil_filenames = proj.get("project airfoils", [])
             for idx, airfoil_filename in enumerate(airfoil_filenames):
                 airfoil_path = os.path.join(tmpdir, airfoil_filename)
-                airfoil_obj = load_airfoil_from_json(airfoil_path)
+                airfoil_obj, warning = load_airfoil_from_json(airfoil_path)
+                warning_count += warning
                 PROJECT.project_airfoils.append(airfoil_obj)
 
             # Load components using templates
@@ -280,7 +364,10 @@ def loadProject(fileName):
                     component.wings.append(wing)
                 PROJECT.project_components.append(component)
 
-    print("AIRFLOW > Project archive successfully loaded:", fileName)
+    if warning_count == 0:
+        print(f"AIRFLOW > Project archive '{base_name}' successfully loaded")
+    else: 
+        print(f"AIRFLOW > Project archive '{base_name}' loaded with ({warning_count}) warnings, check might be necessary!")
     return True
 
 AIRFLOW = Program()  # Create a global instance of Program
