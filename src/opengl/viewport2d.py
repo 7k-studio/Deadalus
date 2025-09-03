@@ -26,6 +26,7 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QFont
 from OpenGL.GL import *
 from OpenGL.GLUT import *
+from OpenGL.GLUT import GLUT_BITMAP_HELVETICA_10
 from OpenGL.GLU import gluOrtho2D, gluProject  # Add this import
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QFileDialog
 from PyQt5.QtOpenGL import QGLWidget
