@@ -22,7 +22,9 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
+import numpy as np
 import math
+from geomdl import BSpline, utilities
 
 from src.obj.car import Wheels
 
@@ -205,3 +207,74 @@ def draw_wing(self, wing, no_of_segments):
             glVertex3f(te_child[0][i],     te_child[1][i],     z_child)
         glEnd()
 
+def draw_b_spline_surf(segment):
+    """
+    Create a NURBS surface from a 2D grid of control points.
+
+    control_grid: list of rows (u-direction), each row is list of [x,y,z] points
+                  shape = [n_u][n_v], with n_u, n_v in [2..6]
+    """
+
+    for key in ['le', 'ps', 'te', 'ss']:
+        control_points = np.array(segment.surfaces_grid[key])
+        #print(f"{key}: ", control_points)
+        #if key == "ss" or "te":
+        #    control_points = control_points[::-1]
+        if control_points.size > 0:
+            
+            current_front = glGetIntegerv(GL_FRONT_FACE)
+            # Flatten grid
+            n_u = len(control_points)      # rows
+            n_v = len(control_points[0])   # cols
+            ctrlpts_flat = ctrlpts_flat = [[float(p[0]), float(p[1]), float(p[2])]
+                for row in control_points for p in row]
+
+            # Define surface
+            surf = BSpline.Surface()
+            surf.degree_u = n_u - 1
+            surf.degree_v = n_v - 1
+            surf.set_ctrlpts(ctrlpts_flat, n_u, n_v)
+
+            # Knot vectors
+            surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
+            surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
+
+            # Evaluate
+            # Set evaluation delta
+            surf.delta = (0.05, 0.05)   # finer grid in u and v
+
+            # Evaluate surface
+            surf.evaluate()
+
+            # After surf.evaluate()
+            res_u = surf.sample_size[0]  # number of points along U
+            res_v = surf.sample_size[1]  # number of points along V
+
+            # Reshape into 2D grid [i][j]
+            grid = [[surf.evalpts[i * res_v + j] for j in range(res_v)] for i in range(res_u)]
+
+            # Now draw quads
+            glColor3f(0.8, 0.8, 0.9)
+
+            # if key == "ss" or key == :
+            #     glFrontFace(GL_CW)   # treat clockwise as front
+            # else:
+            #     glFrontFace(GL_CCW)
+
+            for i in range(res_u - 1):
+                for j in range(res_v - 1):
+                    
+                    p0 = grid[i][j]
+                    p1 = grid[i][j+1]
+                    p2 = grid[i+1][j+1]
+                    p3 = grid[i+1][j]
+
+                    glBegin(GL_QUADS)
+                    glVertex3fv(p0)
+                    glVertex3fv(p1)
+                    glVertex3fv(p2)
+                    glVertex3fv(p3)
+                    glEnd()
+            
+            # Restore front face state
+            glFrontFace(current_front)

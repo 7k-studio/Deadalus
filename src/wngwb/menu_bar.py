@@ -36,7 +36,7 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
-import src.obj.wing
+import src.obj.objects3D
 from src.opengl.viewport3d import ViewportOpenGL
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
@@ -86,24 +86,30 @@ class MenuBar(QMenuBar):
         copyWingAction = QAction('Copy Wing', self)
         renameWingAction = QAction('Rename Wing', self)
         deleteWingAction = QAction('Delete Wing', self)
-        addSectionAction = QAction('Add Segment', self)
-        appendSectionAction = QAction('Append Segment', self)
-        copySectionAction = QAction('Copy Segment', self)
-        renameSectionAction = QAction('Rename Segment', self)
-        deleteSectionAction = QAction('Delete Segment', self)
+        addSegmentAction = QAction('Add Segment', self)
+        appendSegmentAction = QAction('Append Segment', self)
+        copySegmentAction = QAction('Copy Segment', self)
+        renameSegmentAction = QAction('Rename Segment', self)
+        deleteSegmentAction = QAction('Delete Segment', self)
 
         addComponentAction.triggered.connect(self.addComponent)
         deleteComponentAction.triggered.connect(self.deleteComponent)
 
         addWingAction.triggered.connect(self.addWing)
+        deleteWingAction.triggered.connect(self.deleteWing)
 
-        addSectionAction.triggered.connect(self.addSegment)
+        addSegmentAction.triggered.connect(self.addSegment)
+        deleteSegmentAction.triggered.connect(self.deleteSegment)
 
 
         editMenu.addAction(addComponentAction)
         editMenu.addAction(deleteComponentAction)
+        editMenu.addSeparator()
         editMenu.addAction(addWingAction)
-        editMenu.addAction(addSectionAction)
+        editMenu.addAction(deleteWingAction)
+        editMenu.addSeparator()
+        editMenu.addAction(addSegmentAction)
+        editMenu.addAction(deleteSegmentAction)
 
         viewMenu = self.addMenu('View')
 
@@ -148,7 +154,7 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
             self.main_window.tree_menu.init_tree()
@@ -156,7 +162,7 @@ class MenuBar(QMenuBar):
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Database Files (*.db) ;; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
             print(f"Saved file: {fileName}")
@@ -180,13 +186,13 @@ class MenuBar(QMenuBar):
     def placeholder(self):
         print("Placeholder action triggered")
 
-    def addComponent(self, name='Component'):
+    def addComponent(self, name=f'Component {len(globals.PROJECT.project_components)+1}'):
         """Add a new component to the tree menu."""
-        component_obj = src.obj.wing.Component()
+        component_obj = src.obj.objects3D.Component()
         component_obj.infos['name'] = name  # Ensure the name is set in infos
         component_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
         component_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
-        tools_wing.add_component_to_tree(self.main_window.tree_menu, name, component_obj)
+        tools_wing.add_component_to_tree(self.main_window.tree_menu, component_obj)
 
     def deleteComponent(self):
         """Add a new wing to the selected component."""
@@ -199,32 +205,22 @@ class MenuBar(QMenuBar):
                 index = self.main_window.tree_menu.indexOfTopLevelItem(selected_item)
                 if index != -1:
 
-                    # Add the wing as a child of the selected component
-                    wing_name = f'Wing {selected_item.childCount()+1}'
-                    wing_obj.infos['name'] = wing_name  # Ensure the name is set in infos
-                    wing_item = QTreeWidgetItem([wing_name])
-                    selected_item.addChild(wing_item)
+                    # Remove the item from the tree menu
+                    self.main_window.tree_menu.takeTopLevelItem(index)
+                    del globals.PROJECT.project_components[index]
+                    print(f"ARFDES > delete component > Deleted component at index {index}.")
+                    self.main_window.tree_menu.init_tree()
 
-                    # Expand the parent item to show the new child
-                    selected_item.setExpanded(True)
-
-                    selected_item = globals.PROJECT.project_components[index]
-                    #print(f"Found component at index {index}.")
-                    tools_wing.add_wing_to_tree(selected_item, wing_name, wing_obj, selected_item)
-                    print(f"Added {wing_name} under {selected_item}.")
                 else:
-                    print("Cannot set wing to selected item!")
+                    print("ARFDES > deleteAirfoil > Invalid selection.")
             else:
                 print("Component NOT selected!")
-        
-        #self.airfoil_list.append({"name": name, "data": airfoil_obj.to_dict()})  # Update shared list
 
-        
     def addWing(self):
         """Add a new wing to the selected component."""
-        wing_obj = src.obj.wing.Wing()
-        #wing_obj.infos['creation_date'] = date.today()
-        #wing_obj.infos['modification_date'] = date.today()
+        wing_obj = src.obj.objects3D.Wing()
+        wing_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
+        wing_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
 
         # Ensure main_window is set
         if self.main_window:
@@ -248,7 +244,7 @@ class MenuBar(QMenuBar):
                     selected_item = globals.PROJECT.project_components[index]
                     #print(f"Found component at index {index}.")
                     tools_wing.add_wing_to_tree(selected_item, wing_name, wing_obj, selected_item)
-                    print(f"Added {wing_name} under {selected_item}.")
+                    print(f"WNGWB > Added '{wing_name}' as a part of '{selected_item.infos['name']}'.")
                 else:
                     print("Cannot set wing to selected item!")
             else:
@@ -256,12 +252,42 @@ class MenuBar(QMenuBar):
         
         #self.airfoil_list.append({"name": name, "data": airfoil_obj.to_dict()})  # Update shared list
 
+    def deleteWing(self):
+        """Delete selected wing"""
+
+        # Ensure main_window is set
+        if self.main_window:
+            selected_item = self.main_window.tree_menu.currentItem()
+            if selected_item:
+
+                #Find parent item
+                parent_item = selected_item.parent()
+                if parent_item:
+
+                    # Find the index of the selected item
+                    wing_index = parent_item.indexOfChild(selected_item)
+                    component_index = self.main_window.tree_menu.indexOfTopLevelItem(parent_item)
+
+                    if wing_index != -1 and component_index != -1:
+                        globals.PROJECT.project_components[component_index].wings[wing_index]
+                        # Add the segment as a child of the selected component
+                        del globals.PROJECT.project_components[component_index].wings[wing_index]
+                        print(f"ARFDES > delete wing > Deleted wing at index {component_index}:{wing_index}.")
+                        self.main_window.tree_menu.init_tree()
+
+                    else:
+                        print("Cannot set segment to selected item!")
+                else:
+                    print("Wing NOT selected!")
+            else:
+                print("Component NOT found!")
+
     def addSegment(self):
-        """Add a new section to the selected wing."""
-        segment_obj = src.obj.wing.Segment()
+        """Add a new Segment to the selected wing."""
+        segment_obj = src.obj.objects3D.Segment()
         segment_obj.airfoil = globals.PROJECT.project_airfoils[0]  # Ensure the name is set in infos
-        #wing_obj.infos['creation_date'] = date.today()
-        #wing_obj.infos['modification_date'] = date.today()
+        segment_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
+        segment_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
 
         # Ensure main_window is set
         if self.main_window:
@@ -277,13 +303,17 @@ class MenuBar(QMenuBar):
                     wing_index = parent_item.indexOfChild(selected_item)
                     component_index = self.main_window.tree_menu.indexOfTopLevelItem(parent_item)
 
-                    print(wing_index, component_index)
+                    #print(wing_index, component_index)
 
                     if wing_index != -1 and component_index != -1:
 
                         # Add the segment as a child of the selected component
                         segment_name = f'Segment {selected_item.childCount()+1}'
+                        #print(segment_name)
                         segment_obj.infos['name'] = segment_name  # Ensure the name is set in infos
+                        if selected_item.childCount() > 0:
+                            segment_obj.params['origin_Z'] = globals.PROJECT.project_components[component_index].wings[wing_index].segments[selected_item.childCount()-1].params['origin_Z']+0.2
+                        segment_obj.update_segment()
                         segment_item = QTreeWidgetItem([segment_name])
                         selected_item.addChild(segment_item)
 
@@ -300,6 +330,48 @@ class MenuBar(QMenuBar):
                         #        break
 
                         #tools_wing.add_segment_to_tree(component_item, segment_name, segment_obj, selected_item)
+
+                    else:
+                        print("Cannot set segment to selected item!")
+                else:
+                    print("Wing NOT selected!")
+            else:
+                print("Component NOT found!")
+
+        #print(len(globals.PROJECT.project_components[component_index].wings[wing_index].segments))
+        #if len(globals.PROJECT.project_components[component_index].wings[wing_index].segments) > 1:
+        #    globals.PROJECT.project_components[component_index].wings[wing_index].build_connection()
+        #    test = globals.PROJECT.project_components[component_index].wings[wing_index].segments[0]
+        #    print(test)
+            
+    
+    def deleteSegment(self):
+        """Delete selected segment"""
+
+        # Ensure main_window is set
+        if self.main_window:
+            selected_item = self.main_window.tree_menu.currentItem()
+            if selected_item:
+
+                #Find parent item
+                parent_item = selected_item.parent()
+                if parent_item:
+
+                    try:
+                        grandparent_item = parent_item.parent()
+                    except:
+                        print("ERROR: Segment is not part of the component!")
+
+                    if grandparent_item:
+
+                        # Find the index of the selected item
+                        segment_index = parent_item.indexOfChild(selected_item)
+                        wing_index = grandparent_item.indexOfChild(parent_item)
+                        component_index = self.main_window.tree_menu.indexOfTopLevelItem(grandparent_item)
+
+                        del globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index]
+                        print(f"ARFDES > delete segment > Deleted segment at index {component_index}:{wing_index}:{segment_index}.")
+                        self.main_window.tree_menu.init_tree()
 
                     else:
                         print("Cannot set segment to selected item!")
@@ -330,11 +402,18 @@ class MenuBar(QMenuBar):
         self.airfoil_designer_window = AirfoilDesigner()  # Pass airfoil_list
         self.airfoil_designer_window.show()
 
-    def preferencesWindow(self):
+    def preferencesWindow(self):        
         """Open the preferences dialog."""
-        from preferences import PreferencesWindow
+        print("AirFLOW > Preferences")
+        from src.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
+        msg = QMessageBox(self)
+        msg.setWindowTitle("WARNING!")
+        msg.setText(f"If you changed the preferences, you need to restart the application for the changes to take effect.")
+        msg.setIcon(QMessageBox.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def showAbout(self):
         dialog = globals.AIRFLOW.showAboutDialog(self)

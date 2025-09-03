@@ -38,7 +38,7 @@ from PyQt5.QtWidgets import (
 import src.utils.dxf as dxf
 import src.arfdes.tools_airfoil as tools_airfoil
 from src.arfdes.tools_airfoil import Reference_load
-from src.obj.airfoil import Airfoil
+from src.obj.objects2D import Airfoil
 from src.arfdes.widget_tree import add_airfoil_to_tree
 
 from PyQt5.QtWidgets import (
@@ -161,7 +161,7 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
             print(f"AirFLOW: opened file '{fileName}'")
@@ -169,7 +169,7 @@ class MenuBar(QMenuBar):
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Database Files (*.db) ;; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
             print(f"Saved file: {fileName}")
@@ -189,9 +189,10 @@ class MenuBar(QMenuBar):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Airfoil Format (*.arf);;All Files (*)", options=options)
 
         if fileName:
-            airfoil_obj = tools_airfoil.load_airfoil_from_json(fileName)
+            airfoil_obj, _ = tools_airfoil.load_airfoil_from_json(fileName)
             # Add the airfoil to the tree menu
-            self.PROJECT.project_airfoils.append(airfoil_obj)
+            globals.PROJECT.project_airfoils.append(airfoil_obj)
+            print(airfoil_obj)
             if airfoil_obj:
                 add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
             else:
@@ -280,7 +281,7 @@ class MenuBar(QMenuBar):
             #setattr(current_airfoil, 'name', text)
             # Update the airfoil object with the new name
             current_airfoil.infos['name'] = text
-            current_airfoil.infos['modification_date'] = str(date.today())
+            current_airfoil.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
             
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
@@ -368,7 +369,6 @@ class MenuBar(QMenuBar):
             print("Selected airfoil object not found.")
             return None
         
-        
         # Open the Fit2RefWindow dialog
         dlg = fit_2_reference.Fit2RefWindow(parent=self.main_window, current_airfoil=current_airfoil, reference_airfoil=self.main_window.reference_airfoil)
         dlg.exec_()
@@ -404,6 +404,10 @@ class MenuBar(QMenuBar):
                 self.referenceStatus.emit(referenceState, None)
 
     def open_wing_module(self):
+        
+        for airfoil in globals.PROJECT.project_airfoils:
+            airfoil.update()
+
         from src.wngwb.main_window import MainWindow  # Late import to avoid circular dependency
         self.airfoil_designer_window = MainWindow()  # Pass airfoil_list
         self.airfoil_designer_window.show()

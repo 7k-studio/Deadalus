@@ -134,6 +134,6 @@ class Airfoil:
 
         return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
 
-    def update_airfoil(self):
+    def update(self):
         print("Recalculating airfoil geometry...")
         self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct_airfoil()

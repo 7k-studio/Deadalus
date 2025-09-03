@@ -20,7 +20,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
-import src.obj.airfoil as airfoil
+import src.obj.objects2D as objects2D
 from src.wngwb.tools_wing import add_component_to_tree
 from datetime import date
 import src.globals as globals
@@ -57,3 +57,4 @@ class TreeMenu(QTreeWidget):
     def on_item_clicked(self, item, column):
         # Handle item click events
         print(f"Clicked on: {item.text(column)}")
+        

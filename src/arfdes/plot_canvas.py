@@ -53,7 +53,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.clear()
 
         # Extract parameters
-        Current_Airfoil.update_airfoil()
+        Current_Airfoil.update()
 
         # Plot
         if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == True and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == True:

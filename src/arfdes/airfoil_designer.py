@@ -56,15 +56,16 @@ import src.wngwb.tools_wing
 import src.utils.dxf
 from src.arfdes.widget_tabele import Tabele
 from .menu_bar import MenuBar
-from src.obj.airfoil import Airfoil
+from src.obj.objects2D import Airfoil
 from src.arfdes.tools_airfoil import Reference_load
 from src.arfdes.tools_airfoil import CreateBSpline
 from src.arfdes.widget_tree import add_airfoil_to_tree
 import src.globals as globals
 
 from src.arfdes.plot_canvas import PlotCanvas
+from src.opengl.viewport2d import ViewportOpenGL
 
-Airfoil_0 = src.obj.airfoil.Airfoil()
+Airfoil_0 = src.obj.objects2D.Airfoil()
 
 class AirfoilDesigner(QMainWindow):
 
@@ -94,6 +95,10 @@ class AirfoilDesigner(QMainWindow):
         self.canvas = PlotCanvas(self.program, self.project, self.params)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
 
+        # Add the OpenGL viewport to the inner splitter
+        self.viewport = QWidget()
+        self.open_gl = ViewportOpenGL(parent=self.viewport)
+
         # Tree and Table Layout
         tree_table_layout = QVBoxLayout()  # Vertical layout for tree and table
 
@@ -104,7 +109,7 @@ class AirfoilDesigner(QMainWindow):
         tree_table_layout.addWidget(self.tree_menu)
 
         # Add tabele
-        self.table = Tabele(self, canvas=self.canvas, tree_menu=self.tree_menu, project=self.project)
+        self.table = Tabele(self, canvas=self.canvas, open_gl=self.open_gl, tree_menu=self.tree_menu, project=self.project)
         self.update_tree_menu()
 
         # Create the menu bar
@@ -112,7 +117,8 @@ class AirfoilDesigner(QMainWindow):
         self.setMenuBar(self.menu_bar)
 
         # Add canvas to the horizontal layout
-        content_layout.addWidget(self.canvas, 2)
+        #content_layout.addWidget(self.canvas, 2)
+        content_layout.addWidget(self.open_gl, 2)
 
         # Add table to the vertical layout
         tree_table_layout.addWidget(self.table)
@@ -135,12 +141,12 @@ class AirfoilDesigner(QMainWindow):
             self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
     
     def add_airfoil(self, name, dscr='designed from scratch in airfoil designer'):
-        airfoil_obj = src.obj.airfoil.Airfoil()
+        airfoil_obj = src.obj.objects2D.Airfoil()
         airfoil_obj.infos['name'] = name  # Ensure the name is set in infos
-        airfoil_obj.infos['creation_date'] = date.today()
-        airfoil_obj.infos['modification_date'] = date.today()
+        airfoil_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
+        airfoil_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
         airfoil_obj.infos['description'] = dscr
-        self.project.project_airfoils.append(airfoil_obj)
+        globals.PROJECT.project_airfoils.append(airfoil_obj)
         add_airfoil_to_tree(self.tree_menu, name, airfoil_obj)
 
     def handleReferenceToggle(self, state, filename):

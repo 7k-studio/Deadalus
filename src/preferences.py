@@ -21,8 +21,9 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox
+    QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox, QSlider
 )
+from PyQt5.QtCore import Qt
 from src.globals import AIRFLOW
 import json
 
@@ -65,16 +66,25 @@ class PreferencesWindow(QDialog):
 
         perf_text = QLabel("General Performance:")
         perf_text.setToolTip("Select the general performance level for the application.")
-        self.general_performance = QComboBox()
-        self.general_performance.addItems(["fast", "normal", "good"])
-        self.general_performance.currentTextChanged.connect(self.on_performance_changed)
-        # Fix: Ensure AIRFLOW.preferences['general'] is a dict, not a list
-        self.general_performance.setCurrentText(AIRFLOW.preferences['general'].get('performance', 'normal'))
+
+        # Slider for performance (10% - 100%)
+        self.general_performance_slider = QSlider(Qt.Horizontal)
+        self.general_performance_slider.setMinimum(10)
+        self.general_performance_slider.setMaximum(100)
+        self.general_performance_slider.setTickInterval(10)
+        self.general_performance_slider.setSingleStep(10)
+
+        # Label to show % value
+        self.general_performance_label = QLabel(f"{self.general_performance_slider.value()}%")
+
+        self.general_performance_slider.valueChanged.connect(self.on_performance_changed)
+
         self.general_beta_features = QCheckBox("Beta Features")
         self.general_beta_features.setChecked(AIRFLOW.preferences['general']['beta_features'])
 
         perf_layout.addWidget(perf_text)
-        perf_layout.addWidget(self.general_performance)
+        perf_layout.addWidget(self.general_performance_slider)
+        perf_layout.addWidget(self.general_performance_label)
         
         layout.addLayout(perf_layout)
         layout.addWidget(self.general_beta_features)
@@ -82,6 +92,7 @@ class PreferencesWindow(QDialog):
         self.general_tab.setLayout(layout)
 
     def on_performance_changed(self, value):
+        self.general_performance_label.setText(f"{value}%")
         AIRFLOW.preferences['general']["performance"] = value
 
     def init_airfoil_tab(self):
@@ -112,6 +123,7 @@ class PreferencesWindow(QDialog):
 
     def save_preferences(self):
         AIRFLOW.preferences['general']["beta_features"] = self.general_beta_features.isChecked()
+        AIRFLOW.preferences['general']["performance"] = self.general_performance_slider.value()
         AIRFLOW.preferences['airfoil_designer']["show_grid"] = self.airfoil_show_grid.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_control_points"] = self.airfoil_show_control_points.isChecked()
         AIRFLOW.preferences['airfoil_designer']["show_construction"] = self.airfoil_show_construction.isChecked()
@@ -119,14 +131,9 @@ class PreferencesWindow(QDialog):
         AIRFLOW.preferences['wing_designer']["show_ruler"] = self.wing_show_ruler.isChecked()
         self.accept()
         
-        """Save the airfoil data to a JSON format file."""
-        # Use self.program_info to access program details
-
         preferences = {}
-
-        # Fix: Remove trailing comma so this is a dict, not a tuple
         preferences['general'] = {
-            "performance": str(AIRFLOW.preferences['general'].get("performance", "")),
+            "performance": self.general_performance_slider.value(),
             "beta_features": AIRFLOW.preferences['general'].get("beta_features", False),
         }
         preferences['airfoil_designer'] = {

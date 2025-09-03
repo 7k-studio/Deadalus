@@ -21,7 +21,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 
 import math
 import sys
-import src.obj.airfoil as airfoil
+import src.obj.objects2D as objects2D
 import json
 import os
 import numpy as np
@@ -291,7 +291,7 @@ def rotate_airfoil(angle, tmp_le, tmp_ps, tmp_ss, tmp_te, incidence):
     
     return angle, tmp_le, tmp_ps, tmp_ss, tmp_te
 
-def add_component_to_tree(tree_menu, name, component_obj):
+def add_component_to_tree(tree_menu, component_obj):
     """Add an airfoil to the list and tree menu."""
     globals.PROJECT.project_components.append(component_obj)
     name = component_obj.infos.get('name', 'Unknown')

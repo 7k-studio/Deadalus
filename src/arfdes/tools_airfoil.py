@@ -91,15 +91,10 @@ def CreateBSpline(const_points):
     t=np.append(t,[1,1,1])
 
     tck=[t,[const_points[0],const_points[1]],3]
-    if globals.AIRFLOW.preferences['general']['performance'] == 'fast':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*1,25)),endpoint=True)
-    if globals.AIRFLOW.preferences['general']['performance'] == 'normal':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*2,50)),endpoint=True)
-    if globals.AIRFLOW.preferences['general']['performance'] == 'good':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*3,75)),endpoint=True)
+    
+    f = int(globals.AIRFLOW.preferences['general']['performance'])
+
+    u3=np.linspace(0,1,(max(l*f/100,f)),endpoint=True)
 
     spline = splev(u3, tck)
 
@@ -179,8 +174,8 @@ def load_airfoil_from_json(fileName):
     """load the airfoil data from a JSON format file."""
     is_version_different =  False
     error_count = 0
-    import src.obj.airfoil as airfoil
-    Airfoil = airfoil.Airfoil()
+    import obj.objects2D as objects2D
+    Airfoil = objects2D.Airfoil()
 
     if fileName:
         try:
@@ -194,7 +189,7 @@ def load_airfoil_from_json(fileName):
     if data:
         try:
             airfoil_version = data["program version"]
-            airfoil = data["airfoil"]
+            objects2D = data["airfoil"]
         except KeyError as e:
             print(f"ERROR: Missing key in ARF data - {e}")
             print("File may not load properly or is not compatible with AirFLOW")
@@ -212,31 +207,31 @@ def load_airfoil_from_json(fileName):
         try:
             # Set parameters in Airfoil.params dictionary
             Airfoil.params = {
-                "chord": airfoil["chord"],
-                "origin_X": airfoil["origin_X"],
-                "origin_Y": airfoil["origin_Y"],
-                "le_thickness": airfoil["le_thickness"],
-                "le_depth": airfoil["le_depth"],
-                "le_offset": airfoil["le_offset"],
-                "le_angle": airfoil["le_angle"],
-                "te_thickness": airfoil["te_thickness"],
-                "te_depth": airfoil["te_depth"],
-                "te_offset": airfoil["te_offset"],
-                "te_angle": airfoil["te_angle"],
-                "ps_fwd_angle": airfoil["ps_fwd_angle"],
-                "ps_rwd_angle": airfoil["ps_rwd_angle"],
-                "ps_fwd_accel": airfoil["ps_fwd_accel"],
-                "ps_rwd_accel": airfoil["ps_rwd_accel"],
-                "ss_fwd_angle": airfoil["ss_fwd_angle"],
-                "ss_rwd_angle": airfoil["ss_rwd_angle"],
-                "ss_fwd_accel": airfoil["ss_fwd_accel"],
-                "ss_rwd_accel": airfoil["ss_rwd_accel"]
+                "chord": objects2D["chord"],
+                "origin_X": objects2D["origin_X"],
+                "origin_Y": objects2D["origin_Y"],
+                "le_thickness": objects2D["le_thickness"],
+                "le_depth": objects2D["le_depth"],
+                "le_offset": objects2D["le_offset"],
+                "le_angle": objects2D["le_angle"],
+                "te_thickness": objects2D["te_thickness"],
+                "te_depth": objects2D["te_depth"],
+                "te_offset": objects2D["te_offset"],
+                "te_angle": objects2D["te_angle"],
+                "ps_fwd_angle": objects2D["ps_fwd_angle"],
+                "ps_rwd_angle": objects2D["ps_rwd_angle"],
+                "ps_fwd_accel": objects2D["ps_fwd_accel"],
+                "ps_rwd_accel": objects2D["ps_rwd_accel"],
+                "ss_fwd_angle": objects2D["ss_fwd_angle"],
+                "ss_rwd_angle": objects2D["ss_rwd_angle"],
+                "ss_fwd_accel": objects2D["ss_fwd_accel"],
+                "ss_rwd_accel": objects2D["ss_rwd_accel"]
             }
             Airfoil.infos = {
-                "name": airfoil["infos"]["name"],
-                "creation_date": airfoil["infos"]["creation_date"],
-                "modification_date": airfoil["infos"]["modification_date"],
-                "description": airfoil["infos"]["description"]
+                "name": objects2D["infos"]["name"],
+                "creation_date": objects2D["infos"]["creation_date"],
+                "modification_date": objects2D["infos"]["modification_date"],
+                "description": objects2D["infos"]["description"]
             }
         except KeyError as e:
             print(f"ERROR: Missing key in ARF data - {e}")
@@ -248,6 +243,7 @@ def load_airfoil_from_json(fileName):
         else:
             print(f"AIRFLOW > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
 
+        Airfoil.update()
 
         return Airfoil, error_count
 

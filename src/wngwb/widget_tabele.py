@@ -254,7 +254,7 @@ class Tabele(QTableWidget):
                     parent_index = grandparent_item.indexOfChild(parent_item)
                     grandparent_index = self.tree_menu.indexOfTopLevelItem(grandparent_item)
 
-                    print(f'Segment at index: {grandparent_index} >>> {parent_index} >>> {item_index}')
+                    print(f'Segment at index: {grandparent_index}:{parent_index}:{item_index}')
 
                     element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
                     print(type(element_item))
@@ -303,9 +303,10 @@ class Tabele(QTableWidget):
                     parent_index = grandparent_item.indexOfChild(parent_item)
                     grandparent_index = self.tree_menu.indexOfTopLevelItem(grandparent_item)
 
-                    print(f'WNGWB > Save_state > Segment at index: {grandparent_index} >>> {parent_index} >>> {item_index}')
-
+                    print(f'WNGWB > Save_state > Segment at index: {grandparent_index}:{parent_index}:{item_index}')
+                    
                     element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
+                    globals.PROJECT.project_components[grandparent_index].wings[parent_index].build_connection()
 
                 if parent_item and not grandparent_item:
 
@@ -315,6 +316,7 @@ class Tabele(QTableWidget):
                     print(f'WNGWB > Save_state > Wing at index: {parent_index} >>> {item_index}')
 
                     element_item = globals.PROJECT.project_components[parent_index].wings[item_index]
+                    globals.PROJECT.project_components[parent_index].wings[item_index].build_connection()
 
                 if not parent_item and not grandparent_item:
 
@@ -323,6 +325,8 @@ class Tabele(QTableWidget):
                     print(f'WNGWB > Save_state > Component at index: {item_index}')
 
                     element_item = globals.PROJECT.project_components[item_index]
+                    for item in element_item.wings:
+                        item.build_connection()
 
                 # Update the airfoil object with table data
                 for row in range(self.rowCount()):

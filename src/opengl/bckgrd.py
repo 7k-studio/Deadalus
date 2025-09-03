@@ -141,7 +141,6 @@ def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
         glVertex3f(x, y, origin_z-(length*zoom))
     glEnd()
 
-
 def draw_grid(self, linewidth=1, size=100, step=1, zoom=-10):
     glLineWidth(linewidth)
     glColor3f(0.8, 0.8, 0.8)  # Grey color
@@ -205,5 +204,41 @@ def draw_ruller(self, linewidth=2, size=1000, step=1, zoom = -10):
 
     glVertex3f(0, 0, 0)
     glVertex3f(0, 0, 4 + 1)  
+    
+    glEnd()
+
+def draw_ruller_2d(self, linewidth=2, size=1000, step=1, zoom = -10):
+    glLineWidth(linewidth)
+    glColor3f(0.4, 0.4, 0.4)
+    glBegin(GL_LINES)
+
+    # Adjust scale based on zoom level
+    if -zoom < 2:
+        scale = 100  
+    else:
+        scale = 10
+
+    #Drawing ruller lines: main axis
+    for i in range(-size, size + 1, step):
+        # Vertical lines [ X | Y | Z ]
+        glVertex3f(i/scale, 0, 0)
+        glVertex3f(i/scale, 0.01*(-zoom), 0)
+        # Horizontal lines [ X | Y | Z ]
+        glVertex3f(0, i/scale, 0)
+        glVertex3f(0.01*(-zoom), i/scale, 0)
+
+    for i in range(-size, size + 1, int(step*10)):
+        # Vertical lines [ X | Y | Z ]
+        glVertex3f(i/10, 0, 0)
+        glVertex3f(i/10, 0.2, 0)
+        # Horizontal lines [ X | Y | Z ]
+        glVertex3f(0, i/10, 0)
+        glVertex3f(0.2, i/10, 0)
+
+    glVertex3f(-size, 0, 0)
+    glVertex3f(size + 1, 0, 0)
+
+    glVertex3f(0, -size, 0)
+    glVertex3f(0, size + 1, 0)
     
     glEnd()

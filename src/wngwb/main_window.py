@@ -29,7 +29,7 @@ from PyQt5.QtCore import Qt
 
 import numpy as np
 
-import src.obj.airfoil as airfoil
+import src.obj.objects2D as objects2D
 import src.wngwb.tools_wing as tools_wing
 import src.utils.dxf as dxf
 import random
@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 
-from src.opengl.viewport3d import ViewportOpenGL
+from src.opengl.viewport import Viewport3D
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 
@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None, flags=Qt.WindowFlags()):
         super(MainWindow, self).__init__(parent, flags)
-        print("Opening Wing Workbench")
-        self.setWindowTitle(globals.AIRFLOW.program_name)
+        print("AIRFLOW > module: Wing Workbench")
+        self.setWindowTitle("AirFLOW: Wing Workbench")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
@@ -74,7 +74,7 @@ class MainWindow(QMainWindow):
 
         # Add the OpenGL viewport to the inner splitter
         self.viewport = QWidget()
-        self.open_gl = ViewportOpenGL(parent=self.viewport)
+        self.open_gl = Viewport3D(parent=self.viewport)
         viewport_layout = QVBoxLayout(self.viewport)
         viewport_layout.addWidget(self.open_gl)
         #self.viewport.setMinimumWidth(500)

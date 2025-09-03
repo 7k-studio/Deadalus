@@ -5,3 +5,4 @@ ezdxf
 matplotlib
 scipy
 tqdm
+geomdl

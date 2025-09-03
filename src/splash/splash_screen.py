@@ -58,15 +58,20 @@ class SplashScreen(QWidget):
         version_label.setStyleSheet("font-size: 12px; font-weight: regular; color: black;")
         layout.addWidget(version_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
+        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
+        copyright_label.setStyleSheet("font-size: 9px; font-weight: regular; color: black;")
+        layout.addWidget(copyright_label, alignment=Qt.AlignCenter | Qt.AlignTop)
+        
+
         # Add buttons
         button_layout = QHBoxLayout()
         button1 = QPushButton("New Project")
-        button1.setStyleSheet("background-color: lightblue;")
+        button1.setStyleSheet("background-color: lightgrey;")
         button1.clicked.connect(self.new_project)
         button1.setFixedSize(220, 30)  # Set fixed size for the button
 
         button2 = QPushButton("Open Project")
-        button2.setStyleSheet("background-color: lightgreen;")
+        button2.setStyleSheet("background-color: lightgrey;")
         button2.clicked.connect(self.open_project)
         button2.setFixedSize(220, 30)  # Set fixed size for the button
 
@@ -103,7 +108,7 @@ class SplashScreen(QWidget):
     def open_project(self):
         """Load AirFLOW project and open the AirfoilDesigner window."""
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Database Files (*.db.tgz) ;; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
         if fileName:
             self.PROJECT = globals.loadProject(fileName)
             self.airfoil_designer_window = AirfoilDesigner(globals.AIRFLOW, globals.PROJECT)  # Pass airfoil_list

@@ -32,11 +32,11 @@ import src.globals as globals  # Import from globals.py
 class Tabele(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None, canvas=None, tree_menu=None, project=None):
+    def __init__(self, parent=None, canvas=None, open_gl=None, tree_menu=None, project=None):
         super(Tabele, self).__init__(parent)
         self.canvas = canvas
+        self.open_gl = open_gl
         self.project = project
-        #self.airfoils_list = airfoils_list
         self.tree_menu = tree_menu
         self.Up_ref_points = None  # Add attribute to store Up_ref_points
         self.Dwn_ref_points = None  # Add attribute to store Dwn_ref_points
@@ -145,11 +145,12 @@ class Tabele(QTableWidget):
         """Display the selected airfoil's data in the table."""
         index = self.tree_menu.indexOfTopLevelItem(item)
         if index != -1:
-            selected_airfoil = self.project.project_airfoils[index]
+            selected_airfoil = globals.PROJECT.project_airfoils[index]
             self.populate_table(selected_airfoil)
             # Update self.params with the selected airfoil's parameters
             self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
             self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
+            self.open_gl.set_airfoil_to_display(selected_airfoil)
 
     def save_current_airfoil_state(self):
         """Overwrite the current table data into the selected airfoil object."""
@@ -182,4 +183,5 @@ class Tabele(QTableWidget):
         self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
+        self.open_gl.update()
 

@@ -22,30 +22,36 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 from datetime import date
 import json
 import tempfile
+import shutil
 import tarfile
+import struct
 import os
+import uuid
 import datetime
 import numpy as np  # Add this import for numpy
 from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
 import webbrowser
+import src.obj.objects3D as objects3D
+import src.obj.objects2D as objects2D
 
 class Program:
     def __init__(self):
         self.program_name = "AirFLOW"
-        self.program_version = "0.2.7-beta"
+        self.program_version = "0.2.0-beta"
 
         self.preferences = {
             'general': {
                 "units": "meters / degrees", # Options: "meters / radians", (future: "milimeters / degrees", "feet / degrees")
-                "performance": "normal",  # Options: "normal", "fast", "slow"
+                "performance": "normal",  # Options: "normal", "fast", "good"
                 "beta_features": False,  # Enable beta features
             },
             'airfoil_designer': {
                 "show_grid": True,
                 "show_control_points": True,
                 "show_construction": True,
+                "wireframe_color": {'le': [0.0, 0.0, 1.0], 'te': [1.0, 1.0, 0.0], 'ps': [0.0, 1.0, 0.0], 'ss': [1.0, 0.0, 0.0]}
             },
             'wing_designer': {
                 "show_grid": True,
@@ -53,7 +59,8 @@ class Program:
                 "show_control_points": True,
                 "show_construction": True,
                 "show_wireframe": True,
-                "show_solid": True
+                "show_solid": True,
+                "wireframe_color": {'le': [0.0, 0.0, 1.0], 'te': [1.0, 1.0, 0.0], 'ps': [0.0, 1.0, 0.0], 'ss': [1.0, 0.0, 0.0], 'le_ps': [0.0, 1.0, 0.0], 'le_ss': [1.0, 0.0, 0.0], 'te_ps': [0.0, 1.0, 0.0], 'te_ss': [1.0, 0.0, 0.0]}
             }
         }
         self.readPreferences()  # Load preferences from file
@@ -84,13 +91,12 @@ class Program:
         logo_label.setPixmap(pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
 
-        # Title and version
-        #title_label = QLabel(self.program_name)
-        #title_label.setFont(QFont("Arial", 14, QFont.Bold))
-        #title_label.setAlignment(Qt.AlignCenter)
+        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
+        copyright_label.setFont(QFont("Arial", 8))
+        copyright_label.setAlignment(Qt.AlignCenter)
 
         version_label = QLabel(f"Version: {self.program_version}")
-        version_label.setFont(QFont("Arial", 10))
+        version_label.setFont(QFont("Arial", 12))
         version_label.setAlignment(Qt.AlignCenter)
 
         # Optional description
@@ -106,7 +112,7 @@ class Program:
         # Layout
         layout = QVBoxLayout()
         layout.addWidget(logo_label)
-        #layout.addWidget(title_label)
+        layout.addWidget(copyright_label)
         layout.addWidget(version_label)
         layout.addWidget(description_label)
 
@@ -141,153 +147,92 @@ class Project:
         self.project_components.clear()
         self.project_airfoils.clear()
     
+def new_id():
+    return str(uuid.uuid4())
+
+def write_chunk(f, chunk_type: str, data: dict):
+    """Write one chunk with type (4 chars), size (uint32), and JSON payload."""
+    payload = json.dumps(data).encode("utf-8")
+    f.write(chunk_type.encode("ascii"))
+    f.write(struct.pack("<I", len(payload)))
+    f.write(payload)
+
 def saveProject(fileName):
     from src.arfdes.tools_airfoil import save_airfoil_to_json
     from src.utils.tools_program import convert_ndarray_to_list
 
-    # Create a temporary directory to store files before archiving
-    with tempfile.TemporaryDirectory() as tmpdir:
+    base_path = fileName if fileName.endswith(".afdb") else fileName + ".afdb"
+    if os.path.exists(base_path):
+        os.remove(base_path)
 
-        airfoil_filenames = []
-
-        # Save each airfoil as a separate JSON file
+    with open(base_path, "wb") as f:
+        # --- Save airfoils ---
+        airfoil_ids = []
         for idx, airfoil in enumerate(PROJECT.project_airfoils):
-            airfoil_data = save_airfoil_to_json(idx)
-            airfoil_filename = f"airfoil_{idx}.arf"
-            airfoil_path = os.path.join(tmpdir, airfoil_filename)
-            with open(airfoil_path, "w") as outfile:
-                outfile.write(airfoil_data)
-            airfoil_filenames.append(airfoil_filename)
+            airfoil_id = new_id()
+            airfoil_data = {
+                "id": airfoil_id,
+                "infos": airfoil.infos,
+                "params": airfoil.params,
+            }
+            write_chunk(f, "AIFO", convert_ndarray_to_list(airfoil_data))
+            airfoil_ids.append(airfoil_id)
 
-        designed_components = []
+        # --- Save components / wings / segments ---
+        for comp_idx, component in enumerate(PROJECT.project_components):
+            comp_id = new_id()
+            comp_data = {
+                "id": comp_id,
+                "infos": component.infos,
+                "params": component.params,
+            }
+            write_chunk(f, "COMP", convert_ndarray_to_list(comp_data))
 
-        for component in PROJECT.project_components:
-            designed_wings = []
-            for wing in component.wings:
-                designed_segments = []
-                for segment in wing.segments:
-                    infos = {
-                        "name": segment.infos.get('name', 'Unknown'),
-                        "creation_date": segment.infos.get('creation_date', 'Unknown'),
-                        "modification_date": segment.infos.get('modification_date', 'Unknown'),
-                    }
-                    params = {
-                        "origin_X": segment.params.get('origin_X', 0),
-                        "origin_Y": segment.params.get('origin_Y', 0),
-                        "origin_Z": segment.params.get('origin_Z', 0),
-                        "incidence": segment.params.get('incidence', 0),
-                        "scale": segment.params.get('scale', 1.0),
-                        "tan_accel": segment.params.get('tan_accel', 0.1)
-                    }
-                    control_points = {
-                        'le': segment.control_points.get('le', []),
-                        'ps': segment.control_points.get('ps', []),
-                        'ss': segment.control_points.get('ss', []),
-                        'te': segment.control_points.get('te', []),
-                        'le_ps': segment.control_points.get('le_ps', []),
-                        'te_ps': segment.control_points.get('te_ps', []),
-                        'le_ss': segment.control_points.get('le_ss', []),
-                        'te_ss': segment.control_points.get('te_ss', [])
-                    }
-                    geom = {
-                        'le': segment.geom.get('le', []),
-                        'ps': segment.geom.get('ps', []),
-                        'ss': segment.geom.get('ss', []),
-                        'te': segment.geom.get('te', [])
-                    }
-                    segments = {
-                        "infos": infos,
-                        "airfoil": f"airfoil_{getattr(segment, 'airfoil_index', 0)}.json",  # reference to airfoil file
+            for wing_idx, wing in enumerate(component.wings):
+                wing_id = new_id()
+                wing_data = {
+                    "id": wing_id,
+                    "parent_id": comp_id,
+                    "infos": wing.infos,
+                    "params": wing.params,
+                }
+                write_chunk(f, "WING", convert_ndarray_to_list(wing_data))
+
+                for seg_idx, segment in enumerate(wing.segments):
+                    seg_id = new_id()
+                    seg_data = {
+                        "id": seg_id,
+                        "parent_id": wing_id,
+                        "infos": segment.infos,
+                        "params": segment.params,
                         "anchor": segment.anchor,
-                        "params": params,
-                        "control_points": control_points,
-                        "geom": geom
+                        "airfoil_ref": airfoil_ids[getattr(segment, "airfoil_index", 0)]
                     }
-                    designed_segments.append(segments)
-                infos = {
-                    "name": wing.infos.get('name', 'Unknown'),
-                    "creation_date": wing.infos.get('creation_date', 'Unknown'),
-                    "modification_date": wing.infos.get('modification_date', 'Unknown'),
-                }
-                params = {
-                    "origin_X": wing.params.get('origin_X', 0),
-                    "origin_Y": wing.params.get('origin_Y', 0),
-                    "origin_Z": wing.params.get('origin_Z', 0),
-                }
-                geom = {
-                    'le': wing.geom.get('le', []),
-                    'ps': wing.geom.get('ps', []),
-                    'ss': wing.geom.get('ss', []),
-                    'te': wing.geom.get('te', [])
-                }
-                wings = {
-                    "infos": infos,
-                    "params": params,
-                    "segments": designed_segments,
-                    "geom": geom
-                }
-                designed_wings.append(wings)
+                    write_chunk(f, "SEGM", convert_ndarray_to_list(seg_data))
 
-            infos = {
-            "name": component.infos.get('name', 'Unknown'),
-            "creation_date": component.infos.get('creation_date', 'Unknown'),
-            "modification_date": component.infos.get('modification_date', 'Unknown'),
-            }
-            params = {
-                "origin_X": component.params.get('origin_X', 0),
-                "origin_Y": component.params.get('origin_Y', 0),
-                "origin_Z": component.params.get('origin_Z', 0),
-            }
-            components = {
-                "infos": infos,
-                "params": params,
-                "wings": designed_wings
-            }
-            designed_components.append(components)
-        
-        AirFLOW = {
+        # --- Save global project metadata ---
+        AirFLOW_meta = {
             "program name": AIRFLOW.program_name,
             "program version": AIRFLOW.program_version,
             "file name": os.path.basename(fileName),
         }
-        Project = {
+        Project_meta = {
             "project name": PROJECT.project_name,
             "creation date": PROJECT.project_date,
             "modification date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "project description": PROJECT.project_description,
-            "project path": fileName,
-            "project components": designed_components,
-            "project airfoils": airfoil_filenames
         }
-        data = {
-            "Program": AirFLOW,
-            "Project": Project
-        }
+        meta = {"Program": AirFLOW_meta, "Project": Project_meta}
+        write_chunk(f, "PROJ", convert_ndarray_to_list(meta))
 
-        # Convert all numpy arrays to lists before saving
-        data = convert_ndarray_to_list(data)
+    print("AIRFLOW > Project database successfully saved:", base_path)
+    return base_path
 
-        # Save project.airflow
-        project_json_path = os.path.join(tmpdir, "project.airflow")
-        with open(project_json_path, "w") as f:
-            json.dump(data, f, indent=1)
-
-        # Create .tgz archive
-        tgz_path = fileName if fileName.endswith('.tgz') else fileName + ".tgz"
-
-        with tarfile.open(tgz_path, "w:gz") as tar:
-            tar.add(project_json_path, arcname="project.airflow")
-            for airfoil_filename in airfoil_filenames:
-                tar.add(os.path.join(tmpdir, airfoil_filename), arcname=airfoil_filename)
-
-        print("AIRFLOW > Project archive successfully saved: ", tgz_path)
-        return tgz_path
-
-def loadProject(fileName):
+def loadProjectold(fileName):
 
     from src.arfdes.tools_airfoil import load_airfoil_from_json
     from src.utils.tools_program import convert_list_to_ndarray
-    from src.obj.wing import Component, Wing, Segment  # Import the templates
+    from obj.objects3D import Component, Wing, Segment  # Import the templates
     base_name = os.path.basename(fileName)
     warning_count = 0
 
@@ -369,6 +314,103 @@ def loadProject(fileName):
     else: 
         print(f"AIRFLOW > Project archive '{base_name}' loaded with ({warning_count}) warnings, check might be necessary!")
     return True
+
+def read_chunks(file_path):
+    """Generator: yields (chunk_type, parsed_json_obj)."""
+    with open(file_path, "rb") as f:
+        while True:
+            header = f.read(8)
+            if not header:
+                break
+            chunk_type, length = struct.unpack("<4sI", header)
+            data = f.read(length)
+            yield chunk_type.decode("ascii"), json.loads(data.decode("utf-8"))
+
+def loadProject(fileName):
+
+    file_path = fileName if fileName.endswith(".afdb") else fileName + ".afdb"
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"No project file found: {file_path}")
+
+    # Reset project state
+    PROJECT.project_airfoils.clear()
+    PROJECT.project_components.clear()
+
+    # Collect objects by ID
+    airfoils, segments, wings, components = {}, {}, {}, {}
+    project_meta = {}
+
+    for ctype, obj in read_chunks(file_path):
+        if ctype == "AIFO":
+            airfoils[obj["id"]] = obj
+        elif ctype == "SEGM":
+            segments[obj["id"]] = obj
+        elif ctype == "WING":
+            wings[obj["id"]] = obj
+        elif ctype == "COMP":
+            components[obj["id"]] = obj
+        elif ctype == "PROJ":
+            project_meta = obj
+
+    # --- Rebuild hierarchy ---
+    # Link segments to wings
+    for seg in segments.values():
+        wing = wings.get(seg["parent_id"])
+        if wing:
+            wing.setdefault("segments", []).append(seg)
+
+    # Link wings to components
+    for wing in wings.values():
+        comp = components.get(wing["parent_id"])
+        if comp:
+            comp.setdefault("wings", []).append(wing)
+
+    # Attach components to PROJECT
+    for comp in components.values():
+        comp_obj = objects3D.Component()
+        comp_obj.infos = comp.get("infos", {})
+        comp_obj.params = comp.get("params", {})
+
+        for wing in comp.get("wings", []):
+            wing_obj = objects3D.Wing()
+            wing_obj.infos = wing.get("infos", {})
+            wing_obj.params = wing.get("params", {})
+            wing_obj.geom = wing.get("geom", {})
+
+            for seg in wing.get("segments", []):
+                seg_obj = objects3D.Segment()
+                seg_obj.infos = seg.get("infos", {})
+                seg_obj.params = seg.get("params", {})
+                seg_obj.anchor = seg.get("anchor", None)
+                seg_obj.airfoil_index = list(airfoils.keys()).index(seg.get("airfoil_ref"))
+                wing_obj.segments.append(seg_obj)
+
+            comp_obj.wings.append(wing_obj)
+
+        PROJECT.project_components.append(comp_obj)
+
+    # Restore airfoils
+    for aifo in airfoils.values():
+        arf_obj = objects2D.Airfoil()
+        arf_obj.infos = aifo.get("infos", {})
+        arf_obj.params = aifo.get("params", {})
+        PROJECT.project_airfoils.append(arf_obj)
+
+    # Restore metadata
+    if "Program" in project_meta:
+        prog = project_meta["Program"]
+        AIRFLOW.program_name = prog.get("program name", AIRFLOW.program_name)
+        AIRFLOW.program_version = prog.get("program version", AIRFLOW.program_version)
+
+    if "Project" in project_meta:
+        proj = project_meta["Project"]
+        PROJECT.project_name = proj.get("project name", PROJECT.project_name)
+        PROJECT.project_date = proj.get("creation date", PROJECT.project_date)
+        PROJECT.project_description = proj.get("project description", PROJECT.project_description)
+
+    print(f"AIRFLOW > Project successfully loaded from {file_path}")
+    return PROJECT
+
 
 AIRFLOW = Program()  # Create a global instance of Program
 PROJECT = Project()  # Create a global instance of Project

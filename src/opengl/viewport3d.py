@@ -82,7 +82,6 @@ class ViewportOpenGL(QGLWidget):
         glRotatef(self.rotation[2], 0.0, 0.0, 1.0)
         glTranslatef(-self.CoR[0], -self.CoR[1], -self.CoR[2])
 
-
         #Drawing background elements
         bckgrd.draw_grid(self, linewidth=1, zoom=self.zoom)
         bckgrd.draw_ruller(self, zoom=self.zoom)
@@ -94,7 +93,7 @@ class ViewportOpenGL(QGLWidget):
             #print(f"Drawing component {i+1}/{len(globals.PROJECT.project_components)}")
 
             for j in range(len(globals.PROJECT.project_components[i].wings)):
-                solid.draw_cube(globals.PROJECT.project_components[i].wings[j].params['origin_X'],globals.PROJECT.project_components[i].wings[j].params['origin_Y'],globals.PROJECT.project_components[i].wings[j].params['origin_Z'],0.2)
+                #solid.draw_cube(globals.PROJECT.project_components[i].wings[j].params['origin_X'],globals.PROJECT.project_components[i].wings[j].params['origin_Y'],globals.PROJECT.project_components[i].wings[j].params['origin_Z'],0.2)
                 construction.draw_cp_net(globals.PROJECT.project_components[i].wings[j], self.zoom)
                 #print(f"  Drawing wing {j+1}/{len(globals.PROJECT.project_components[i].wings)}")
                 
@@ -106,8 +105,8 @@ class ViewportOpenGL(QGLWidget):
                         if error != GL_NO_ERROR:
                             print(f"OpenGL Error before airfoil: {(error)}") #gluErrorString
 
-                        wireframe.draw_airfoil_wireframe(self, globals.PROJECT.project_components[i].wings[j].segments[k])
-                        globals.PROJECT.project_components[i].wings[j].build_connection()
+                        wireframe.draw_airfoil_wireframe(self, i, j, k)
+                        
                         #shapes.draw_wing(self, globals.PROJECT.project_components[i].wings[j], len(globals.PROJECT.project_components[i].wings[j].segments))
                         # Check for errors after drawing
                         error = glGetError()
