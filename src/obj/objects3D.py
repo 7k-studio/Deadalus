@@ -139,7 +139,7 @@ class Segment:
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
     
-    def update_segment(self):
+    def update(self):
 
         print("Updating airfoil geometry...")
 
@@ -171,7 +171,7 @@ class Segment:
 
     def transform_airfoil(self, grandparent_index, parent_index, item_index):
 
-        self.update_segment()
+        self.update()
 
         cmp_X = globals.PROJECT.project_components[grandparent_index].params['origin_X']
         cmp_Y = globals.PROJECT.project_components[grandparent_index].params['origin_Y']
@@ -280,21 +280,22 @@ class Wing:
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
     
-    def update_airfoil(self):
+    def update(self):
         print("Restoring airfoil geometry...")
-        self.geom['le'] = self.airfoil.geom['le']
-        self.geom['ps'] = self.airfoil.geom['ps']
-        self.geom['ss'] = self.airfoil.geom['ss']
-        self.geom['te'] = self.airfoil.geom['te']
+        self.build_connection()
+        #self.geom['le'] = self.airfoil.geom['le']
+        #self.geom['ps'] = self.airfoil.geom['ps']
+        #self.geom['ss'] = self.airfoil.geom['ss']
+        #self.geom['te'] = self.airfoil.geom['te']
 
-        self.control_points['le'] = self.airfoil.constr['le']
-        self.control_points['ps'] = self.airfoil.constr['ps']
-        self.control_points['ss'] = self.airfoil.constr['ss']
-        self.control_points['te'] = self.airfoil.constr['te']
+        #self.control_points['le'] = self.airfoil.constr['le']
+        #self.control_points['ps'] = self.airfoil.constr['ps']
+        #self.control_points['ss'] = self.airfoil.constr['ss']
+        #self.control_points['te'] = self.airfoil.constr['te']
 
     def transform_airfoil(self, grandparent_index, parent_index, item_index):
 
-        self.update_wing()
+        self.update()
 
         cmp_X = globals.PROJECT.project_components[grandparent_index].origin_X
         cmp_Y = globals.PROJECT.project_components[grandparent_index].origin_Y
@@ -399,9 +400,9 @@ class Wing:
                 self.segments[i].geom['te_ss'] = CreateBSpline_3D(self.segments[i].control_points['te_ss'], degree)
 
                 u_start_cp = self.segments[i].control_points['ps']
-                u_end_cp = self.segments[i+1].control_points['ps']
+                u_end_cp   = self.segments[i+1].control_points['ps']
                 v_start_cp = self.segments[i].control_points['le_ps']
-                v_end_cp = self.segments[i].control_points['te_ps']
+                v_end_cp   = self.segments[i].control_points['te_ps']
 
                 # Build grid [u][v]
                 # u: chordwise, v: spanwise
@@ -429,14 +430,24 @@ class Wing:
                 self.segments[i].surfaces_grid['le'] = surf
 
                 u_start_cp = self.segments[i].control_points['te']
+                #u_start_cp = u_start_cp[:, ::-1]
                 u_end_cp = self.segments[i+1].control_points['te']
-                v_start_cp = self.segments[i].control_points['te_ps']
-                v_end_cp = self.segments[i].control_points['te_ss']
+                #u_end_cp = u_end_cp[:, ::-1]
+
+                v_start_cp = self.segments[i].control_points['te_ss']
+                v_end_cp = self.segments[i].control_points['te_ps']
+
+                # print(u_start_cp)
+                # print(u_end_cp)
+                # print(v_start_cp)
+                # print(v_end_cp)
 
                 # Build grid [u][v]
                 # u: chordwise, v: spanwise
                 surf = make_surface_from_boundaries(u_start_cp, u_end_cp, v_start_cp, v_end_cp)
                 self.segments[i].surfaces_grid['te'] = surf
+
+                print(surf)
 
         print(f'WNGWB > Wing > build_connection > Connection between two segments established')
 
@@ -608,7 +619,7 @@ class Component:
 
         return tmp_X, tmp_Y, tmp_Z
     
-    def restore_component(self):
+    def update(self):
         print("Restoring component params...")
         self.params['origin_X'] = 0
         self.params['origin_Y'] = 0

@@ -74,7 +74,15 @@ class Approval:
     
     def export(self):
         return f"#{self.idx} = APPROVAL ( #{self.status_idx}, '{self.spec}' ) ;"
+
+class ApplicationContext:
+    def __init__(self, idx):
+        self.idx = idx
+        self.context = "configuration controlled 3d designs of mechanical parts and assemblies"
     
+    def export(self):
+        return f"#{self.idx} = APPLICATION_CONTEXT ( '{self.context}' ) ;"
+
 class CCDesignAproval:
     def __init__(self, idx, approval_idx, pdfwss_idx):
         self.idx = idx
@@ -84,16 +92,65 @@ class CCDesignAproval:
     def export(self):
         return f"#{self.idx} = CC_DESIGN_APPROVAL ( #{self.approval_idx}, ( #{self.product_def_for_with_specified_source_idx} ) ) ;"
 
+class DesignContext:
+    def __init__(self, idx, application_context_obj):
+        self.idx = idx
+        self.desc = "detailed design"
+        self.application_context = application_context_obj
+        self.label = "design"
+
+    def export(self):
+        return f"#{self.idx} = DESIGN_CONTEXT ( '{self.desc}', #{self.application_context.idx}, '{self.label}' ) ;"
+
+class Plane:
+    def __init__(self, idx, desc=None, ax_idx=None):
+        self.idx = idx
+        self.desc = desc if desc != None else 'NONE'
+        self.ax2_placement_idx = ax_idx
+    
+    def export(self):
+        return f"#{self.idx} = PLANE ( '{self.desc}', #{self.ax2_placement_idx} ) ;"
+
+class Product:
+    def __init__(self, idx, name, mechanical_context_obj):
+        self.idx = idx
+        self.name = name
+        self.mechanical_context = mechanical_context_obj
+
+    def export(self):
+        return f"#{self.idx} = PRODUCT ( '{self.name}', '{self.name}', '', ( #{self.mechanical_context.idx} ) );"
+
+class ProductDefinition:
+    def __init__(self, idx=None, desc='UNKNOWN', spec1="", prod_def_form_w_spec_source=None, design_context=None):
+        self.idx = idx
+        self.description = desc
+        self.spec1 = spec1
+        self.pdfwss = prod_def_form_w_spec_source
+        self.des_con = design_context
+
+    def export(self):
+        return f"#{self.idx} = PRODUCT_DEFINITION ( '{self.description}', '{self.spec1}', #{self.pdfwss.idx}, #{self.des_con.idx} ) ;"
+
 class ProductDefinitionFormationWithSpecifiedSource:
-    def __init__(self, idx, product_idx):
+    def __init__(self, idx, product):
         self.idx = idx
         self.var1 = 'ANY'
         self.var2 = ''
-        self.product_idx = product_idx
+        self.product = product
         self.spec = '.NOT_KNOWN.'
     
     def export(self):
-        return f"#{self.idx} = PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE ( '{self.var1}', '{self.var2}', #{self.product_idx}, {self.spec} ) ;"
+        return f"#{self.idx} = PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE ( '{self.var1}', '{self.var2}', #{self.product.idx}, {self.spec} ) ;"
+
+class ProductDefinitionShape:
+    def __init__(self, idx, product_definition):
+        self.idx = idx
+        self.spec1 = "NONE"
+        self.spec2 = "NONE"
+        self.product_definition = product_definition
+
+    def export(self):
+        return f"#{self.idx} = PRODUCT_DEFINITION_SHAPE ( '{self.spec1}', '{self.spec2}', #{self.product_definition.idx} );"
 
 class SolidAngleUnit:
     def __init__(self, idx):
@@ -162,48 +219,39 @@ class BsplineWithKnots:
         self.degree= len(points_indexes)-1
         self.points_indexes = points_indexes
         self.spec1 = '.UNSPECIFIED.'
-        self.spec2 = '.F.'
-        self.spec3 = '.F.'
+        self.orientation_flag_1 = '.T.'
+        self.orientation_flag_2 = '.T.'
         self.uv_grid_points_number = [len(points_indexes),len(points_indexes)]
         self.spec5 = [0.000000000000000000, 1.000000000000000000]
         self.spec6 = '.UNSPECIFIED.'
     
     def export(self):
-        knots = ', '.join([f'#{i}' for i in self.points_indexes])
-        return f"#{self.idx} = B_SPLINE_CURVE_WITH_KNOTS ( '{self.desc}', {self.degree}, ( {knots} ), {self.spec1}, {self.spec2}, {self.spec3}, ( {self.uv_grid_points_number[0]}, {self.uv_grid_points_number[1]} ), ( {self.spec5[0]}, {self.spec5[1]} ), {self.spec6} ) ;"
+        knots = ', '.join([f'#{obj.idx}' for obj in self.points_indexes])
+        return f"#{self.idx} = B_SPLINE_CURVE_WITH_KNOTS ( '{self.desc}', {self.degree}, ( {knots} ), {self.spec1}, {self.orientation_flag_1}, {self.orientation_flag_2}, ( {self.uv_grid_points_number[0]}, {self.uv_grid_points_number[1]} ), ( {self.spec5[0]}, {self.spec5[1]} ), {self.spec6} ) ;"
 
 class EdgeCurve:
-    def __init__(self, idx, desc=None, VP1_idx=None, VP2_idx=None, Curv_idx=None):
+    def __init__(self, idx, desc=None, VP1=None, VP2=None, Curv=None):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
-        self.vertex_point_1_idx = VP1_idx
-        self.vertex_point_2_idx = VP2_idx
-        self.curve_idx = Curv_idx
-        self.spec = '.T.'
+        self.vertex_point_1 = VP1
+        self.vertex_point_2 = VP2
+        self.curve = Curv
+        self.orientation_flag = '.T.'
     
     def export(self):
-        return f"#{self.idx} = EDGE_CURVE ( '{self.desc}', #{self.vertex_point_1_idx}, #{self.vertex_point_2_idx}, #{self.curve_idx}, {self.spec} ) ;"
+        return f"#{self.idx} = EDGE_CURVE ( '{self.desc}', #{self.vertex_point_1.idx}, #{self.vertex_point_2.idx}, #{self.curve.idx}, {self.orientation_flag} ) ;"
 
 class OrientedEdge:
-    def __init__(self, idx, desc=None, ec_idx=None):
+    def __init__(self, idx, desc=None, ec_obj=None, orientation=None):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
         self.var2 = '*'
         self.var3 = '*'
-        self.edge_curve_idx = ec_idx
-        self.spec = '.F.'
+        self.edge_curve = ec_obj
+        self.orientation_flag = f'.{orientation}.'
 
     def export(self):
-        return f"#{self.idx} = ORIENTED_EDGE ( '{self.desc}', {self.var2}, {self.var3}, #{self.edge_curve_idx}, {self.spec} ) ;"
-
-class Plane:
-    def __init__(self, idx, desc=None, ax_idx=None):
-        self.idx = idx
-        self.desc = desc if desc != None else 'NONE'
-        self.ax2_placement_idx = ax_idx
-    
-    def export(self):
-        return f"#{self.idx} = PLANE ( '{self.desc}', #{self.ax2_placement_idx} ) ;"
+        return f"#{self.idx} = ORIENTED_EDGE ( '{self.desc}', {self.var2}, {self.var3}, #{self.edge_curve.idx}, {self.orientation_flag} ) ;"
 
 class Axis2Placement3D:
     def __init__(self, idx, desc=None, cp_idx=None, dir1_idx=None, dir2_idx=None):
@@ -226,25 +274,25 @@ class Direction:
         return f"#{self.idx} = DIRECTION ( '{self.desc}', ( {self.vec[0]}, {self.vec[1]}, {self.vec[2]} ) );"
 
 class AdvancedFace:
-    def __init__(self, idx, desc=None, fob_idx=None, p_idx=None):
+    def __init__(self, idx, desc=None, fob_idx=None, plane_object=None):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
         self.face_outer_bound_idx = fob_idx
-        self.plane_idx = p_idx
+        self.plane = plane_object
         self.spec = '.T.'
 
     def export(self):
-        return f"#{self.idx} = ADVANCED_FACE ( '{self.desc}', ( #{self.face_outer_bound_idx} ), #{self.plane_idx}, {self.spec} ) ;"
+        return f"#{self.idx} = ADVANCED_FACE ( '{self.desc}', ( #{self.face_outer_bound_idx} ), #{self.plane.idx}, {self.spec} ) ;"
 
 class FaceOuterBounds:
-    def __init__(self, idx, desc=None, el_idx=None):
+    def __init__(self, idx, desc=None, edge_loop=None):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
-        self.edge_loop_idx = el_idx
+        self.edge_loop = edge_loop
         self.spec = '.T.'
 
     def export(self):
-        return f"#{self.idx} = FACE_OUTER_BOUND ( '{self.desc}', #{self.edge_loop_idx}, {self.spec} ) ;"
+        return f"#{self.idx} = FACE_OUTER_BOUND ( '{self.desc}', #{self.edge_loop.idx}, {self.spec} ) ;"
 
 class EdgeLoop:
     def __init__(self, idx, desc=None, OrientedEdge_list=None):
@@ -253,7 +301,7 @@ class EdgeLoop:
         self.OrientedEdge_list = OrientedEdge_list
     
     def export(self):
-        oriented_edges = ', '.join([f'#{i}' for i in self.OrientedEdge_list])
+        oriented_edges = ', '.join([f'#{obj.idx}' for obj in self.OrientedEdge_list])
         return f"#{self.idx} = EDGE_LOOP ( '{self.desc}', ( {oriented_edges} ) ) ;"
 
 class ShellBasedSurfaceModel:
@@ -266,13 +314,13 @@ class ShellBasedSurfaceModel:
         return f"#{self.idx} = SHELL_BASED_SURFACE_MODEL ( '{self.desc}', ( #{self.open_shell_idx} ) ) ;"
 
 class OpenShell:
-    def __init__(self, idx, desc=None, af_idx=None):
+    def __init__(self, idx, desc=None, af_obj=None):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
-        self.advanced_face_list = af_idx
+        self.advanced_face_list = af_obj
     
     def export(self):
-        advanced_faces = ', '.join([f'#{i}' for i in self.advanced_face_list])
+        advanced_faces = ', '.join([f'#{obj.idx}' for obj in self.advanced_face_list])
         return f"#{self.idx} = OPEN_SHELL ( '{self.desc}', ( {advanced_faces} ) ) ;"
 
 class ManifoldSurfaceShapeRepresentation:
@@ -287,30 +335,23 @@ class ManifoldSurfaceShapeRepresentation:
         return f"#{self.idx} = MANIFOLD_SURFACE_SHAPE_REPRESENTATION ( '{self.desc}', ( #{self.shell_based_surf_model_idx}, #{self.axis2_placement_3d_idx} ), #{self.geom_representation_idx} ) ;"
 
 class ShapeDefinitionRepresentation:
-    def __init__(self, idx, mssr_idx):
+    def __init__(self, idx, product_definition_shape, manifold_surf_shape_rep):
         self.idx = idx
-        self.product_def_shape_idx = 1000 #pds_idx bez tego zdaje się działać
-        self.manifold_surf_shape_rep_idx = mssr_idx
+        self.product_def_shape = product_definition_shape #pds_idx bez tego zdaje się działać
+        self.manifold_surf_shape_rep = manifold_surf_shape_rep
     
     def export(self):
-        return f"#{self.idx} = SHAPE_DEFINITION_REPRESENTATION ( #{self.product_def_shape_idx}, #{self.manifold_surf_shape_rep_idx} ) ;"
-
-class Product:
-    def __init__(self, idx, name):
-        self.idx = idx
-        self.name = name
-    def export(self):
-        return f"#{self.idx} = PRODUCT ( '{self.name}', '{self.name}', '', ( #231 ) );"
+        return f"#{self.idx} = SHAPE_DEFINITION_REPRESENTATION ( #{self.product_def_shape.idx}, #{self.manifold_surf_shape_rep.idx} ) ;"
 
 class MechanicalContext:
-    def __init__ (self, idx, desc=None, product_idx=None, context='mechanical'):
+    def __init__ (self, idx, desc=None, application_context_obj=None, context='mechanical'):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
-        self.app_context_idx = product_idx
+        self.app_context = application_context_obj
         self.context = context
     
     def export(self):
-        return f"#{self.idx} = MECHANICAL_CONTEXT ( '{self.desc}', #{self.app_context_idx} ) ;"
+        return f"#{self.idx} = MECHANICAL_CONTEXT ( '{self.desc}', #{self.app_context.idx}, '{self.context}' ) ;"
 
 class ApplicationContext:
     def __init__(self, idx, context='parametrical 3d design of wings'):
@@ -320,14 +361,6 @@ class ApplicationContext:
     def export(self):
         return f"#{self.idx} = APPLICATION_CONTEXT ( '{self.context}' ) ;"
     
-class ProductDefinitionShape:
-    def __init__(self, idx, prod_idx):
-        self.idx = idx
-        self.prod_idx = prod_idx
-
-    def export(self):
-        return f"#{self.idx} = PRODUCT_DEFINITION_SHAPE ( 'NONE', 'NONE', #{self.prod_idx} );"
-
 class AdvancedBrepShapeRepresentation:
     def __init__(self, idx, name, brep_idx, axis_idx, context_idx):
         self.idx = idx
@@ -349,30 +382,31 @@ class ClosedShell:
         return f"#{self.idx} = CLOSED_SHELL ( 'NONE', ( {faces} ) );"
 
 class BSplineSurfaceWithKnots:
-    def __init__(self, idx, desc, u_degree, v_degree, spline_vector, knots_u, knots_v):
+    def __init__(self, idx, desc, u_degree, v_degree, cp_uv_grid, knots_u, knots_v):
         self.idx = idx
         self.desc = desc if desc != None else 'NONE'
         self.u_degree = u_degree
         self.v_degree = v_degree
-        self.spline = spline_vector
+        self.uv_grid = cp_uv_grid
         self.knots_u = knots_u
         self.knots_v = knots_v
 
     def export(self):
-        group = []
-        for i in range(len(self.spline)):
 
-            grid_group = ', '.join([f'#{obj.idx}' for obj in self.spline[i]])
-            bracket = f"( {grid_group} )"
-            group.append(bracket)
+        # --- Create b spline from u direction ---
+        u_dir_cp = []
+        for j in range(len(self.uv_grid)):
+            u_group = ', '.join([f'#{self.uv_grid[k][j].idx}' for k in range(len(self.uv_grid[j]))])
+            bracket = f"( {u_group} )"
+            u_dir_cp.append(bracket)
         
-        spline_group = ', '.join([f'{vec}' for vec in group])
+        spline_group = ', '.join([f'{vec}' for vec in u_dir_cp])
 
         return (
             f"#{self.idx} = B_SPLINE_SURFACE_WITH_KNOTS ( '{self.desc}', {self.u_degree}, {self.v_degree}, ( "
             f"{spline_group}"
             "),.UNSPECIFIED., .F., .F., .F.,"
-            f"( 4, 4 ),( 4, 4 ),"
+            f"( {self.u_degree+1}, {self.v_degree+1} ),( {self.u_degree+1}, {self.v_degree+1} ),"
             f"( {self.knots_u[0]}, {self.knots_u[1]} ),"
             f"( {self.knots_v[0]}, {self.knots_v[1]} ),.UNSPECIFIED. );"
         )
@@ -403,55 +437,265 @@ def normalized_coords(x, y, z):
         float(round(z, 10))
     )
 
-def _write_control_points(current_idx, segment, key):
-    cp_store = []
-    ve_store = []
-    for i in range(len(segment.control_points[key][0, :])):
-        coords = normalized_coords(
-            segment.control_points[key][0, i],
-            segment.control_points[key][1, i],
-            segment.control_points[key][2, i],
-        )
-        cp = CartesianPoint(current_idx, desc='Control Point', X=coords[0], Y=coords[1], Z=coords[2])
-        cp_store.append(cp)
-        current_idx += 1
-        print(current_idx)
-        
-    print("CP store:", cp_store)
-
-    # Create Vertex Point of first point 
-    ve = VertexPoint(current_idx, f"End point {key}", cp_store[0].idx)
-    ve_store.append(ve)
-    current_idx += 1
-
-    # Create Vertex Point of last point 
-    ve = VertexPoint(current_idx, f"End point {key}", cp_store[-1].idx)
-    ve_store.append(ve)
-    current_idx += 1
-
-    print(current_idx)
-
-    return current_idx, cp_store, ve_store
-
-def _write_b_spline(current_idx, construction_points, key):
-    cp_indices = [obj.idx for obj in construction_points]
-    bspline = BsplineWithKnots(current_idx, key, cp_indices)
-    current_idx += 1
-
-    return current_idx, bspline
-
-def _write_edge_curve(current_idx, ve_points, bspline):
-    ve_indices = [obj.idx for obj in ve_points]
-    edge_curve = EdgeCurve(current_idx, None, ve_indices[0], ve_indices[1], bspline.idx)
-    current_idx += 1
-
-    return current_idx, edge_curve
-
-def _write_oriented_edges(current_idx, edge_curve):
-    oriented_edge = OrientedEdge(current_idx, None, edge_curve.idx)
-    current_idx += 1
+def _write_control_points(current_idx=None, uv_grid=None, key=None, ps_cp_grid=None, ss_cp_grid=None):
     
-    return current_idx, oriented_edge
+    cp_store = []
+    
+    rows = len(uv_grid)
+    cols = len(uv_grid[0])
+
+    print(f"Recognized {rows}x{cols} UV grid")
+
+    tmp_control_points_grid = [[0 for col in range(cols)] for row in range(rows)]
+
+    for i in range(cols):
+        for j in range(rows):
+            coords = normalized_coords(
+                uv_grid[j][i][0],
+                uv_grid[j][i][1],
+                uv_grid[j][i][2],
+            )
+            cp = CartesianPoint(current_idx, desc='Control Point', X=coords[0], Y=coords[1], Z=coords[2])
+            tmp_control_points_grid[j][i] = cp
+            cp_store.append(cp)
+            current_idx += 1
+
+    if key == 'le':
+
+        # LE <==> PS
+        for k in range(cols):
+            tmp_control_points_grid[0][k] = ps_cp_grid[0][k]
+
+        # LE <==> SS
+        for k in range(cols):
+            tmp_control_points_grid[-1][k] = ss_cp_grid[0][k]
+    
+    if key == 'te':
+       
+        # TE <==> SS
+        for k in range(cols):
+            tmp_control_points_grid[0][k] = ss_cp_grid[-1][k]
+
+        # TE <==> PS
+        for k in range(cols):
+            tmp_control_points_grid[-1][k] = ps_cp_grid[-1][k]
+    
+    print('\nControl Points')
+    for i in range(rows):
+        s = ""
+        for j in range(cols):
+            if tmp_control_points_grid[i][j] == 0:
+                s += str(" - ")
+            else:
+                if (key == 'le' or key == 'te') and i == 0:
+                    s += str(" ↕ ")
+                elif (key == 'le' or key == 'te') and i == cols-1:
+                    s += str(" ↕ ")
+                else:
+                    s += str(" X ")
+        print(s)
+
+    return current_idx, cp_store, tmp_control_points_grid
+    
+def _write_vertex_point(current_idx: int=None, uv_grid_of_objects: list=None, key: str=None, ps_vp_grid: list=None, ss_vp_grid: list=None):
+    vp_store = []
+
+    rows = len(uv_grid_of_objects)
+    cols = len(uv_grid_of_objects[0])
+
+    max_u = cols - 1
+    max_v = rows - 1
+
+    tmp_vertex_points_grid = [[0 for col in range(cols)] for row in range(rows)]
+
+    if ps_vp_grid != None and ss_vp_grid != None:
+        if key == 'le':
+            tmp_vertex_points_grid[0][0]   = ps_vp_grid[0][0]
+            tmp_vertex_points_grid[0][-1]  = ps_vp_grid[0][-1]
+            tmp_vertex_points_grid[-1][0]  = ss_vp_grid[0][0]
+            tmp_vertex_points_grid[-1][-1] = ss_vp_grid[0][-1]
+        if key == 'te':
+            tmp_vertex_points_grid[0][0]   = ps_vp_grid[-1][0]
+            tmp_vertex_points_grid[0][-1]  = ps_vp_grid[-1][-1]
+            tmp_vertex_points_grid[-1][0]  = ss_vp_grid[-1][0]
+            tmp_vertex_points_grid[-1][-1] = ss_vp_grid[-1][-1]
+    else:    
+
+        vp = VertexPoint(current_idx, f"End point {key}", uv_grid_of_objects[0][0].idx)
+        tmp_vertex_points_grid[0][0] = vp
+        vp_store.append(vp)
+        current_idx += 1
+
+        # Create Vertex Point of first point
+        vp = VertexPoint(current_idx, f"End point {key}", uv_grid_of_objects[0][max_u].idx) #like a ps and le_ps point
+        tmp_vertex_points_grid[0][max_u] = vp
+        vp_store.append(vp)
+        current_idx += 1
+
+        # Create Vertex Point of last point 
+        vp = VertexPoint(current_idx, f"End point {key}", uv_grid_of_objects[max_v][0].idx)
+        tmp_vertex_points_grid[max_v][0] = vp
+        vp_store.append(vp)
+        current_idx += 1
+
+        vp = VertexPoint(current_idx, f"End point {key}", uv_grid_of_objects[max_v][max_u].idx)
+        tmp_vertex_points_grid[max_v][max_u] = vp
+        vp_store.append(vp)
+        current_idx += 1
+
+    print('\nVertex Points')
+    for i in range(cols):
+        s = ""
+        for j in range(rows):
+            if tmp_vertex_points_grid[i][j] == 0:
+                s += str(" - ")
+            else:
+                if (key == 'le' or key == 'te') and i == 0:
+                    s += str(" ↕ ")
+                elif (key == 'le' or key == 'te') and i == cols-1:
+                    s += str(" ↕ ")
+                else:
+                    s += str(" X ")
+        print(s)
+
+    return current_idx, vp_store, tmp_vertex_points_grid
+
+def _write_b_spline_out_of_uv_grid(current_idx, i, uv_grid, key):
+
+    # -- Reporting --
+
+    # strip out "segment " part
+    txt = [t.replace("segment ", "") for t in txt]
+
+    # expand horizontal edges with spaces
+    top = " ".join(txt[2])
+    bottom = " ".join(txt[3])
+    left, right = txt[0], txt[1]
+
+    max_u = max(len(top), len(bottom)) + 6   # +4 for corner padding
+    max_v = max(len(left), len(right)) + 2
+
+    # make grid filled with spaces
+    report_grid = [[" " for _ in range(max_u)] for _ in range(max_v)]
+
+    # place top (centered)
+    start_top = (max_u - len(top)) // 2
+    report_grid[0][start_top:start_top+len(top)] = list(top)
+
+    # place bottom (centered)
+    start_bottom = (max_u - len(bottom)) // 2
+    report_grid[-1][start_bottom:start_bottom+len(bottom)] = list(bottom)
+
+    # place left (vertical, centered)
+    start_left = (max_v - len(left)) // 2
+    for j, ch in enumerate(left):
+        report_grid[start_left+j][0] = ch
+
+    # place right (vertical, centered)
+    start_right = (max_v - len(right)) // 2
+    for j, ch in enumerate(right):
+        report_grid[start_right+j][-1] = ch
+
+    print("\nCreated B-Splines")
+    print("_"*max_u)
+    # print as text
+    for row in report_grid:
+        print("".join(row))
+    print("_"*max_u)
+
+    return current_idx, store
+
+def _write_oriented_edge_from_uv_grid(current_idx, i, key, cp_uv_grid, vp_uv_grid):
+    spline_store = []
+    ec_store = []
+    oe_store = []
+
+    if key in ['ps', 'ss']:
+        txt = [f'{i} {key}', f'{i+1} {key}', f'{i} le_{key}', f'{i} te_{key}']
+    if key in 'le':
+        txt = [f'{i} le', f'{i+1} le', f'{i} le_ss', f'{i} le_ps']
+    if key in 'te':
+        txt = [f'{i} te', f'{i+1} te', f'{i} te_ps', f'{i} te_ss']
+
+    rows = len(vp_uv_grid)
+    cols = len(vp_uv_grid[0])
+
+    max_u = cols - 1
+    max_v = rows - 1
+
+    # --- Create b spline from first column ---
+    spline_construction_points = []
+    spline_vertex_points = []
+    for j in range(rows):
+        spline_construction_points.append(np.array(cp_uv_grid[j][0]).T.tolist())
+        spline_vertex_points.append(np.array(vp_uv_grid[j][0]).T.tolist())
+    bspline = BsplineWithKnots(current_idx, txt[0], spline_construction_points)
+    current_idx += 1
+    spline_store.append(bspline)
+    ve_start = spline_vertex_points[0]
+    ve_end   = spline_vertex_points[-1]
+    edge_curve = EdgeCurve(current_idx, f'spline {txt[0]}', ve_start, ve_end, bspline)
+    ec_store.append(edge_curve)
+    current_idx += 1
+    oriented_edge = OrientedEdge(current_idx, f'spline {txt[0]}', edge_curve, 'F')
+    oe_store.append(oriented_edge)
+    current_idx += 1
+
+    # --- Create b spline from first row ---
+    spline_construction_points = []
+    spline_vertex_points = []
+    for j in range(cols):
+        spline_construction_points.append(cp_uv_grid[0][j])
+        spline_vertex_points.append(vp_uv_grid[0][j])
+    bspline = BsplineWithKnots(current_idx, txt[2], spline_construction_points)
+    current_idx += 1
+    spline_store.append(bspline)
+    ve_start = spline_vertex_points[0]
+    ve_end   = spline_vertex_points[-1]
+    edge_curve = EdgeCurve(current_idx, f'spline {txt[2]}', ve_start, ve_end, bspline)
+    ec_store.append(edge_curve)
+    current_idx += 1
+    oriented_edge = OrientedEdge(current_idx, f'spline {txt[2]}', edge_curve, 'T')
+    oe_store.append(oriented_edge)
+    current_idx += 1
+
+    # --- Create b spline from last column ---
+    spline_construction_points = []
+    spline_vertex_points = []
+    for j in range(rows):
+        spline_construction_points.append(np.array(cp_uv_grid[j][-1]).T.tolist())
+        spline_vertex_points.append(np.array(vp_uv_grid[j][-1]).T.tolist())
+    bspline = BsplineWithKnots(current_idx, txt[1], spline_construction_points)
+    current_idx += 1
+    spline_store.append(bspline)
+    ve_start = spline_vertex_points[0]
+    ve_end   = spline_vertex_points[-1]
+    edge_curve = EdgeCurve(current_idx, f'spline {txt[1]}', ve_start, ve_end, bspline)
+    ec_store.append(edge_curve)
+    current_idx += 1
+    oriented_edge = OrientedEdge(current_idx, f'spline {txt[1]}', edge_curve, 'T')
+    oe_store.append(oriented_edge)
+    current_idx += 1
+
+    # --- Create b spline from last row ---
+    spline_construction_points = []
+    spline_vertex_points = []
+    for j in range(cols):
+        spline_construction_points.append(cp_uv_grid[-1][j])
+        spline_vertex_points.append(vp_uv_grid[-1][j])
+    bspline = BsplineWithKnots(current_idx, txt[3], spline_construction_points)
+    current_idx += 1
+    spline_store.append(bspline)
+    ve_start = spline_vertex_points[0]
+    ve_end   = spline_vertex_points[-1]
+    edge_curve = EdgeCurve(current_idx, f'spline {txt[3]}', ve_start, ve_end, bspline)
+    ec_store.append(edge_curve)
+    current_idx += 1
+    oriented_edge = OrientedEdge(current_idx, f'spline {txt[3]}', edge_curve, 'F')
+    oe_store.append(oriented_edge)
+    current_idx += 1
+
+    return current_idx, oe_store, ec_store, spline_store
 
 def _write_direction(current_idx, segment):
     P1 = [0,0,0]
@@ -472,58 +716,27 @@ def _write_direction(current_idx, segment):
 
     return current_idx, direction_normal, direction_tangential
 
-def _write_b_spline_surface(current_idx, segment, key, wing_elements_store, i):
+def _write_avanced_face_from_uv_grid(current_idx, key, cp_uv_grid, oriented_edge_store):
 
-    cp_store = []
+    rows = len(cp_uv_grid)
+    cols = len(cp_uv_grid[0])
 
-    print(cp_store)
-    print(key)
-    print(len(segment.surfaces_grid[key]))
-    control_points = segment.surfaces_grid[key]
+    max_u = cols-1
+    max_v = rows-1
 
-    if len(control_points) > 0:
-            
-        # Flatten grid
-        n_u = len(control_points)      # rows
-        n_v = len(control_points[0])   # cols
-        
-        for v in range(n_v):
-            spline = []
-            for u in range(n_u):
-                
-                print(control_points[u][v])
-                p = control_points[u][v]
-                coords = [float(p[0]), float(p[1]), float(p[2])]
-                cp = CartesianPoint(current_idx, desc='Control Point', X=coords[0], Y=coords[1], Z=coords[2])
-                current_idx += 1
-                spline.append(cp)
-            cp_store.append(spline)
-
-    #print(cp_store)
-
-    b_spline_surface = BSplineSurfaceWithKnots(current_idx, f'{key} b-spline surface', n_u-1, n_v-1, cp_store,[0, 1],[0, 1])
+    b_spline_surface = BSplineSurfaceWithKnots(current_idx, f'{key} b-spline surface', max_u, max_v, cp_uv_grid,[0, 1],[0, 1])
     current_idx += 1
-    if key == 'le' or key == 'te':
-        surface_edge_loop = EdgeLoop(current_idx, f'{key} surface', [
-                                                        wing_elements_store[i-1][f'{key}_oriented_edge'].idx,
-                                                        wing_elements_store[i-1][f'{key}_ps_oriented_edge'].idx,
-                                                        wing_elements_store[i-1][f'{key}_ss_oriented_edge'].idx,
-                                                        wing_elements_store[i][f'{key}_oriented_edge'].idx])
-    if key == 'ps' or key == 'ss':
-        surface_edge_loop = EdgeLoop(current_idx, f'{key} surface', [
-                                                        wing_elements_store[i-1][f'{key}_oriented_edge'].idx,
-                                                        wing_elements_store[i-1][f'le_{key}_oriented_edge'].idx,
-                                                        wing_elements_store[i-1][f'te_{key}_oriented_edge'].idx,
-                                                        wing_elements_store[i][f'{key}_oriented_edge'].idx])
+
+    surface_edge_loop = EdgeLoop(current_idx, f'{key} surface', oriented_edge_store)
     current_idx += 1
                                                      
-    face_outer_bound = FaceOuterBounds(current_idx, f'{key} surface', surface_edge_loop.idx)
+    face_outer_bound = FaceOuterBounds(current_idx, f'{key} surface', surface_edge_loop)
     current_idx += 1
 
-    advanced_face = AdvancedFace(current_idx, f'{key} surface', face_outer_bound.idx, b_spline_surface.idx)
+    advanced_face = AdvancedFace(current_idx, f'{key} surface', face_outer_bound.idx, b_spline_surface)
     current_idx += 1
 
-    return current_idx, cp_store, b_spline_surface, surface_edge_loop, face_outer_bound, advanced_face
+    return current_idx, b_spline_surface, surface_edge_loop, face_outer_bound, advanced_face
 
 def _write_unit_settings(current_idx, all_elements_store):
 
@@ -602,169 +815,38 @@ def export_only_control_points(filepath, base_name):
             
     write_a_step_file(filepath, all_elements_store)
 
-def export_2d_segment_wing(filepath, base_name):
-    project = globals.PROJECT  # fallback for legacy use
-    current_idx = 1
+def ensure_grid_connectivity(parent, child, key):
 
-    all_elements_store = []
+    grid = parent.surfaces_grid[key[0]]
 
-    solid_angle_unit = SolidAngleUnit(current_idx)
-    current_idx += 1
-    plane_angle_unit = PlaneAngleUnit(current_idx)
-    current_idx += 1
-    length_unit = LengthUnit(current_idx)
-    current_idx += 1
-    uncertainty_measure = UncertaintyMeasure(current_idx, length_unit.idx)
-    current_idx += 1
-    geometric_representation_context = GeometricRepresentationContext(current_idx, uncertainty_measure.idx, length_unit.idx, solid_angle_unit.idx, plane_angle_unit.idx)
-    current_idx += 1
+    rows = len(grid)
+    cols = len(grid[0])
 
-    all_elements_store.append(solid_angle_unit)
-    all_elements_store.append(plane_angle_unit)
-    all_elements_store.append(length_unit)
-    all_elements_store.append(uncertainty_measure)
-    all_elements_store.append(geometric_representation_context)
+    print(grid)
 
-    for component in project.project_components:
-        for wing in component.wings:
-            for segment in wing.segments:
+    # --- Modify first column ---
+    for j in range(rows):
+        print(parent.control_points[key[0]].T[j].tolist())
+        grid[j][0] = parent.control_points[key[0]].T[j].tolist()
 
-                print(f"ps: {segment.control_points['ps']}")
-                print(f"ss: {segment.control_points['ss']}")
-                print(f"le: {segment.control_points['le']}")
-                print(f"te: {segment.control_points['te']}")
+    # --- Modify first row ---
+    for j in range(cols):
+        print(parent.control_points[key[1]].T[j].tolist())
+        grid[0][j] = parent.control_points[key[1]].T[j].tolist()
 
-                # === PRESSURE SIDE ===
-                current_idx, ps_control_points = _write_control_points(current_idx, segment, 'ps')
-                current_idx, ps_ve_cp, ps_vertex_edges = _write_vertex_edge(current_idx, segment, 'ps')
+    # --- Modify last column ---
+    for j in range(rows):
+        print(child.control_points[key[2]].T[j].tolist())
+        grid[j][-1] = child.control_points[key[2]].T[j].tolist()
 
-                current_idx, ps_b_spline = _write_b_spline(current_idx, ps_control_points, 'ps')
+    # --- Modify last row ---
+    for j in range(cols):
+        print(parent.control_points[key[3]].T[j].tolist())
+        grid[-1][j] = parent.control_points[key[3]].T[j].tolist()
 
-                current_idx, ps_edge_curve = _write_edge_curve(current_idx, ps_vertex_edges, ps_b_spline)
+    print(grid)
 
-                current_idx, ps_oriented_edge =_write_oriented_edges(current_idx, ps_edge_curve)
-
-                for obj in ps_control_points:
-                    all_elements_store.append(obj)
-                for obj in ps_ve_cp:
-                    all_elements_store.append(obj)
-                for obj in ps_vertex_edges:
-                    all_elements_store.append(obj)
-                all_elements_store.append(ps_b_spline)
-                all_elements_store.append(ps_edge_curve)
-                all_elements_store.append(ps_oriented_edge)
-
-                print(f'ps >>> is at idx: {current_idx}, CP: {len(ps_control_points)}, VE: {len(ps_vertex_edges)}, B-spline: {1 if ps_b_spline != None else 0}, EC: {1 if ps_edge_curve != None else 0}, OE: {1 if ps_oriented_edge != None else 0}')
-
-                # === SUCTION SIDE ===
-                current_idx, ss_control_points = _write_control_points(current_idx, segment, 'ss')
-                current_idx, ss_ve_cp, ss_vertex_edges = _write_vertex_edge(current_idx, segment, 'ss')
-
-                current_idx, ss_b_spline = _write_b_spline(current_idx, ss_control_points, 'ss')
-
-                current_idx, ss_edge_curve = _write_edge_curve(current_idx, ss_vertex_edges, ss_b_spline)
-
-                current_idx, ss_oriented_edge =_write_oriented_edges(current_idx, ss_edge_curve)
-
-                for obj in ss_control_points:
-                    all_elements_store.append(obj)
-                for obj in ss_ve_cp:
-                    all_elements_store.append(obj)
-                for obj in ss_vertex_edges:
-                    all_elements_store.append(obj)
-                all_elements_store.append(ss_b_spline)
-                all_elements_store.append(ss_edge_curve)
-                all_elements_store.append(ss_oriented_edge)
-
-                print(f'ss >>> is at idx: {current_idx}, CP: {len(ss_control_points)}, VE: {len(ss_vertex_edges)}, B-spline: {1 if ss_b_spline != None else 0}, EC: {1 if ss_edge_curve != None else 0}, OE: {1 if ss_oriented_edge != None else 0}')
-
-                # === LEADING EDGE ===
-                current_idx, le_control_points, le_vertex_edges = _write_control_points(current_idx, segment, 'le')
-
-                current_idx, le_b_spline = _write_b_spline(current_idx, le_control_points, 'le')
-
-                current_idx, le_edge_curve = _write_edge_curve(current_idx, le_vertex_edges, le_b_spline)
-
-                current_idx, le_oriented_edge =_write_oriented_edges(current_idx, le_edge_curve)
-
-                for obj in le_control_points:
-                    all_elements_store.append(obj)
-                for obj in le_vertex_edges:
-                    all_elements_store.append(obj)
-                all_elements_store.append(le_b_spline)
-                all_elements_store.append(le_edge_curve)
-                all_elements_store.append(le_oriented_edge)
-
-                print(f'le >>> is at idx: {current_idx}, CP: {len(le_control_points)}, VE: {len(le_vertex_edges)}, B-spline: {1 if le_b_spline != None else 0}, EC: {1 if le_edge_curve != None else 0}, OE: {1 if le_oriented_edge != None else 0}')
-
-                # === TRAILING EDGE ===
-                current_idx, te_control_points = _write_control_points(current_idx, segment, 'te')
-                current_idx, te_ve_cp, te_vertex_edges = _write_vertex_edge(current_idx, segment, 'te')
-
-                current_idx, te_b_spline = _write_b_spline(current_idx, te_control_points, 'te')
-
-                current_idx, te_edge_curve = _write_edge_curve(current_idx, te_vertex_edges, te_b_spline)
-
-                current_idx, te_oriented_edge =_write_oriented_edges(current_idx, te_edge_curve)
-
-                for obj in te_control_points:
-                    all_elements_store.append(obj)
-                for obj in te_ve_cp:
-                    all_elements_store.append(obj)
-                for obj in te_vertex_edges:
-                    all_elements_store.append(obj)
-                all_elements_store.append(te_b_spline)
-                all_elements_store.append(te_edge_curve)
-                all_elements_store.append(te_oriented_edge)
-
-                print(f'te >>> is at idx: {current_idx}, CP: {len(te_control_points)}, VE: {len(te_vertex_edges)}, B-spline: {1 if te_b_spline != None else 0}, EC: {1 if te_edge_curve != None else 0}, OE: {1 if te_oriented_edge != None else 0}')
-
-                # === Directions ===
-                current_idx, seg_direction_nor, seg_direction_tan = _write_direction(current_idx, segment)
-
-                all_elements_store.append(seg_direction_nor)
-                all_elements_store.append(seg_direction_tan)
-
-                axis2_placement_3d = Axis2Placement3D(current_idx, None, ps_control_points[0].idx, seg_direction_nor.idx, seg_direction_tan.idx)
-                all_elements_store.append(axis2_placement_3d)
-                current_idx += 1
-
-                edge_loop = EdgeLoop(current_idx, None, [le_oriented_edge.idx, ps_oriented_edge.idx, te_oriented_edge.idx, ss_oriented_edge.idx] )
-                all_elements_store.append(edge_loop)
-                current_idx += 1
-
-                face_outer_bound = FaceOuterBounds(current_idx, None, edge_loop.idx)
-                all_elements_store.append(face_outer_bound)
-                #fob_store.append(face_outer_bound)
-                current_idx += 1
-
-                plane = Plane(current_idx, None, axis2_placement_3d.idx)
-                all_elements_store.append(plane)
-                current_idx += 1
-
-                advanced_face = AdvancedFace(current_idx, None, face_outer_bound.idx, plane.idx)
-                all_elements_store.append(advanced_face)
-                current_idx += 1
-
-                open_shell = OpenShell(current_idx, None, advanced_face.idx)
-                all_elements_store.append(open_shell)
-                current_idx += 1
-
-                shell_based_surface_model = ShellBasedSurfaceModel(current_idx, None, open_shell.idx)
-                all_elements_store.append(shell_based_surface_model)
-                current_idx += 1
-
-                manifold_shape_surf_repersentation = ManifoldSurfaceShapeRepresentation(current_idx, f'{base_name}', shell_based_surface_model.idx, axis2_placement_3d.idx, geometric_representation_context.idx)
-                all_elements_store.append(manifold_shape_surf_repersentation)
-                current_idx += 1
-
-                shape_definition_representation = ShapeDefinitionRepresentation(current_idx, manifold_shape_surf_repersentation.idx)
-                all_elements_store.append(shape_definition_representation)
-                current_idx += 1
-
-                print(all_elements_store)
-                
-    write_a_step_file(filepath, base_name, all_elements_store)
+    return grid
 
 def export_3d_segment_wing(filepath, base_name):
     project = globals.PROJECT  # fallback for legacy use
@@ -802,211 +884,129 @@ def export_3d_segment_wing(filepath, base_name):
             tmp_wing_store = []
             if len(wing.segments) > 1:
                 print('WNGWB > STEP_export >> NOTE: Wing has more than 1 segment, exporting to 3D.')
-                for i in range(len(wing.segments)):
+                for i in range(len(wing.segments)-1):
 
                     segment_elements_store = {}
 
                     segment = wing.segments[i]
 
                     # === PRESSURE SIDE ===
-                    current_idx, ps_control_points, ps_vertex_edges = _write_control_points(current_idx, segment, 'ps')
-
-                    current_idx, ps_b_spline = _write_b_spline(current_idx, ps_control_points, 'ps')
-                    current_idx, ps_edge_curve = _write_edge_curve(current_idx, ps_vertex_edges, ps_b_spline)
-                    current_idx, ps_oriented_edge =_write_oriented_edges(current_idx, ps_edge_curve)
+                    uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['ps','le_ps', 'ps', 'te_ps'])
+                    current_idx, ps_c_point_store, ps_c_point_grid = _write_control_points(current_idx, uv_grid, 'ps')
+                    current_idx, ps_v_point_store, ps_v_point_grid = _write_vertex_point(current_idx, ps_c_point_grid, 'ps')
+                    current_idx, ps_o_edges_store, ps_e_curve_store, ps_b_splin_store= _write_oriented_edge_from_uv_grid(current_idx, i, 'ps', ps_c_point_grid, ps_v_point_grid)
+                    current_idx, ps_b_spline_surface, ps_surface_edge_loop, ps_face_outer_bound, ps_advanced_face = _write_avanced_face_from_uv_grid(current_idx, 'ps', ps_c_point_grid, ps_o_edges_store)
 
                     # Store in dictionary
-                    segment_elements_store['ps_control_points'] = ps_control_points
-                    segment_elements_store['ps_vertex_edges'] = ps_vertex_edges
-                    segment_elements_store['ps_b_spline'] = ps_b_spline
-                    segment_elements_store['ps_edge_curve'] = ps_edge_curve
-                    segment_elements_store['ps_oriented_edge'] = ps_oriented_edge
+                    segment_elements_store['ps_control_points'] = ps_c_point_store
+                    segment_elements_store['ps_vertex_edges'] = ps_v_point_store
+                    segment_elements_store['ps_b_spline'] = ps_b_splin_store
+                    segment_elements_store['ps_edge_curve'] = ps_e_curve_store
+                    segment_elements_store['ps_oriented_edge'] = ps_o_edges_store
+                    segment_elements_store['ps_b_spline_surface']  = ps_b_spline_surface
+                    segment_elements_store['ps_surface_edge_loop'] = ps_surface_edge_loop
+                    segment_elements_store['ps_face_outer_bound']  = ps_face_outer_bound
+                    segment_elements_store['ps_advanced_face']     = ps_advanced_face
 
-                    print(f'WNGWB > STEP_Export_3D > ps >>> is at idx: {current_idx}, CP: {len(ps_control_points)}, VE: {len(ps_vertex_edges)}, B-spline: {1 if ps_b_spline != None else 0}, EC: {1 if ps_edge_curve != None else 0}, OE: {1 if ps_oriented_edge != None else 0}')
+                    print(f'WNGWB > STEP_Export_3D > PS >>> CP: {len(ps_c_point_store)}, VE: {len(ps_v_point_store)}, B-spline: {1 if ps_b_splin_store != None else 0}, EC: {1 if ps_e_curve_store != None else 0}, OE: {1 if ps_o_edges_store != None else 0}')
 
                     # === SUCTION SIDE ===
-                    current_idx, ss_control_points, ss_vertex_edges = _write_control_points(current_idx, segment, 'ss')
-
-                    current_idx, ss_b_spline = _write_b_spline(current_idx, ss_control_points, 'ss')
-                    current_idx, ss_edge_curve = _write_edge_curve(current_idx, ss_vertex_edges, ss_b_spline)
-                    current_idx, ss_oriented_edge =_write_oriented_edges(current_idx, ss_edge_curve)
+                    uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['ss','le_ss', 'ss', 'te_ss'])
+                    current_idx, ss_c_point_store, ss_c_point_grid = _write_control_points(current_idx, uv_grid, 'ss')
+                    current_idx, ss_v_point_store, ss_v_point_grid = _write_vertex_point(current_idx, ss_c_point_grid, 'ss')
+                    current_idx, ss_o_edges_store, ss_e_curve_store, ss_b_splin_store= _write_oriented_edge_from_uv_grid(current_idx, i, 'ss', ss_c_point_grid, ss_v_point_grid)
+                    current_idx, ss_b_spline_surface, ss_surface_edge_loop, ss_face_outer_bound, ss_advanced_face = _write_avanced_face_from_uv_grid(current_idx, 'ss', ss_c_point_grid, ss_o_edges_store)
 
                     # Store in dictionary
-                    segment_elements_store['ss_control_points'] = ss_control_points
-                    segment_elements_store['ss_vertex_edges'] = ss_vertex_edges
-                    segment_elements_store['ss_b_spline'] = ss_b_spline
-                    segment_elements_store['ss_edge_curve'] = ss_edge_curve
-                    segment_elements_store['ss_oriented_edge'] = ss_oriented_edge
+                    segment_elements_store['ss_control_points'] = ss_c_point_store
+                    segment_elements_store['ss_vertex_edges'] = ss_v_point_store
+                    segment_elements_store['ss_b_spline'] = ss_b_splin_store
+                    segment_elements_store['ss_edge_curve'] = ss_e_curve_store
+                    segment_elements_store['ss_oriented_edge'] = ss_o_edges_store
+                    segment_elements_store['ss_b_spline_surface']  = ss_b_spline_surface
+                    segment_elements_store['ss_surface_edge_loop'] = ss_surface_edge_loop
+                    segment_elements_store['ss_face_outer_bound']  = ss_face_outer_bound
+                    segment_elements_store['ss_advanced_face']     = ss_advanced_face
 
-                    print(f'WNGWB > STEP_export_3D >> ss >>> is at idx: {current_idx}, CP: {len(ss_control_points)}, VE: {len(ss_vertex_edges)}, B-spline: {1 if ss_b_spline != None else 0}, EC: {1 if ss_edge_curve != None else 0}, OE: {1 if ss_oriented_edge != None else 0}')
+                    print(f'WNGWB > STEP_Export_3D > SS >>> CP: {len(ss_c_point_store)}, VE: {len(ss_v_point_store)}, B-spline: {1 if ss_b_splin_store != None else 0}, EC: {1 if ss_e_curve_store != None else 0}, OE: {1 if ss_o_edges_store != None else 0}')
 
                     # === LEADING EDGE ===
-                    current_idx, le_control_points, le_vertex_edges = _write_control_points(current_idx, segment, 'le')
-
-                    current_idx, le_b_spline = _write_b_spline(current_idx, le_control_points, 'le')
-                    current_idx, le_edge_curve = _write_edge_curve(current_idx, le_vertex_edges, le_b_spline)
-                    current_idx, le_oriented_edge =_write_oriented_edges(current_idx, le_edge_curve)
+                    uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['le','le_ss', 'le', 'le_ps'])
+                    current_idx, le_c_point_store, le_c_point_grid = _write_control_points(current_idx, uv_grid, 'le', ps_c_point_grid, ss_c_point_grid)
+                    current_idx, le_v_point_store, le_v_point_grid = _write_vertex_point(current_idx, le_c_point_grid, 'le', ps_v_point_grid, ss_v_point_grid)
+                    current_idx, le_o_edges_store, le_e_curve_store, le_b_splin_store= _write_oriented_edge_from_uv_grid(current_idx, i, 'le', le_c_point_grid, le_v_point_grid)
+                    current_idx, le_b_spline_surface, le_surface_edge_loop, le_face_outer_bound, le_advanced_face = _write_avanced_face_from_uv_grid(current_idx, 'le', le_c_point_grid, le_o_edges_store)
 
                     # Store in dictionary
-                    segment_elements_store['le_control_points'] = le_control_points
-                    segment_elements_store['le_vertex_edges'] = le_vertex_edges
-                    segment_elements_store['le_b_spline'] = le_b_spline
-                    segment_elements_store['le_edge_curve'] = le_edge_curve
-                    segment_elements_store['le_oriented_edge'] = le_oriented_edge
+                    segment_elements_store['le_control_points'] = le_c_point_store
+                    segment_elements_store['le_vertex_edges'] = le_v_point_store
+                    segment_elements_store['le_b_spline'] = le_b_splin_store
+                    segment_elements_store['le_edge_curve'] = le_e_curve_store
+                    segment_elements_store['le_oriented_edge'] = le_o_edges_store
+                    segment_elements_store['le_b_spline_surface']  = le_b_spline_surface
+                    segment_elements_store['le_surface_edge_loop'] = le_surface_edge_loop
+                    segment_elements_store['le_face_outer_bound']  = le_face_outer_bound
+                    segment_elements_store['le_advanced_face']     = le_advanced_face
 
-                    print(f'WNGWB > STEP_export_3D >> le >>> at idx: {current_idx}, CP: {len(le_control_points)}, VE: {len(le_vertex_edges)}, B-spline: {1 if le_b_spline != None else 0}, EC: {1 if le_edge_curve != None else 0}, OE: {1 if le_oriented_edge != None else 0}')
+                    print(f'WNGWB > STEP_Export_3D > LE >>> CP: {len(le_c_point_store)}, VE: {len(le_v_point_store)}, B-spline: {1 if le_b_splin_store != None else 0}, EC: {1 if le_e_curve_store != None else 0}, OE: {1 if le_o_edges_store != None else 0}')
 
                     # === TRAILING EDGE ===
-                    current_idx, te_control_points, te_vertex_edges = _write_control_points(current_idx, segment, 'te')
-
-                    current_idx, te_b_spline = _write_b_spline(current_idx, te_control_points, 'te')
-                    current_idx, te_edge_curve = _write_edge_curve(current_idx, te_vertex_edges, te_b_spline)
-                    current_idx, te_oriented_edge =_write_oriented_edges(current_idx, te_edge_curve)
+                    uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['te','te_ss', 'te', 'te_ps'])
+                    current_idx, te_c_point_store, te_c_point_grid = _write_control_points(current_idx, uv_grid, 'te', ps_c_point_grid, ss_c_point_grid)
+                    current_idx, te_v_point_store, te_v_point_grid = _write_vertex_point(current_idx, te_c_point_grid, 'te', ps_v_point_grid, ss_v_point_grid)
+                    current_idx, te_o_edges_store, te_e_curve_store, te_b_splin_store= _write_oriented_edge_from_uv_grid(current_idx, i, 'te', te_c_point_grid, te_v_point_grid)
+                    current_idx, te_b_spline_surface, te_surface_edge_loop, te_face_outer_bound, te_advanced_face = _write_avanced_face_from_uv_grid(current_idx, 'te', te_c_point_grid, te_o_edges_store)
 
                     # Store in dictionary
-                    segment_elements_store['te_control_points'] = te_control_points
-                    segment_elements_store['te_vertex_edges'] = te_vertex_edges
-                    segment_elements_store['te_b_spline'] = te_b_spline
-                    segment_elements_store['te_edge_curve'] = te_edge_curve
-                    segment_elements_store['te_oriented_edge'] = te_oriented_edge
+                    segment_elements_store['te_control_points'] = te_c_point_store
+                    segment_elements_store['te_vertex_edges'] = te_v_point_store
+                    segment_elements_store['te_b_spline'] = te_b_splin_store
+                    segment_elements_store['te_edge_curve'] = te_e_curve_store
+                    segment_elements_store['te_oriented_edge'] = te_o_edges_store
+                    segment_elements_store['te_b_spline_surface']  = te_b_spline_surface
+                    segment_elements_store['te_surface_edge_loop'] = te_surface_edge_loop
+                    segment_elements_store['te_face_outer_bound']  = te_face_outer_bound
+                    segment_elements_store['te_advanced_face']     = te_advanced_face
 
-                    print(f'WNGWB > STEP_export_3D >> te >>> at idx: {current_idx}, CP: {len(te_control_points)}, VE: {len(te_vertex_edges)}, B-spline: {1 if te_b_spline != None else 0}, EC: {1 if te_edge_curve != None else 0}, OE: {1 if te_oriented_edge != None else 0}')
-
-                    # === LEADING EDGE <-> PRESSURE SIDE ===
-                    if len(segment.control_points['le_ps']) != 0:
-                        current_idx, le_ps_control_points, le_ps_vertex_edges = _write_control_points(current_idx, segment, 'le_ps')
-
-                        current_idx, le_ps_b_spline = _write_b_spline(current_idx, le_ps_control_points, 'le_ps')
-                        current_idx, le_ps_edge_curve = _write_edge_curve(current_idx, le_ps_vertex_edges, le_ps_b_spline)
-                        current_idx, le_ps_oriented_edge =_write_oriented_edges(current_idx, le_ps_edge_curve)
-
-                        # Store in dictionary
-                        segment_elements_store['le_ps_control_points'] = le_ps_control_points
-                        segment_elements_store['le_ps_vertex_edges'] = le_ps_vertex_edges
-                        segment_elements_store['le_ps_b_spline'] = le_ps_b_spline
-                        segment_elements_store['le_ps_edge_curve'] = le_ps_edge_curve
-                        segment_elements_store['le_ps_oriented_edge'] = le_ps_oriented_edge
-
-                        print(f'WNGWB > STEP_Export_3D >> le_ps >>> at idx: {current_idx}, CP: {len(le_ps_control_points)}, VE: {len(le_ps_vertex_edges)}, B-spline: {1 if le_ps_b_spline != None else 0}, EC: {1 if le_ps_edge_curve != None else 0}, OE: {1 if le_ps_oriented_edge != None else 0}')
-
-                    # === TRAILING EDGE <-> PRESSURE SIDE ===
-                    if len(segment.control_points['te_ps']) != 0:
-                        current_idx, te_ps_control_points, te_ps_vertex_edges = _write_control_points(current_idx, segment, 'te_ps')
-
-                        current_idx, te_ps_b_spline = _write_b_spline(current_idx, te_ps_control_points, 'te_ps')
-                        current_idx, te_ps_edge_curve = _write_edge_curve(current_idx, te_ps_vertex_edges, te_ps_b_spline)
-                        current_idx, te_ps_oriented_edge =_write_oriented_edges(current_idx, te_ps_edge_curve)
-
-                        segment_elements_store['te_ps_control_points'] = te_ps_control_points
-                        segment_elements_store['te_ps_vertex_edges'] = te_ps_vertex_edges
-                        segment_elements_store['te_ps_b_spline'] = te_ps_b_spline
-                        segment_elements_store['te_ps_edge_curve'] = te_ps_edge_curve
-                        segment_elements_store['te_ps_oriented_edge'] = te_ps_oriented_edge
-
-                        print(f'WNGWB > STEP_Export_3D >> te_ps >>> at idx: {current_idx}, CP: {len(te_ps_control_points)}, VE: {len(te_ps_vertex_edges)}, B-spline: {1 if te_ps_b_spline != None else 0}, EC: {1 if te_ps_edge_curve != None else 0}, OE: {1 if te_ps_oriented_edge != None else 0}')
-
-                    # === LEADING EDGE <-> SUCTION SIDE ===
-                    if len(segment.control_points['le_ss']) != 0:
-                        current_idx, le_ss_control_points, le_ss_vertex_edges = _write_control_points(current_idx, segment, 'le_ss')
-
-                        current_idx, le_ss_b_spline = _write_b_spline(current_idx, le_ss_control_points, 'le_ss')
-                        current_idx, le_ss_edge_curve = _write_edge_curve(current_idx, le_ss_vertex_edges, le_ss_b_spline)
-                        current_idx, le_ss_oriented_edge =_write_oriented_edges(current_idx, le_ss_edge_curve)
-
-                        # Store in dictionary
-                        segment_elements_store['le_ss_control_points'] = le_ss_control_points
-                        segment_elements_store['le_ss_vertex_edges'] = le_ss_vertex_edges
-                        segment_elements_store['le_ss_b_spline'] = le_ss_b_spline
-                        segment_elements_store['le_ss_edge_curve'] = le_ss_edge_curve
-                        segment_elements_store['le_ss_oriented_edge'] = le_ss_oriented_edge
-
-                        print(f'WNGWB > STEP_Export_3D >> le_ss >>> at idx: {current_idx}, CP: {len(le_ss_control_points)}, VE: {len(le_ss_vertex_edges)}, B-spline: {1 if le_ss_b_spline != None else 0}, EC: {1 if le_ss_edge_curve != None else 0}, OE: {1 if le_ss_oriented_edge != None else 0}')
-
-                    # === TRAILING EDGE <-> SUCTION SIDE ===
-                    if len(segment.control_points['te_ss']) != 0:
-                        current_idx, te_ss_control_points, te_ss_vertex_edges = _write_control_points(current_idx, segment, 'te_ss')
-
-                        current_idx, te_ss_b_spline = _write_b_spline(current_idx, te_ss_control_points, 'te_ss')
-                        current_idx, te_ss_edge_curve = _write_edge_curve(current_idx, te_ss_vertex_edges, te_ss_b_spline)
-                        current_idx, te_ss_oriented_edge =_write_oriented_edges(current_idx, te_ss_edge_curve)
-
-                        # Store in dictionary
-                        segment_elements_store['te_ss_control_points'] = te_ss_control_points
-                        segment_elements_store['te_ss_vertex_edges'] = te_ss_vertex_edges
-                        segment_elements_store['te_ss_b_spline'] = te_ss_b_spline
-                        segment_elements_store['te_ss_edge_curve'] = te_ss_edge_curve
-                        segment_elements_store['te_ss_oriented_edge'] = te_ss_oriented_edge
-
-                        print(f'WNGWB > STEP_Export_3D >> te_ss >>> at idx: {current_idx}, CP: {len(te_ss_control_points)}, VE: {len(te_ss_vertex_edges)}, B-spline: {1 if te_ss_b_spline != None else 0}, EC: {1 if te_ss_edge_curve != None else 0}, OE: {1 if te_ss_oriented_edge != None else 0}')
+                    print(f'WNGWB > STEP_Export_3D > TE >>> CP: {len(te_c_point_store)}, VE: {len(te_v_point_store)}, B-splines: {len(le_b_splin_store)}, Edge Curves: {len(le_e_curve_store)}, Oriented Edges: {len(le_o_edges_store)}')
 
                     # === Directions ===
                     current_idx, seg_direction_nor, seg_direction_tan = _write_direction(current_idx, segment)
 
                     segment_elements_store['direction'] = [seg_direction_nor, seg_direction_tan]
 
-                    axis2_placement_3d = Axis2Placement3D(current_idx, None, ps_control_points[0].idx, seg_direction_nor.idx, seg_direction_tan.idx)
+                    axis2_placement_3d = Axis2Placement3D(current_idx, None, ss_c_point_store[0].idx, seg_direction_nor.idx, seg_direction_tan.idx)
                     segment_elements_store['axis2_placement_3d'] = axis2_placement_3d
                     current_idx += 1
 
-                    edge_loop = EdgeLoop(current_idx, None, [le_oriented_edge.idx, ps_oriented_edge.idx, te_oriented_edge.idx, ss_oriented_edge.idx] )
-                    segment_elements_store['edge_loop'] = edge_loop
-                    current_idx += 1
+                    '''
+                    # edge_loop = EdgeLoop(current_idx, None, [ps_o_edges_store[0], ps_o_edges_store[1], ps_o_edges_store[2], ps_o_edges_store[3]] )
+                    # segment_elements_store['edge_loop'] = edge_loop
+                    # current_idx += 1
 
-                    face_outer_bound = FaceOuterBounds(current_idx, None, edge_loop.idx)
-                    segment_elements_store['face_outer_bound'] = face_outer_bound
-                    current_idx += 1
+                    # face_outer_bound = FaceOuterBounds(current_idx, None, edge_loop.idx)
+                    # segment_elements_store['face_outer_bound'] = face_outer_bound
+                    # current_idx += 1
 
-                    plane = Plane(current_idx, None, axis2_placement_3d.idx)
-                    segment_elements_store['plane'] = plane
-                    current_idx += 1
+                    # plane = Plane(current_idx, None, axis2_placement_3d.idx)
+                    # segment_elements_store['plane'] = plane
+                    # current_idx += 1
 
-                    advanced_face = AdvancedFace(current_idx, None, face_outer_bound.idx, plane.idx)
-                    segment_elements_store['advanced_face'] = advanced_face
-                    current_idx += 1
+                    #advanced_face = AdvancedFace(current_idx, None, face_outer_bound.idx, plane.idx)
+                    #segment_elements_store['advanced_face'] = advanced_face
+                    #current_idx += 1
 
                     #open_shell = OpenShell(current_idx, None, advanced_face.idx)
                     #segment_elements_store['open_shell'] = open_shell
                     #current_idx += 1
+                    '''
 
-                    tmp_wing_store.append(segment_elements_store)
-                    print('Wing Elements Store:', tmp_wing_store)
-
-                    if i > 0:
-                        current_idx, ps_surf_cp, ps_b_spline_surface, ps_surface_edge_loop, ps_face_outer_bound, ps_advanced_face = _write_b_spline_surface(current_idx, wing.segments[i-1], 'ps', tmp_wing_store, i)
-                        current_idx, ss_surf_cp, ss_b_spline_surface, ss_surface_edge_loop, ss_face_outer_bound, ss_advanced_face = _write_b_spline_surface(current_idx, wing.segments[i-1], 'ss', tmp_wing_store, i)
-                        current_idx, le_surf_cp, le_b_spline_surface, le_surface_edge_loop, le_face_outer_bound, le_advanced_face = _write_b_spline_surface(current_idx, wing.segments[i-1], 'le', tmp_wing_store, i)
-                        current_idx, te_surf_cp, te_b_spline_surface, te_surface_edge_loop, te_face_outer_bound, te_advanced_face = _write_b_spline_surface(current_idx, wing.segments[i-1], 'te', tmp_wing_store, i)
-
-                        segment_elements_store['ps_surf_cp'] = ps_surf_cp
-                        segment_elements_store['ps_b_spline_surface'] = ps_b_spline_surface
-                        segment_elements_store['ps_surface_edge_loop'] = ps_surface_edge_loop
-                        segment_elements_store['ps_face_outer_bound'] = ps_face_outer_bound
-                        segment_elements_store['ps_advanced_face'] = ps_advanced_face
-
-                        segment_elements_store['ss_surf_cp'] = ss_surf_cp
-                        segment_elements_store['ss_b_spline_surface'] = ss_b_spline_surface
-                        segment_elements_store['ss_surface_edge_loop'] = ss_surface_edge_loop
-                        segment_elements_store['ss_face_outer_bound'] = ss_face_outer_bound
-                        segment_elements_store['ss_advanced_face'] = ss_advanced_face
-
-                        segment_elements_store['le_surf_cp'] = le_surf_cp
-                        segment_elements_store['le_b_spline_surface'] = le_b_spline_surface
-                        segment_elements_store['le_surface_edge_loop'] = le_surface_edge_loop
-                        segment_elements_store['le_face_outer_bound'] = le_face_outer_bound
-                        segment_elements_store['le_advanced_face'] = le_advanced_face
-
-                        segment_elements_store['te_surf_cp'] = te_surf_cp
-                        segment_elements_store['te_b_spline_surface'] = te_b_spline_surface
-                        segment_elements_store['te_surface_edge_loop'] = te_surface_edge_loop
-                        segment_elements_store['te_face_outer_bound'] = te_face_outer_bound 
-                        segment_elements_store['te_advanced_face'] = te_advanced_face
-
-                        open_shell = OpenShell(current_idx, 'Wing from segment', [ps_advanced_face.idx, ss_advanced_face.idx, le_advanced_face.idx, te_advanced_face.idx])
-                        segment_elements_store['open_shell'] = open_shell
-                        current_idx += 1
+                    open_shell = OpenShell(current_idx, 'Wing from segment', [ps_advanced_face, le_advanced_face, ss_advanced_face, te_advanced_face])
+                    segment_elements_store['open_shell'] = open_shell
+                    current_idx += 1
                     
                     wing_elements_store.append(segment_elements_store)
-                    print('Wing Elements Store:', wing_elements_store)
+                    #print('Wing Elements Store:', wing_elements_store)
 
             component_elements_store["wing"] = wing_elements_store
 
@@ -1014,11 +1014,39 @@ def export_3d_segment_wing(filepath, base_name):
         component_elements_store["shell_based_surface_model"] = shell_based_surface_model
         current_idx += 1
 
-        manifold_shape_surf_repersentation = ManifoldSurfaceShapeRepresentation(current_idx, f'{base_name}', shell_based_surface_model.idx, axis2_placement_3d.idx, geometric_representation_context.idx)
+        manifold_shape_surf_repersentation = ManifoldSurfaceShapeRepresentation(current_idx, f'{base_name.replace(".step", "")}', shell_based_surface_model.idx, axis2_placement_3d.idx, geometric_representation_context.idx)
         component_elements_store["manifold_shape_surf_repersentation"] = manifold_shape_surf_repersentation
         current_idx += 1
 
-        shape_definition_representation = ShapeDefinitionRepresentation(current_idx, manifold_shape_surf_repersentation.idx)
+        application_context = ApplicationContext(current_idx)
+        component_elements_store["application_context"] = application_context
+        current_idx += 1
+
+        design_context = DesignContext(current_idx, application_context)
+        component_elements_store["design_context"] = design_context
+        current_idx += 1
+
+        mechanical_context = MechanicalContext(current_idx, application_context_obj=application_context)
+        component_elements_store["mechanical_context"] = mechanical_context
+        current_idx += 1
+
+        product = Product(current_idx, {base_name.replace(".step", "")}, mechanical_context)
+        component_elements_store["product"] = product
+        current_idx += 1
+
+        product_definition_form_w_spec_source = ProductDefinitionFormationWithSpecifiedSource(current_idx, product)
+        component_elements_store["product_definition_form_w_spec_source"] = product_definition_form_w_spec_source
+        current_idx += 1
+
+        product_definition = ProductDefinition(current_idx, prod_def_form_w_spec_source=product_definition_form_w_spec_source, design_context=design_context)
+        component_elements_store["product_definition"] = product_definition
+        current_idx += 1
+
+        product_definition_shape = ProductDefinitionShape(current_idx, product_definition)
+        component_elements_store["product_definition_shape"] = product_definition_shape
+        current_idx += 1
+        
+        shape_definition_representation = ShapeDefinitionRepresentation(current_idx, product_definition_shape, manifold_shape_surf_repersentation)
         component_elements_store["shape_definition_representation"] = shape_definition_representation
         current_idx += 1
     

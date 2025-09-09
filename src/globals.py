@@ -49,9 +49,10 @@ class Program:
             },
             'airfoil_designer': {
                 "show_grid": True,
+                "show_ruller": True,
                 "show_control_points": True,
                 "show_construction": True,
-                "wireframe_color": {'le': [0.0, 0.0, 1.0], 'te': [1.0, 1.0, 0.0], 'ps': [0.0, 1.0, 0.0], 'ss': [1.0, 0.0, 0.0]}
+                "color_scheme": {'le': [0.0, 0.0, 1.0], 'te': [1.0, 0.8, 0.2], 'ps': [0.0, 1.0, 0.0], 'ss': [1.0, 0.0, 0.0]},
             },
             'wing_designer': {
                 "show_grid": True,
@@ -409,6 +410,17 @@ def loadProject(fileName):
         PROJECT.project_description = proj.get("project description", PROJECT.project_description)
 
     print(f"AIRFLOW > Project successfully loaded from {file_path}")
+    print(f"Rebuilidng geometries...")
+    for airfoil in PROJECT.project_airfoils:
+        airfoil.update()
+    for component in PROJECT.project_components:
+        for wing in component.wings:
+            for segment in wing.segments:
+                segment.airfoil.update()
+                segment.update()
+            wing.update()
+        component.update()
+    print("Update finished!")
     return PROJECT
 
 

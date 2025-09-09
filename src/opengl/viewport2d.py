@@ -31,6 +31,7 @@ from OpenGL.GLU import gluOrtho2D, gluProject  # Add this import
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QAction, QFileDialog
 from PyQt5.QtOpenGL import QGLWidget
 import math
+import numpy as np
 
 #from .test_cube import draw_object_from_file  # Import the new function
 from . import construction
@@ -49,6 +50,7 @@ class ViewportOpenGL(QGLWidget):
         self.translation = [-0.5, 0, 0]
         self.lastPos = QPoint()
         self.airfoil = None
+        self.arf_des_settings = globals.AIRFLOW.preferences["airfoil_designer"]
     
     def set_airfoil_to_display(self, airfoil):
         self.airfoil = airfoil
@@ -77,11 +79,17 @@ class ViewportOpenGL(QGLWidget):
         glTranslatef(self.translation[0], self.translation[1], 0)
 
         #Drawing background elements
-        self.draw_grid()
-        self.draw_ruler()
+        if self.arf_des_settings["show_grid"] == True:
+            self.draw_grid()
+        if self.arf_des_settings["show_ruller"] == True:
+            self.draw_ruler()
 
         if self.airfoil:
             self.draw_airfoil(self.airfoil)
+            if self.arf_des_settings["show_control_points"] == True:
+                self.draw_cp_net(self.airfoil, self.zoom)
+            if self.arf_des_settings["show_construction"] == True:
+                self.draw_dashed_line(self.airfoil, 0.01, self.zoom)
             #self.fit_to_airfoil(self.airfoil)
 
     def draw_cor(self, position, size=5):
@@ -237,10 +245,7 @@ class ViewportOpenGL(QGLWidget):
         Current_Airfoil.update()
         glDisable(GL_DEPTH_TEST)
     
-        color = {'le': [0.0, 0.0, 1.0], 
-                'te': [1.0, 1.0, 0.0], 
-                'ps': [0.0, 1.0, 0.0], 
-                'ss': [1.0, 0.0, 0.0]}
+        color = globals.AIRFLOW.preferences['airfoil_designer']['color_scheme']
 
         for key in ['le', 'te', 'ps', 'ss']:
             vec_length = len(Current_Airfoil.geom[key][0])
@@ -263,3 +268,52 @@ class ViewportOpenGL(QGLWidget):
         height = max(ys) - min(ys)
         self.zoom = -max(width, height) * 0.6
         self.translation = [-(min(xs)+max(xs))/2, -(min(ys)+max(ys))/2, 0]
+
+    def draw_cp_net(self, airfoil, zoom):
+        
+        color = globals.AIRFLOW.preferences['airfoil_designer']['color_scheme']
+        glPointSize(6.0)
+
+        for key in airfoil.constr:
+            glColor3f(color[key][0], color[key][1], color[key][2])
+            glBegin(GL_POINTS)
+            points = np.array(airfoil.constr[key]).T
+            #print(f"{key}: ", points)
+            for point in points:
+                glVertex3f(point[0], point[1], 0.0)
+            glEnd()
+
+    def draw_dashed_line(self, airfoil, base_dash_length=0.01, zoom=1):
+        """Draw dashed line between points p1 and p2."""
+        from numpy import array, linalg
+
+        for key in airfoil.constr:
+            points = np.array(airfoil.constr[key]).T
+            z = 0 if key in ['le', 'ps', 'ss', 'te'] else None
+            for j in range(len(points) - 1):
+                p1 = points[j]
+                #print(p1)
+                p2 = points[j + 1]
+                if z is not None:
+                    p1 = [p1[0], p1[1], z]
+                    p2 = [p2[0], p2[1], z]
+                #print(f"{key}: ", points)
+
+                zoom = abs(zoom) if zoom != 0 else 0.001  # avoid divide-by-zero
+                dash_length = base_dash_length * zoom
+
+                p1 = array(p1)
+                p2 = array(p2)
+                vec = p2 - p1
+                length = linalg.norm(vec)
+                dir_vec = vec / length 
+
+                num_dashes = int(length / (2 * dash_length))
+                for i in range(num_dashes):
+                    start = p1 + dir_vec * (2 * i) * dash_length
+                    end = p1 + dir_vec * (2 * i + 1) * dash_length
+                    glColor3f(0.3, 0.3, 0.3)
+                    glBegin(GL_LINES)
+                    glVertex3fv(start)
+                    glVertex3fv(end)
+                    glEnd()
