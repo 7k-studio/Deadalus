@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -216,65 +216,20 @@ def draw_b_spline_surf(segment):
     """
 
     for key in ['le', 'ps', 'te', 'ss']:
-        control_points = np.array(segment.surfaces_grid[key])
-        #print(f"{key}: ", control_points)
-        #if key == "ss" or "te":
-        #    control_points = control_points[::-1]
-        if control_points.size > 0:
+        face = segment.surfaces[key]
+        if face != []:
             
-            current_front = glGetIntegerv(GL_FRONT_FACE)
-            # Flatten grid
-            n_u = len(control_points)      # rows
-            n_v = len(control_points[0])   # cols
-            ctrlpts_flat = ctrlpts_flat = [[float(p[0]), float(p[1]), float(p[2])]
-                for row in control_points for p in row]
+            #current_front = glGetIntegerv(GL_FRONT_FACE)
 
-            # Define surface
-            surf = BSpline.Surface()
-            surf.degree_u = n_u - 1
-            surf.degree_v = n_v - 1
-            surf.set_ctrlpts(ctrlpts_flat, n_u, n_v)
-
-            # Knot vectors
-            surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
-            surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
-
-            # Evaluate
-            # Set evaluation delta
-            surf.delta = (0.05, 0.05)   # finer grid in u and v
-
-            # Evaluate surface
-            surf.evaluate()
-
-            # After surf.evaluate()
-            res_u = surf.sample_size[0]  # number of points along U
-            res_v = surf.sample_size[1]  # number of points along V
-
-            # Reshape into 2D grid [i][j]
-            grid = [[surf.evalpts[i * res_v + j] for j in range(res_v)] for i in range(res_u)]
-
-            # Now draw quads
             glColor3f(0.8, 0.8, 0.9)
-
-            # if key == "ss" or key == :
-            #     glFrontFace(GL_CW)   # treat clockwise as front
-            # else:
-            #     glFrontFace(GL_CCW)
-
-            for i in range(res_u - 1):
-                for j in range(res_v - 1):
-                    
-                    p0 = grid[i][j]
-                    p1 = grid[i][j+1]
-                    p2 = grid[i+1][j+1]
-                    p3 = grid[i+1][j]
-
-                    glBegin(GL_QUADS)
-                    glVertex3fv(p0)
-                    glVertex3fv(p1)
-                    glVertex3fv(p2)
-                    glVertex3fv(p3)
-                    glEnd()
+            for quad in face:
+                p0, p1, p2, p3 = quad
+                glBegin(GL_QUADS)
+                glVertex3fv(p0)
+                glVertex3fv(p1)
+                glVertex3fv(p2)
+                glVertex3fv(p3)
+                glEnd()
             
             # Restore front face state
-            glFrontFace(current_front)
+            #glFrontFace(current_front)

@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -27,10 +27,11 @@ import src.globals as globals  # Import from globals.py
 
 
 class Tabele(QTableWidget):
-    def __init__(self, parent=None, tree_menu=None, project=None):
+    def __init__(self, parent=None, tree_menu=None, open_gl=None, project=None):
         super(Tabele, self).__init__(parent)
         self.main_window = parent
         self.project = project
+        self.open_gl = open_gl
         self.tree_menu = tree_menu
         self.init_tabele()
     
@@ -162,7 +163,7 @@ class Tabele(QTableWidget):
 
     def adjust_value(self, row, delta):
         # Adjust parameter value by delta
-        print(self.params)
+        #print(self.params)
         param_name = self.item(row, 0).text()
         current_value = self.params['params'][param_name]
         new_value = current_value + delta
@@ -189,7 +190,7 @@ class Tabele(QTableWidget):
             row = self.rowCount()
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem('airfoil'))
-            airfoil_dropdown = QtWidgets.QComboBox(self)  # <-- przekazanie self jako parent
+            airfoil_dropdown = QtWidgets.QComboBox(self)
             airfoil_names = [airfoil.infos['name'] for airfoil in globals.PROJECT.project_airfoils]
             airfoil_dropdown.addItems(airfoil_names)
             current_name = getattr(element_obj.airfoil, 'infos', {}).get('name', '')
@@ -209,7 +210,7 @@ class Tabele(QTableWidget):
             row = self.rowCount()
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem('anchor'))
-            anchor_dropdown = QtWidgets.QComboBox(self)  # <-- przekazanie self jako parent
+            anchor_dropdown = QtWidgets.QComboBox(self)
             anchor_names = ['G0', 'G1']
             anchor_dropdown.addItems(anchor_names)
             current_name = getattr(element_obj, 'anchor', '')
@@ -257,11 +258,11 @@ class Tabele(QTableWidget):
                     print(f'Segment at index: {grandparent_index}:{parent_index}:{item_index}')
 
                     element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
-                    print(type(element_item))
+                    #print(type(element_item))
 
                     self.populate_table(element_item)
                     self.params = {key: value for key, value in vars(element_item).items() if key != "infos"}
-                    element_item.transform_airfoil(grandparent_index, parent_index, item_index)
+                    #element_item.update(grandparent_index, parent_index, item_index)
 
                 if parent_item and not grandparent_item:
 
@@ -283,6 +284,8 @@ class Tabele(QTableWidget):
                     element_item = globals.PROJECT.project_components[item_index]
                     self.populate_table(element_item)
                     self.params = {key: value for key, value in vars(element_item).items() if key != "infos"}
+                
+                self.open_gl.update()
 
     def save_current_element_state(self):
         """Overwrite the current table data into the selected airfoil object."""
@@ -297,6 +300,9 @@ class Tabele(QTableWidget):
                 grandparent_item = None
             
             if selected_item:
+                
+                # ----- SEGMENT UPDATE -----
+
                 if parent_item and grandparent_item:
 
                     item_index = parent_item.indexOfChild(selected_item)
@@ -306,7 +312,9 @@ class Tabele(QTableWidget):
                     print(f'WNGWB > Save_state > Segment at index: {grandparent_index}:{parent_index}:{item_index}')
                     
                     element_item = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
-                    globals.PROJECT.project_components[grandparent_index].wings[parent_index].build_connection()
+                    #globals.PROJECT.project_components[grandparent_index].wings[parent_index].build_connection()
+
+                # ----- WING UPDATE -----
 
                 if parent_item and not grandparent_item:
 
@@ -316,7 +324,9 @@ class Tabele(QTableWidget):
                     print(f'WNGWB > Save_state > Wing at index: {parent_index} >>> {item_index}')
 
                     element_item = globals.PROJECT.project_components[parent_index].wings[item_index]
-                    globals.PROJECT.project_components[parent_index].wings[item_index].build_connection()
+                    #globals.PROJECT.project_components[parent_index].wings[item_index].build_connection()
+                
+                # ----- COMPONENT UPDATE -----
 
                 if not parent_item and not grandparent_item:
 
@@ -325,8 +335,8 @@ class Tabele(QTableWidget):
                     print(f'WNGWB > Save_state > Component at index: {item_index}')
 
                     element_item = globals.PROJECT.project_components[item_index]
-                    for item in element_item.wings:
-                        item.build_connection()
+                    #for item in element_item.wings:
+                    #    item.build_connection()
 
                 # Update the airfoil object with table data
                 for row in range(self.rowCount()):
@@ -369,10 +379,41 @@ class Tabele(QTableWidget):
                                 print(f"WNGWB > Save_state > Invalid value for parameter '{key}', skipping update.")
                 
                 print(f"WNGWB > Save_state > Saved params of: {element_item.infos['name']}")
-                try:
-                    globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].transform_airfoil(grandparent_index, parent_index, item_index)
-                except:
-                    print('WARNING: No airfoil to transform')
+
+                if parent_item and grandparent_item:
+                    try:
+                        globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].update(grandparent_index, parent_index, item_index)
+                        globals.PROJECT.project_components[grandparent_index].wings[parent_index].update(grandparent_index, parent_index, item_index)
+                    except:
+                        print('NOTE: No segment to transform')
+
+                if parent_item and not grandparent_item:
+                    for i in range(len(globals.PROJECT.project_components[parent_index].wings[item_index].segments)):
+                        try:
+                            globals.PROJECT.project_components[parent_index].wings[item_index].segments[i].update(parent_index, item_index, i)
+                        except:
+                            print('NOTE: No segment to transform')
+                        try:
+                            globals.PROJECT.project_components[parent_index].wings[item_index].update(parent_index, item_index, i)
+                        except:
+                            print('NOTE: No wing to transform')
+
+                if not parent_item and not grandparent_item:
+                    for w in range(len(globals.PROJECT.project_components[item_index].wings)):
+                        for i in range(len(globals.PROJECT.project_components[item_index].wings[w].segments)):
+                            try:
+                                globals.PROJECT.project_components[item_index].wings[w].segments[i].update(item_index, w, i)
+                            except:
+                                print('NOTE: No segment to transform')
+                            try:
+                                globals.PROJECT.project_components[item_index].wings[w].update(item_index, w, i)
+                            except:
+                                print('NOTE: No wing to transform')
+                            try:
+                                globals.PROJECT.project_components[item_index].update(item_index, w, i)
+                            except:
+                                print('NOTE: No component to transform')
 
                 # Optionally, update the tree menu display
                 selected_item.setText(0, f"{element_item.infos['name']}*")
+                self.open_gl.update()

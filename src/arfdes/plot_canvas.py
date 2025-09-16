@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -26,7 +26,7 @@ from matplotlib.figure import Figure
 class PlotCanvas(FigureCanvasQTAgg):
     ''' This class creates a canvas for plotting the airfoil using Matplotlib. '''
     def __init__(self, program, project, params):
-        self.AIRFLOW = program
+        self.DEADALUS = program
         self.project = project
         self.params = params
         self.fig = Figure()
@@ -56,19 +56,19 @@ class PlotCanvas(FigureCanvasQTAgg):
         Current_Airfoil.update()
 
         # Plot
-        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == True and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == True:
+        if self.DEADALUS.preferences['airfoil_designer']['show_construction'] == True and self.DEADALUS.preferences['airfoil_designer']['show_control_points'] == True:
             self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], 'b--', marker='o', label='LE Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], 'g--', marker='o', label='PS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], 'r--', marker='o', label='SS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['te'][0], Current_Airfoil.constr['te'][1], 'y--', marker='o', label='TE Control Polygon')
 
-        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == True and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == False:
+        if self.DEADALUS.preferences['airfoil_designer']['show_construction'] == True and self.DEADALUS.preferences['airfoil_designer']['show_control_points'] == False:
             self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], 'b--', label='LE Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], 'g--', label='PS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], 'r--', label='SS Control Polygon')
             self.ax.plot(Current_Airfoil.constr['te'][0], Current_Airfoil.constr['te'][1], 'y--', label='TE Control Polygon')
 
-        if self.AIRFLOW.preferences['airfoil_designer']['show_construction'] == False and self.AIRFLOW.preferences['airfoil_designer']['show_control_points'] == True:
+        if self.DEADALUS.preferences['airfoil_designer']['show_construction'] == False and self.DEADALUS.preferences['airfoil_designer']['show_control_points'] == True:
             self.ax.plot(Current_Airfoil.constr['le'][0], Current_Airfoil.constr['le'][1], linestyle='None', marker='o', color='b', label='LE Control Points')
             self.ax.plot(Current_Airfoil.constr['ps'][0], Current_Airfoil.constr['ps'][1], linestyle='None', marker='o', color='g', label='PS Control Points')
             self.ax.plot(Current_Airfoil.constr['ss'][0], Current_Airfoil.constr['ss'][1], linestyle='None', marker='o', color='r', label='SS Control Points')
@@ -84,7 +84,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         self.ax.set_title("Airfoil Designer")
         self.ax.axis('equal')
         self.ax.set_aspect("equal")
-        if self.AIRFLOW.preferences['airfoil_designer']['show_grid'] == True:
+        if self.DEADALUS.preferences['airfoil_designer']['show_grid'] == True:
             self.ax.grid(True)
 
         self.draw()

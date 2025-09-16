@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -55,7 +55,7 @@ class MenuBar(QMenuBar):
 
     def __init__(self, program=None, project=None, parent=None, canvas=None, program_info=None, tree_menu=None):
         super(MenuBar, self).__init__(parent)
-        self.AIRFLOW = program
+        self.DEADALUS = program
         self.PROJECT = project
         self.main_window = parent
         self.canvas = canvas
@@ -67,55 +67,56 @@ class MenuBar(QMenuBar):
         """File menu creation"""
         fileMenu = self.addMenu('File')
         
-        newFileAction = QAction('New', self)
-        openFileAction = QAction('Open', self)
-        saveFileAction = QAction('Save', self)
-        preferencesFileAction = QAction('Preferences', self)
+        newAction = QAction('New', self)
+        openAction = QAction('Open', self)
+        saveAction = QAction('Save', self)
+        exitAction = QAction('Exit', self)
 
-        newFileAction.triggered.connect(self.newFile)
-        openFileAction.triggered.connect(self.openFile)
-        saveFileAction.triggered.connect(self.saveFile)
-        preferencesFileAction.triggered.connect(self.preferencesWindow)
+        newAction.triggered.connect(self.newFile)
+        openAction.triggered.connect(self.openFile)
+        saveAction.triggered.connect(self.saveFile)
+        exitAction.triggered.connect(self.quitApp)
 
-        fileMenu.addAction(newFileAction)
-        if globals.AIRFLOW.preferences['general']['beta_features']:
-            fileMenu.addAction(openFileAction)
-            fileMenu.addAction(saveFileAction)
+        fileMenu.addAction(newAction)
+        fileMenu.addAction(openAction)
+        fileMenu.addAction(saveAction)
+        fileMenu.addSeparator()
+        fileMenu.addAction(exitAction)
         
 
         """Edit menu creation"""
         editMenu = self.addMenu('Edit')
 
-        newAction = QAction('Create', self)
-        appendAction = QAction('Append', self)
-        deleteAction = QAction('Delete', self)
-        saveAction = QAction('Save', self)
-        exportAction = QAction('Export', self)
-        flipAction = QAction('Flip Airfoil', self)
-        renameArfAction = QAction('Rename', self)
+        newAirfoilAction = QAction('Create', self)
+        appendAirfoilAction = QAction('Append', self)
+        deleteAirfoilAction = QAction('Delete', self)
+        saveAirfoilAction = QAction('Save', self)
+        exportAirfoilAction = QAction('Export', self)
+        flipAirfoilAction = QAction('Flip Airfoil', self)
+        renameAirfoilAction = QAction('Rename', self)
         editDescriptionAction = QAction('Edit Description', self)
         fit2refAction = QAction('Fit2Reference', self)
 
-        newAction.triggered.connect(self.newAirfoil)
-        appendAction.triggered.connect(self.appendAirfoil)
-        deleteAction.triggered.connect(self.deleteAirfoil)  
-        saveAction.triggered.connect(self.saveAirfoil)
-        exportAction.triggered.connect(self.exportAirfoil)
-        flipAction.triggered.connect(self.flipAirfoil)
-        renameArfAction.triggered.connect(self.renameAirfoil)
+        newAirfoilAction.triggered.connect(self.newAirfoil)
+        appendAirfoilAction.triggered.connect(self.appendAirfoil)
+        deleteAirfoilAction.triggered.connect(self.deleteAirfoil)  
+        saveAirfoilAction.triggered.connect(self.saveAirfoil)
+        exportAirfoilAction.triggered.connect(self.exportAirfoil)
+        flipAirfoilAction.triggered.connect(self.flipAirfoil)
+        renameAirfoilAction.triggered.connect(self.renameAirfoil)
         editDescriptionAction.triggered.connect(self.editDescriptionAirfoil)
         fit2refAction.triggered.connect(self.fit2ref)
         
-        editMenu.addAction(newAction)
-        editMenu.addAction(appendAction)
-        editMenu.addAction(deleteAction)
-        editMenu.addAction(saveAction)
-        editMenu.addAction(exportAction)
-        editMenu.addAction(flipAction)
+        editMenu.addAction(newAirfoilAction)
+        editMenu.addAction(appendAirfoilAction)
+        editMenu.addAction(deleteAirfoilAction)
+        editMenu.addAction(saveAirfoilAction)
+        editMenu.addAction(exportAirfoilAction)
+        editMenu.addAction(flipAirfoilAction)
         editMenu.addSeparator()
-        editMenu.addAction(renameArfAction)
+        editMenu.addAction(renameAirfoilAction)
         editMenu.addAction(editDescriptionAction)
-        if globals.AIRFLOW.preferences['general']['beta_features']:
+        if globals.DEADALUS.preferences['general']['beta_features']:
             editMenu.addAction(fit2refAction)
 
         """View menu creation"""
@@ -132,8 +133,7 @@ class MenuBar(QMenuBar):
         moduleMenu = self.addMenu('Module')
         WingModule = QAction('Wing Module', self)
         WingModule.triggered.connect(self.open_wing_module)
-        if globals.AIRFLOW.preferences['general']['beta_features']:
-            moduleMenu.addAction(WingModule)
+        moduleMenu.addAction(WingModule)
 
         """Program menu creation"""
         programMenu = self.addMenu('Program')
@@ -154,25 +154,31 @@ class MenuBar(QMenuBar):
     def newFile(self):
         msg = QMessageBox.question(self, "New Project", "Do you want to create a new project?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("AirFLOW: Creating new project...")
+            print("DEADALUS: Creating new project...")
             # Reset the project components
             globals.PROJECT.newProject()
             widget_tree.refresh_tree(self.tree_menu)
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
-            print(f"AirFLOW: opened file '{fileName}'")
+            print(f"DEADALUS: opened file '{fileName}'")
             widget_tree.refresh_tree(self.tree_menu)
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
             print(f"Saved file: {fileName}")
+    
+    def quitApp(self):
+        msg = QMessageBox.question(self, "Exit program", "Do you really want to quit a program?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if msg == QMessageBox.Yes:
+            print("DEADALUS > exit")
+            QApplication.quit()
     
     """Airfoil menu actions"""
     
@@ -186,7 +192,7 @@ class MenuBar(QMenuBar):
         """load the airfoil data from a JSON format file."""
         print("ARFDES > appendAirfoil > Appending airfoil...")
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Airfoil Format (*.arf);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
 
         if fileName:
             airfoil_obj, _ = tools_airfoil.load_airfoil_from_json(fileName)
@@ -197,7 +203,6 @@ class MenuBar(QMenuBar):
                 add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
             else:
                 print("ARFDES ERROR: Airfoil import failed!")
-
 
     def deleteAirfoil(self):
         print("ARFDES > deleteAirfoil > Deleting selected airfoil...")
@@ -235,7 +240,7 @@ class MenuBar(QMenuBar):
         json_object = tools_airfoil.save_airfoil_to_json(airfoil_index)
 
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "AirFLOW Airfoil Format (*.arf);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "DEADALUS Airfoil Format (*.arf);;All Files (*)", options=options)
         if fileName:
             with open(f"{fileName}", "w") as outfile:
                 outfile.write(json_object)
@@ -375,7 +380,7 @@ class MenuBar(QMenuBar):
 
     def preferencesWindow(self):        
         """Open the preferences dialog."""
-        print("AirFLOW > Preferences")
+        print("DEADALUS > Preferences")
         from src.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
@@ -413,7 +418,7 @@ class MenuBar(QMenuBar):
         self.airfoil_designer_window.show()
 
     def showAbout(self):
-        dialog = globals.AIRFLOW.showAboutDialog(self)
+        dialog = globals.DEADALUS.showAboutDialog(self)
     
     def showManual(self):
-        manual = globals.AIRFLOW.showUserManual()
+        manual = globals.DEADALUS.showUserManual()

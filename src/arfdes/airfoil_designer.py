@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -73,10 +73,10 @@ class AirfoilDesigner(QMainWindow):
 
     def __init__(self, program=None, project=None):
         super().__init__()
-        print("AIRFLOW > module: Airfoil Designer")
+        print("DEADALUS > module: Airfoil Designer")
         self.program = program
         self.project = project
-        self.setWindowTitle("AirFLOW: Airfoil Designer")
+        self.setWindowTitle("DEADALUS: Airfoil Designer")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
@@ -93,7 +93,7 @@ class AirfoilDesigner(QMainWindow):
 
         # Matplotlib Canvas
         self.canvas = PlotCanvas(self.program, self.project, self.params)
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        # self.toolbar << placeholder
 
         # Add the OpenGL viewport to the inner splitter
         self.viewport = QWidget()
@@ -128,7 +128,6 @@ class AirfoilDesigner(QMainWindow):
 
         # Add toolbar and content layout to the main layout
         main_layout.addLayout(content_layout)
-        main_layout.addWidget(self.toolbar)  # Toolbar below the canvas
 
         self.setCentralWidget(central_widget)
 
@@ -159,20 +158,23 @@ class AirfoilDesigner(QMainWindow):
         if airfoil_index == -1:
             return  # Invalid selection
 
-        current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
+        #current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
 
         if state:
             print(f"ARFDES > Reference enabled with file: '{filename}'")
-            self.canvas.ax.clear()  # Clear the plot
-            self.canvas.plot_airfoil(current_airfoil)
-            self.reference_airfoil = Reference_load(filename)
-            self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
-            self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
+            #self.canvas.ax.clear()  # Clear the plot
+            reference_airfoil = Reference_load(filename)
+            self.open_gl.set_reference_to_display(reference_airfoil)
+            #self.canvas.plot_airfoil(current_airfoil)
+            
+            #self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
+            #self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
         else:
             print("ARFDES > Reference disabled")
-            self.canvas.ax.clear()  # Clear the plot
-            self.table.set_reference_points(None, None)  # Clear reference points in the table
-            self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil
+            #self.canvas.ax.clear()  # Clear the plot
+            #self.table.set_reference_points(None, None)  # Clear reference points in the table
+            #self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil
+            self.open_gl.set_reference_to_display(None)
 
     def update_tree_menu(self):
         """Update the tree menu based on the current self.project.project_airfoils."""

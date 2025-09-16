@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -39,7 +39,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 
-from src.opengl.viewport import Viewport3D
+from src.opengl.viewport3d import Viewport3D
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 
@@ -60,8 +60,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None, flags=Qt.WindowFlags()):
         super(MainWindow, self).__init__(parent, flags)
-        print("AIRFLOW > module: Wing Workbench")
-        self.setWindowTitle("AirFLOW: Wing Workbench")
+        print("DEADALUS > module: Wing Workbench")
+        self.setWindowTitle("DEADALUS: Wing Workbench")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
         #self.viewport.setMinimumWidth(500)
 
         # Create the menu bar
-        self.menu_bar = MenuBar(self)  # Use the MenuBar class
+        self.menu_bar = MenuBar(self, viewport = self.open_gl)  # Use the MenuBar class
         self.setMenuBar(self.menu_bar)
 
         # Use the TreeMenu class directly
@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.tree_menu)
 
         # Add the Tabele module to the inner splitter
-        self.tabele = Tabele(self, tree_menu=self.tree_menu, project=globals.PROJECT)
+        self.tabele = Tabele(self, tree_menu=self.tree_menu, open_gl=self.open_gl, project=globals.PROJECT)
         self.tabele.setMinimumWidth(300)
         self.tabele.setMaximumWidth(300)  # Opcjonalnie: ogranicz maksymalną szerokość
         
@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
 
         if not globals.PROJECT.project_components:
             # Initialize with a default airfoil
-            self.menu_bar.addComponent("Default Component")
+            self.menu_bar.addComponent()
 
         # Connect tree widget selection to display function
         self.tree_menu.itemClicked.connect(self.tabele.display_selected_element)

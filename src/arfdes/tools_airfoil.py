@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -53,7 +53,6 @@ def Reference_load(file):
             
     np.array(AirfoilCoord)
     print("Chosen airfoils data read sucessfully!")
-    print("{} Coordinates".format(file))
     
     i=0
     while AirfoilCoord[i][1] >= 0:
@@ -71,18 +70,19 @@ def Reference_load(file):
     
     DW_points = np.array(DW_points).T
 
-    print(UP_points)
-    print(DW_points)
+    #print(UP_points)
+    #print(DW_points)
     
-    airfoil = src.obj.airfoil.Airfoil_selig_format()
+    airfoil = src.obj.objects2D.Airfoil_selig_format()
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
     airfoil.infos['name'] = airfoil_name
+    print(f"Finished loading {airfoil.name} in selig format")
     
     return airfoil
 
-def CreateBSpline(const_points):
+def CreateBSpline(const_points, f=int(globals.DEADALUS.preferences['general']['performance'])):
 
     l=len(const_points[0])
 
@@ -92,7 +92,7 @@ def CreateBSpline(const_points):
 
     tck=[t,[const_points[0],const_points[1]],3]
     
-    f = int(globals.AIRFLOW.preferences['general']['performance'])
+    #f = int(globals.DEADALUS.preferences['general']['performance'])
 
     u3=np.linspace(0,1,(max(l*f/100,f)),endpoint=True)
 
@@ -174,7 +174,7 @@ def load_airfoil_from_json(fileName):
     """load the airfoil data from a JSON format file."""
     is_version_different =  False
     error_count = 0
-    import obj.objects2D as objects2D
+    import src.obj.objects2D as objects2D
     Airfoil = objects2D.Airfoil()
 
     if fileName:
@@ -192,12 +192,12 @@ def load_airfoil_from_json(fileName):
             objects2D = data["airfoil"]
         except KeyError as e:
             print(f"ERROR: Missing key in ARF data - {e}")
-            print("File may not load properly or is not compatible with AirFLOW")
+            print("File may not load properly or is not compatible with DEADALUS")
             return None
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.AIRFLOW.program_version
+            program_version = globals.DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -238,10 +238,10 @@ def load_airfoil_from_json(fileName):
             return None
         
         if is_version_different == True:
-            print(f"AIRFLOW > Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
+            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
             error_count += 1
         else:
-            print(f"AIRFLOW > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
 
         Airfoil.update()
 
@@ -253,8 +253,8 @@ def save_airfoil_to_json(airfoil_idx=None):
     current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
 
     data = {
-        "program name": globals.AIRFLOW.program_name,
-        "program version": globals.AIRFLOW.program_version,
+        "program name": globals.DEADALUS.program_name,
+        "program version": globals.DEADALUS.program_version,
         "airfoil": {
             "infos": {
                 **current_airfoil.infos,
@@ -263,25 +263,27 @@ def save_airfoil_to_json(airfoil_idx=None):
                 "modification_date": str(current_airfoil.infos.get("modification_date", "")),
                 "description": str(current_airfoil.infos.get("description", ""))
             },
-            "chord": current_airfoil.params["chord"],
-            "origin_X": current_airfoil.params["origin_X"],
-            "origin_Y": current_airfoil.params["origin_Y"],
-            "le_thickness": current_airfoil.params["le_thickness"],
-            "le_depth": current_airfoil.params["le_depth"],
-            "le_offset": current_airfoil.params["le_offset"],
-            "le_angle": current_airfoil.params["le_angle"],
-            "te_thickness": current_airfoil.params["te_thickness"],
-            "te_depth": current_airfoil.params["te_depth"],
-            "te_offset": current_airfoil.params["te_offset"],
-            "te_angle": current_airfoil.params["te_angle"],
-            "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
-            "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
-            "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
-            "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
-            "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
-            "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
-            "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
-            "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
+            "params": {
+                "chord": current_airfoil.params["chord"],
+                "origin_X": current_airfoil.params["origin_X"],
+                "origin_Y": current_airfoil.params["origin_Y"],
+                "le_thickness": current_airfoil.params["le_thickness"],
+                "le_depth": current_airfoil.params["le_depth"],
+                "le_offset": current_airfoil.params["le_offset"],
+                "le_angle": current_airfoil.params["le_angle"],
+                "te_thickness": current_airfoil.params["te_thickness"],
+                "te_depth": current_airfoil.params["te_depth"],
+                "te_offset": current_airfoil.params["te_offset"],
+                "te_angle": current_airfoil.params["te_angle"],
+                "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
+                "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
+                "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
+                "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
+                "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
+                "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
+                "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
+                "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
+            }
         }
     }
  
@@ -291,7 +293,7 @@ def save_airfoil_to_json(airfoil_idx=None):
 
 def flip_airfoil_horizontally(airfoil):
     """Flip the airfoil horizontally."""
-    flipped_airfoil = src.obj.airfoil.Airfoil()
+    flipped_airfoil = src.obj.objects2D.Airfoil()
     flipped_airfoil.infos = airfoil.infos.copy()
     flipped_airfoil.params = airfoil.params.copy()
 

@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -50,10 +50,16 @@ class ViewportOpenGL(QGLWidget):
         self.translation = [-0.5, 0, 0]
         self.lastPos = QPoint()
         self.airfoil = None
-        self.arf_des_settings = globals.AIRFLOW.preferences["airfoil_designer"]
+        self.reference = None
+        self.viewport_settings = globals.DEADALUS.preferences["airfoil_designer"]["viewport"]
+        self.airfoil_settings = globals.DEADALUS.preferences["airfoil_designer"]["airfoil"]
     
     def set_airfoil_to_display(self, airfoil):
         self.airfoil = airfoil
+        self.update()
+    
+    def set_reference_to_display(self, reference):
+        self.reference = reference
         self.update()
 
     def initializeGL(self):
@@ -71,7 +77,6 @@ class ViewportOpenGL(QGLWidget):
         gluOrtho2D(-half_width, half_width, -half_height, half_height)
         glMatrixMode(GL_MODELVIEW)
         
-
     def paintGL(self):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
@@ -79,17 +84,20 @@ class ViewportOpenGL(QGLWidget):
         glTranslatef(self.translation[0], self.translation[1], 0)
 
         #Drawing background elements
-        if self.arf_des_settings["show_grid"] == True:
+        if self.viewport_settings["grid"]["show"] == True:
             self.draw_grid()
-        if self.arf_des_settings["show_ruller"] == True:
+        if self.viewport_settings["ruller"]["show"] == True:
             self.draw_ruler()
 
         if self.airfoil:
             self.draw_airfoil(self.airfoil)
-            if self.arf_des_settings["show_control_points"] == True:
+            if self.airfoil_settings["control_points"]["show"] == True:
                 self.draw_cp_net(self.airfoil, self.zoom)
-            if self.arf_des_settings["show_construction"] == True:
+            if self.airfoil_settings["construction"]["show"] == True:
                 self.draw_dashed_line(self.airfoil, 0.01, self.zoom)
+        if self.reference: 
+            if self.reference.format == 'selig':
+                self.draw_airfoil_selig_format(self.reference)
             #self.fit_to_airfoil(self.airfoil)
 
     def draw_cor(self, position, size=5):
@@ -245,7 +253,7 @@ class ViewportOpenGL(QGLWidget):
         Current_Airfoil.update()
         glDisable(GL_DEPTH_TEST)
     
-        color = globals.AIRFLOW.preferences['airfoil_designer']['color_scheme']
+        color = self.airfoil_settings['wireframe']['color']
 
         for key in ['le', 'te', 'ps', 'ss']:
             vec_length = len(Current_Airfoil.geom[key][0])
@@ -271,7 +279,7 @@ class ViewportOpenGL(QGLWidget):
 
     def draw_cp_net(self, airfoil, zoom):
         
-        color = globals.AIRFLOW.preferences['airfoil_designer']['color_scheme']
+        color = self.airfoil_settings['control_points']['color']
         glPointSize(6.0)
 
         for key in airfoil.constr:
@@ -317,3 +325,47 @@ class ViewportOpenGL(QGLWidget):
                     glVertex3fv(start)
                     glVertex3fv(end)
                     glEnd()
+
+    def draw_airfoil_selig_format(self, reference_airfoil):
+        '''
+        Plots an airfoil based on objects Airfoil stored in obj.arf.py defined by folowing gorup of parameters:
+
+        Base parameters:
+            chord, origin_X, origin_Y
+        Leading Edge parameters:
+            le_thickness, le_depth, le_offset, le_angle
+        Trailing Edge parameters:
+            te_thickness, te_depth, te_offset, te_angle
+        Pressure Side parameters:
+            ps_fwd_angle, ps_rwd_angle, ps_fwd_accel, ps_rwd_accel
+        Suction Side parameters:    
+            ss_fwd_angle, ss_rwd_angle, ss_fwd_accel, ss_rwd_accel
+        '''
+
+        # Extract parameters
+        #reference_airfoil.update()
+        glDisable(GL_DEPTH_TEST)
+    
+        color = self.airfoil_settings['wireframe']['color']
+
+        vec_length = len(reference_airfoil.top_curve[0])
+        if vec_length > 0:
+            # Draw edges connecting front and back faces
+            glColor3f(0.5,0.5,0.5)
+            glBegin(GL_LINE_STRIP)
+            for i in range(vec_length):
+                x = reference_airfoil.top_curve[0][i]
+                y = reference_airfoil.top_curve[1][i]
+                glVertex3f(x, y, 0.0)  # force z=0
+            glEnd()
+        
+        vec_length = len(reference_airfoil.dwn_curve[0])
+        if vec_length > 0:
+
+            glColor3f(0.5,0.5,0.5)
+            glBegin(GL_LINE_STRIP)
+            for i in range(vec_length):
+                x = reference_airfoil.dwn_curve[0][i]
+                y = reference_airfoil.dwn_curve[1][i]
+                glVertex3f(x, y, 0.0)  # force z=0
+            glEnd()

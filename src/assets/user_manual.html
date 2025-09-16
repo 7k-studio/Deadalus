@@ -1,27 +1,27 @@
 <!--
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of Deadalus.
 
-AirFLOW is free software: you can redistribute it and/or modify
+Deadalus is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+Deadalus is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AirFLOW User Manual</title>
+  <title>Deadalus User Manual</title>
   <style>
     body {
       margin: 0;
@@ -134,12 +134,12 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
   <header>
       <img src="logo.png" alt="Program Logo" height="40"/>
       <img src="text_logo.png" alt="Program Text Logo" height="100"/>
-      <!-- <pre> <p style="margin: 0;">Welcome to the AirFLOW User Manual</p> </pre> -->
+      <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
   </header>
 
   <!-- Top Navigation Menu -->
   <div class="section-menu">
-    <button onclick="showSection('airflow')">AirFLOW</button>
+    <button onclick="showSection('Deadalus')">Deadalus</button>
     <button onclick="showSection('designer')">Airfoil Designer</button>
     <button onclick="showSection('wing')">Wing Workbench</button>
     <button onclick="showSection('changelog')">Changelog</button>
@@ -151,9 +151,9 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
     <nav class="sidebar">
       <h3>Contents</h3>
 
-      <ul id="menu-airflow" class="context-menu">
+      <ul id="menu-Deadalus" class="context-menu">
         <li><a href="#intro">Introduction</a></li>
-        <li><a href="#airflow">AirFLOW</a></li>
+        <li><a href="#Deadalus">Deadalus</a></li>
         <li><a href="#FileMenu">File Menu</a></li>
         <li><a href="#ProgramMenu">Program Menu</a></li>
         <li><a href="#todo">ToDo</a></li>
@@ -173,6 +173,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 
       <ul id="menu-changelog" class="context-menu" style="display: none;">
         <li><a href="#notes">Release Notes</a></li>
+        <li><a href="#0.3.X beta">0.2.X beta</a></li>
         <li><a href="#0.2.X beta">0.2.X beta</a></li>
         <li><a href="#0.1.X beta">0.1.X beta</a></li>
       </ul>
@@ -180,26 +181,26 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
 
     <!-- Main Content Area -->
     <main class="content">
-      <!-- AirFLOW Section -->
-      <div id="airflow" class="page-section active">
+      <!-- Deadalus Section -->
+      <div id="Deadalus" class="page-section active">
           <h2>Introduction</h2>
           <p>
-              Welcome to the AirFLOW user manual. AirFLOW is a program for designing, editing, and analyzing airfoils and wings. This manual will guide you through the main features and help you get started with your projects.
+              Welcome to the Deadalus user manual. Deadalus is a program for designing and editing airfoils and wings. This manual will guide you through the main features and help you get started with your projects.
           </p>
           <ul>
               <li>Design and modify airfoils with intuitive tools.</li>
               <li>Import/export airfoil files in various formats.</li>
-              <li>Use the Wing Workbench for advanced wing design (beta).</li>
+              <li>Use the Wing Workbench for advanced wing design.</li>
           </ul>
 
-          <h2>AirFLOW</h2>
-          <p>AirFLOW consists of two modules: 2D airfoil design and 3D wing design.
-            Each AirFLOW module is equipped with the <span class="highlight">File</span>, <span class="highlight">Edit</span>, <span class="highlight">View</span>, <span class="highlight">Module</span>, and <span class="highlight">About</span> menus.
+          <h2>Deadalus</h2>
+          <p>Deadalus consists of two modules: 2D airfoil design and 3D wing design.
+            Each Deadalus module is equipped with the <span class="highlight">File</span>, <span class="highlight">Edit</span>, <span class="highlight">View</span>, <span class="highlight">Module</span>, and <span class="highlight">About</span> menus.
             Global program interactions can be made through the File and About menus.
           </p>
-          <img src="airflow.png" alt="Splash Screen" height="500"/>
 
-          <h3>Splash Screen</h3>
+          <h2>Getting Started</h2>
+          <p>Once you start DEADALUS program you will be welcome by Splash Screen of the program. With splash screen you can:</p>
           <ul>
               <li><b>Create new project:</b> Start a new project.</li>
               <li><b>Open existing project:</b> Load an existing project file.</li>
@@ -239,7 +240,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
           <h2>ToDo</h2>
           <ul>
               <li>1. Improve .STEP export</li>
-              <li>2. Reopening of project from working AirFLOW instance causes problems</li>
+              <li>2. Reopening of project from working Deadalus instance causes problems</li>
               <li>3. Improve transformation of Component, Wing, Section</li>
               <li>4.a. Create ErrorOut file</li>
               <li>4.b. Create better ToolOut file output</li>
@@ -303,7 +304,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
         <details close>
                 <summary>v0.3.X beta</summary>
                 <ul>
-                    <li>Introduction of AirFLOW user manual, available under Program/Manual.</li>
+                    <li>Introduction of Deadalus user manual, available under Program/Manual.</li>
                     <li>Displaying of the overlapping OpenGL elements has been resolved. Objects don't stack up anymore and colors and viewport looks more stable.</li>
                     <li>GUI was stabilized in Wing Workbench at the cost of widgets adjustability. Change positively affected ComboBox in 'Parameters Table'</li>
                 </ul>
@@ -315,7 +316,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
                                 <ul>
                                     <li>New - now tree menu is cleared and project resets</li>
                                     <li>Open - opens existing project from db.tgz database</li>
-                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
                                 </ul>
                             </li>
                             <li><b>Edit menu:</b>
@@ -352,7 +353,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
                         <ul>
                             <li>New - now tree menu is cleared and project resets</li>
                             <li>Open - opens existing project from db.tgz database</li>
-                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
                         </ul>
                     </li>
                 </ul>
@@ -372,7 +373,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
                                 <ul>
                                     <li>New - now tree menu is cleared and project resets</li>
                                     <li>Open - opens existing project from db.tgz database</li>
-                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
                                 </ul>
                             </li>
                             <li><b>Edit menu:</b>
@@ -409,7 +410,7 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
                         <ul>
                             <li>New - now tree menu is cleared and project resets</li>
                             <li>Open - opens existing project from db.tgz database</li>
-                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.airflow)</li>
+                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
                         </ul>
                     </li>
                 </ul>
@@ -488,8 +489,8 @@ along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
       if (menu) menu.style.display = 'block';
     }
 
-    // Default to AirFLOW section on load
-    window.onload = () => showSection('airflow');
+    // Default to Deadalus section on load
+    window.onload = () => showSection('Deadalus');
   </script>
 
 </body>

@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -149,7 +149,7 @@ class Tabele(QTableWidget):
             self.populate_table(selected_airfoil)
             # Update self.params with the selected airfoil's parameters
             self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
-            self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
+            #self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
             self.open_gl.set_airfoil_to_display(selected_airfoil)
 
     def save_current_airfoil_state(self):
@@ -180,7 +180,7 @@ class Tabele(QTableWidget):
                         except ValueError:
                             print(f"ARFDES > Invalid value for parameter '{key}', skipping update.")
         
-        self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
+        #self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
         self.open_gl.update()

@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -31,9 +31,9 @@ import src.globals as globals
 class SplashScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__()
-        self.AIRFLOW = parent
+        self.DEADALUS = parent
         self.setWindowTitle("Splash Screen")
-        self.setFixedSize(500, 400)
+        self.setFixedSize(500, 500)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         #self.setAttribute(Qt.WA_TranslucentBackground, True)
         #self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -43,18 +43,18 @@ class SplashScreen(QWidget):
 
         # Add splash image
         splash_label = QLabel(self)
-        pixmap = QPixmap("src/assets/splash.png")
+        pixmap = QPixmap("src/assets/logo.png")
         if pixmap.isNull():
-            print("Error: 'splash.png' not found or invalid path.")
+            print("Error: 'logo.png' not found or invalid path.")
         splash_label.setPixmap(pixmap)
         splash_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(splash_label)
 
-        program_label = QLabel('AirFoil & Lifting Objects Workbench')
+        program_label = QLabel('Deadalus Airfoil & Wing designer')
         program_label.setStyleSheet("font-size: 12px; font-weight: regular; color: black;")
         layout.addWidget(program_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
-        version_label = QLabel('v{}'.format(self.AIRFLOW.program_version))
+        version_label = QLabel('v{}'.format(self.DEADALUS.program_version))
         version_label.setStyleSheet("font-size: 12px; font-weight: regular; color: black;")
         layout.addWidget(version_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
@@ -99,18 +99,18 @@ class SplashScreen(QWidget):
         layout.insertLayout(0, close_layout)  # Insert at the top of the main layout
 
     def new_project(self):
-        """Create new AirFLOW project and open the AirfoilDesigner window."""
+        """Create new DEADALUS project and open the AirfoilDesigner window."""
         self.PROJECT = globals.PROJECT.newProject()
-        self.airfoil_designer_window = AirfoilDesigner(globals.AIRFLOW, globals.PROJECT)  # Pass airfoil_list
+        self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
         self.airfoil_designer_window.show()
         self.close()
 
     def open_project(self):
-        """Load AirFLOW project and open the AirfoilDesigner window."""
+        """Load DEADALUS project and open the AirfoilDesigner window."""
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "AirFLOW Database Files (*.afdb);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DEADALUS Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             self.PROJECT = globals.loadProject(fileName)
-            self.airfoil_designer_window = AirfoilDesigner(globals.AIRFLOW, globals.PROJECT)  # Pass airfoil_list
+            self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
             self.airfoil_designer_window.show()
             self.close()

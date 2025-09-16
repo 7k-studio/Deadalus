@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of AirFLOW.
+This file is part of DEADALUS.
 
-AirFLOW is free software: you can redistribute it and/or modify
+DEADALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-AirFLOW is distributed in the hope that it will be useful,
+DEADALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with AirFLOW.  If not, see <http://www.gnu.org/licenses/>.
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -51,25 +51,25 @@ def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
 
         # Draw the top and bottom vertices of the tube
         glVertex3f(origin_x, y, z)
-        glVertex3f(origin_x-(length * zoom), y, z)
+        glVertex3f(origin_x+(length * zoom), y, z)
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x-(arrow*zoom), origin_y, origin_z)
+    glVertex3f(origin_x+(arrow*zoom), origin_y, origin_z)
     for i in range(quality + 1):
         angle = i * angle_step
         y = origin_y + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
-        glVertex3f(origin_x-(length*zoom), y, z)
+        glVertex3f(origin_x+(length*zoom), y, z)
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x-(length*zoom), origin_y, origin_z) 
+    glVertex3f(origin_x+(length*zoom), origin_y, origin_z) 
     for i in range(quality + 1):
         angle = i * angle_step
         y = origin_y + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
-        glVertex3f(origin_x-(length*zoom), y, z)
+        glVertex3f(origin_x+(length*zoom), y, z)
     glEnd()
 
 
@@ -85,25 +85,25 @@ def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
 
         # Draw the top and bottom vertices of the tube
         glVertex3f(x, origin_y, z)
-        glVertex3f(x, origin_y-(length * zoom), z)
+        glVertex3f(x, origin_y+(length * zoom), z)
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x, origin_y-(arrow*zoom), origin_z)  # Center of the base circle
+    glVertex3f(origin_x, origin_y+(arrow*zoom), origin_z)  # Center of the base circle
     for i in range(quality + 1):
         angle = i * angle_step
         x = origin_x + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
-        glVertex3f(x, origin_y-(length*zoom), z)
+        glVertex3f(x, origin_y+(length*zoom), z)
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x, origin_y-(length*zoom), origin_z) 
+    glVertex3f(origin_x, origin_y+(length*zoom), origin_z) 
     for i in range(quality + 1):
         angle = i * angle_step
         x = origin_x + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
-        glVertex3f(x, origin_y-(length*zoom), z)
+        glVertex3f(x, origin_y+(length*zoom), z)
     glEnd()
 
 
@@ -120,25 +120,25 @@ def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
 
         # Draw the top and bottom vertices of the tube
         glVertex3f(x, y, origin_z)
-        glVertex3f(x, y, origin_z - (length * zoom))
+        glVertex3f(x, y, origin_z + (length * zoom))
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x, origin_y, origin_z-(arrow*zoom))  # Center of the base circle
+    glVertex3f(origin_x, origin_y, origin_z+(arrow*zoom))  # Center of the base circle
     for i in range(quality + 1):
         angle = i * angle_step
         y = origin_y + (diameter) * math.cos(angle)
         z = origin_z + (diameter) * math.sin(angle)
-        glVertex3f(x, y, origin_z-(length*zoom))
+        glVertex3f(x, y, origin_z+(length*zoom))
     glEnd()
 
     glBegin(GL_TRIANGLE_FAN)
-    glVertex3f(origin_x, origin_y, origin_z-(length*zoom)) 
+    glVertex3f(origin_x, origin_y, origin_z+(length*zoom)) 
     for i in range(quality + 1):
         angle = i * angle_step
         x = origin_x + (diameter) * math.cos(angle)
         y = origin_y + (diameter) * math.sin(angle)
-        glVertex3f(x, y, origin_z-(length*zoom))
+        glVertex3f(x, y, origin_z+(length*zoom))
     glEnd()
 
 def draw_grid(self, linewidth=1, size=100, step=1, zoom=-10):
