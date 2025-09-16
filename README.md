@@ -1,4 +1,4 @@
-# AirFoil & Lifting Objects Workbench AirFLOW
+# Deadalus
 
 This project is a CAD software whitch allows user to create an airfoil from scratch, or match it with reference, and to create wing out of created airfoils.
 Project consists of two modules:
