@@ -133,7 +133,6 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
   <!-- Top Header -->
   <header>
       <img src="logo.png" alt="Program Logo" height="40"/>
-      <img src="text_logo.png" alt="Program Text Logo" height="100"/>
       <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
   </header>
 
@@ -239,13 +238,18 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
           
           <h2>ToDo</h2>
           <ul>
-              <li>1. Improve .STEP export</li>
-              <li>2. Reopening of project from working Deadalus instance causes problems</li>
-              <li>3. Improve transformation of Component, Wing, Section</li>
+              <li><s>1. Improve .STEP export: for non spline wings / Step for multi element wing / Step for 4x3 grid</s></li>
+              <li><s>2. Reopening of project from working Deadalus instance causes problems</s></li>
+              <li><s>3. Improve transformation of Component, Wing, Section</s></li>
               <li>4.a. Create ErrorOut file</li>
               <li>4.b. Create better ToolOut file output</li>
-              <li>5.a. Additional Segment rotation options should be available</li>
-              <li>5.b. Improvement/Change of Airfoil Designer viewport from MatPlotLib to OpenGL</li>
+              <li><s>5. Additional Segment rotation options should be available</s></li>
+              <li><s>6. Improvement/Change of Airfoil Designer viewport from MatPlotLib to OpenGL</s></li>
+              <li><s>7. Refreshing of 3D viewport on update</s></li>
+              <li><s>8. Multi segment wing mess - surfaces go mad</s></li>
+              <li><s>9. Segments of G0 connection and wings of one G1 connection</s></li>
+              <li><s>10. Update preferences window</s></li>
+              <li><s>11. Reference handling in new OpenGL 2D viewport</s></li>
 
           </ul>
           <img src="STEP_export.jpg" alt="Wing Workbench" height="500"/>
@@ -301,64 +305,55 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
         <h2>Change Log</h2>
         <h3 id="notes">Release Notes</h3>
         <p>Details of the latest updates and fixes.</p>
-        <details close>
-                <summary>v0.3.X beta</summary>
+        <details open>
+                <summary>v0.3.0 beta</summary>
                 <ul>
                     <li>Introduction of Deadalus user manual, available under Program/Manual.</li>
-                    <li>Displaying of the overlapping OpenGL elements has been resolved. Objects don't stack up anymore and colors and viewport looks more stable.</li>
-                    <li>GUI was stabilized in Wing Workbench at the cost of widgets adjustability. Change positively affected ComboBox in 'Parameters Table'</li>
+                    <li>Introduction of more complex Open GL viewports</li>
+                    <li>.STEP export is introduced. It is available at Wing Workbench in File menu. It allows to export 3D wings (for now tested only for one wing at the time) but works for line-connected(G0 or 4x2 grids) and spline connected (G1 or 4x3 / 4x4) surfaces</li>
                 </ul>
-                <p><b>Currently available elements and functions are listed below:</b></p>
+                <p><b>More detailed changes are listed below:</b></p>
                 <ul>
                     <li><b>Airfoil designer:</b>
+                      <p>Airfoil designer now has an OpeGL viewport. It allows for more free lookaround and more freedom with designing. It also repairs the problem of 'jumping' zoom back to original on parameter change.</p>
                         <ul>
                             <li><b>File:</b>
                                 <ul>
-                                    <li>New - now tree menu is cleared and project resets</li>
-                                    <li>Open - opens existing project from db.tgz database</li>
-                                    <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
+                                    <li>Open - opens existing project from .ddls file</li>
+                                    <li>Save - saves current project to singular .ddls file containing all airfoils parameters and program info with wing parameters. It's now stored within one location/singular file.<li>
+                                    <li>Exit - I don't know... try it.. maybe it will work, maybe it will crash the program... one way to find out</li>
                                 </ul>
                             </li>
                             <li><b>Edit menu:</b>
                                 <ul>
-                                    <li>Create - creates new airfoil</li>
-                                    <li>Append - appends airfoil from existing .arf file</li>
-                                    <li>Delete - deletes selected airfoil</li>
-                                    <li>Save - saves airfoil to .arf file</li>
-                                    <li>Export - exports airfoil to .dxf file</li>
-                                    <li>Rename - renames airfoil</li>
-                                    <li>Edit description - edits description of an airfoil</li>
-                                    <li>Fit2Reference - fits airfoil to reference airfoil (beta feature)</li>
+                                    <li>No changes, hopeful everything works like before.</li>
                                 </ul>
                             </li>
                             <li><b>View:</b>
                                 <ul>
-                                    <li>Show reference - Shows reference of airfoil in SELIG format</li>
-                                </ul>
-                            </li>
-                            <li><b>Module:</b>
-                                <ul>
-                                    <li>Wing module - open Wing Workbench</li>
+                                    <li>Show reference - Shows reference of airfoil in SELIG format. Now adjusted for OpenGL viewport</li>
                                 </ul>
                             </li>
                             <li><b>Program:</b>
                                 <ul>
+                                    <li>User Manual - But you know that, you are reading this :D</li>
                                     <li>About - shows not so useful about</li>
-                                    <li>Preferences - opens preferences window. Allows user to change settings</li>
+                                    <li>Preferences - opens preferences window. Allows user to change settings. Now adjusted to the new format so more control in more pleasant way. Importantly you can adjuste the performance of the program in here. You can control how detailed are the wireframe and solids/surfaces inside viewport. This is important in terms of NURBS surface in 3D View. Going 100% migth be laggy on slower computers as it currently is on good one. Optimization is yet to be introduced</li>
                                 </ul>
                             </li>
                         </ul>
                     </li>
                     <li><b>Wing designer:</b>
+                      <p>Wing designer now has more advanced and more pleasent OpenGL viewport than before. It allows for more free lookaround and more freedom with designing. LMB to rotate, MMB to translate, RMB to zoom, Mouse Scroll works as well. Double click to reset the view</p>
                         <ul>
-                            <li>New - now tree menu is cleared and project resets</li>
-                            <li>Open - opens existing project from db.tgz database</li>
-                            <li>Save - saves current project to db.tgz format containing all airfoils parameters (.arf) and program info with wing parameters (.Deadalus)</li>
+                            <li>Export - allows to export created with Deadalus wing to .STEP format.</li>
+                            <li>Delete objects - now you can add and delete objects in program... How convenient?</li>
+                            <li>View menu now has number of camera pozitions X+/Y+/Z+/X-/Y-/Z- where first leter describes the axis and +/- symbol defines is camera is pointing ahead or backward</li>
                         </ul>
                     </li>
                 </ul>
         </details>
-        <details open>
+        <details close>
                 <summary>v0.2.X beta</summary>
                 <ul>
                     <li>Introduction of project/file save and load functionality.</li>
