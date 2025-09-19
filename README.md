@@ -1,18 +1,19 @@
-# AirFoil & Lifting Objects Workbench AirFLOW
+# Deadalus
 
 This project is a CAD software whitch allows user to create an airfoil from scratch, or match it with reference, and to create wing out of created airfoils.
 Project consists of two modules:
 1. Airfoil designer - for airfoil operations
 2. Wing Workbench - for wing creation and modification
    
-AirFLOW implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The application allows for mouse interaction to translate, rotate, and zoom within the 3D space. It features a structured layout with a tree menu for navigation, a dropdown menu for basic functions, and a table widgets for user interaction.
+Deadalus implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The application allows for mouse interaction to translate, rotate, and zoom within the 3D space. It features a structured layout with a tree menu for navigation, a dropdown menu for basic functions, and a table widgets for user interaction.
 
 ## Project Structure
 
 ```
-AirFLOW
+Deadalus
+| main.py # Entey point of the application
 ├── src
-│   ├── main.py                # Entry point of the application
+│   ├── main.py                
 |   ├── preferences.py
 |   ├── globals.py
 |   ├── arfdes
@@ -23,6 +24,8 @@ AirFLOW
 |   ├── data
 |   ├── images
 |   ├── obj
+|   |   ├── objects2D.py
+|   |   ├── objects3D.py
 |   |   ├── aero.py
 |   |   └── car.py
 |   ├── opengl
