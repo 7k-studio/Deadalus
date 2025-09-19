@@ -1,7 +1,7 @@
 # Deadalus
 
-This project is a CAD software whitch allows user to create an airfoil from scratch, or match it with reference, and to create wing out of created airfoils.
-Project consists of two modules:
+This project is a free CAD software whitch allows user to create an airfoil from scratch, or match it with reference, and to create wing out of created airfoils.
+Program consists of two modules:
 1. Airfoil designer - for airfoil operations
 2. Wing Workbench - for wing creation and modification
    
@@ -11,46 +11,57 @@ Deadalus implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The applicatio
 
 ```
 Deadalus
-| main.py # Entey point of the application
+├── main.py                      # Entry point of the application
 ├── src
-│   ├── main.py                
-|   ├── preferences.py
-|   ├── globals.py
+│   ├── settings                 # Store for user settings
+|   ├── preferences.py           # Loads / Saves / Changes settngs
+|   ├── globals.py               # Classes for whole program to work
 |   ├── arfdes
-|   |   ├── airfoil_designer.py
-|   |   ├── menu_bar.py
-|   |   ├── plot_canvas.py
-|   |   └── widget_tabele.py
-|   ├── data
-|   ├── images
+|   |   ├── airfoil_designer.py  # Main window layout and setup
+|   |   ├── fit_2_reference.py   # Experimental function for reference matching
+|   |   ├── menu_bar.py          # Dropdown menu for file operations
+|   |   ├── plot_canvas.py       # Obsolete viewport
+|   |   ├── tools_airfoil.py     # Utility functions and helpers
+|   |   ├── widget_tabele.py     # Tabele for object properties
+|   |   └── widget_tree.py       # Tree menu for objects store
+|   |
+|   ├── assets                   # Storage for user manual and images
+|   ├── data                     # Storage for reference and established files
 |   ├── obj
-|   |   ├── objects2D.py
-|   |   ├── objects3D.py
-|   |   ├── aero.py
-|   |   └── car.py
+|   |   ├── car.py               # Classes for reference
+|   |   ├── draw_construction.py # Helper
+|   |   ├── objects2D.py         # Classes for 2D objects
+|   |   └── objects3D.py         # Classes for 3D objects
 |   ├── opengl
-|   |   ├── bckgrd.py
-|   |   ├── shapes.py
-|   |   ├── test_cube.py
-│   │   ├── viewport.py        # OpenGL viewport handling
+|   |   ├── bckgrd.py            # OpenGL functions for 3D drawings
+|   |   ├── construction.py      # OpenGL functions for 3D drawings
+|   |   ├── solid.py             # OpenGL functions for 3D drawings
+|   |   ├── test_cube.py         # OpenGL functions for 3D drawings
+│   │   ├── viewport2D.py        # OpenGL viewport for Airfoil Designer
+│   │   ├── viewport3D.py        # OpenGL viewport for Wing Designer
+│   │   ├── wireframe.py         # OpenGL functions for 3D drawings
 │   │   └── shaders
 │   │       ├── vertex_shader.glsl   # Vertex shader code
 │   │       └── fragment_shader.glsl # Fragment shader code
 |   ├── splash
+│   │   └── splash_screen.py    # Welcome screen on program init
 |   ├── utils
-|   |   ├── dxf.py
-|   |   ├── step.py
-|   |   ├── tools_airfoil.py
-|   |   ├── tools_program.py
-|   |   ├── tools_wing.py
-│   |   └── helpers.py         # Utility functions and helpers
-│   ├── wngwb
-│   │   ├── main_window.py     # Main window layout and setup
-│   │   ├── tree_menu.py       # Tree menu for navigation
-│   │   ├── console_widget.py   # Command-line-like interface for user input
-│   │   └── menu_bar.py        # Dropdown menu for file operations
-├── requirements.txt           # Project dependencies
-└── README.md                  # Project documentation
+|   |   ├── dxf.py              # DXF  export script
+|   |   ├── step.py             # STEP export script
+│   |   └── tools_program.py    # Utility functions and helpers
+│   └── wngwb
+│       ├── console_widget.py   # Command-line-like interface for user input
+│       ├── main_window.py      # Main window layout and setup
+│       ├── menu_bar.py         # Dropdown menu for file operations
+│       ├── menu_context.py     # Future pleaceholder for context menu
+│       ├── tools_wing.py       # Utility functions and helpers
+│       ├── widget_tabele.py    # Tabele for object properties
+│       └── widget_tree.py      # Tree menu for objects store    
+├── .venv
+├── requirements.txt            # Program dependencies
+├── LICENSE                     # Program licence
+├── logo.ico                    # Program logo
+└── README.md                   # Program documentation
 ```
 
 ## Setup Instructions
@@ -80,8 +91,10 @@ Deadalus
 
 ## Features
 
-- MatPlotLib graphics for Airfoil Designer
-- 3D OpenGL viewport with mouse interaction for:
+- 2D OpenGl viewport with mouse interaction for Airfoil Designer
+  - Translation
+  - Zoom
+- 3D OpenGL viewport with mouse interaction for Wing designer:
   - Translation
   - Rotation
   - Zoom
@@ -90,7 +103,7 @@ Deadalus
 
 ## Usage
 
-Once the application is running, you can interact with the 3D viewport using the mouse. Use the tree menu to navigate through different components of the application, and utilize the console widget for input and feedback.
+Once the application is running, you can create a parametric airfoil and wing design. Use interactive tabele of parameters to modify the objects. Interact with the 2D/3D viewport using the mouse to preview created objects. Use the tree menu to navigate through different components of the application. Use export functions to save project to standard CAD format like: .dxf and .step. Use save button to save current state of the project within Deadalus program. 
 
 ## License
 

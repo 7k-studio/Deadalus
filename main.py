@@ -21,9 +21,9 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 import sys
 # Redirect stdout and stderr to a log file
-#log_file = open("toolout.log", "w")
-#sys.stdout = log_file
-#sys.stderr = log_file
+log_file = open("toolout.log", "w")
+sys.stdout = log_file
+sys.stderr = log_file
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
