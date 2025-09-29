@@ -19,6 +19,7 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
+import logging
 from datetime import date
 import json
 import tempfile
@@ -40,6 +41,7 @@ class Program:
     def __init__(self):
         self.program_name = "Deadalus"
         self.program_version = "0.3.0-beta"
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferences = {
             'general': {
@@ -55,7 +57,7 @@ class Program:
                     "grid":{
                         "show": True
                     },
-                    "ruller": {
+                    "ruler": {
                         "show": True
                     },
                 },
@@ -130,11 +132,11 @@ class Program:
                 for section in self.preferences:
                     if section in loaded and isinstance(loaded[section], dict):
                         self.preferences[section].update(loaded[section])
-                #print("Preferences loaded successfully.")
+                self.logger.info("Preferences loaded successfully.")
         except FileNotFoundError:
-            print("DEADALUS > Preferences file not found. Using default settings.")
+            self.logger.warning("Preferences file not found. Using default settings.")
         except json.JSONDecodeError:
-            print("ERROR: decoding preferences file. Using default settings.")
+            self.logger.error("Decoding preferences file. Using default settings.")
 
     def showAboutDialog(self, parent=None):
         dialog = QDialog(parent)
@@ -187,12 +189,17 @@ class Program:
 
 class Project:
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.project_name = "Project"
         self.project_date = date.today().strftime("%Y-%m-%d")
         self.project_description = "Project description"
         self.project_path = ""  # Path to the project directory
-        self.project_components = []
+        
         self.project_airfoils = []
+        self.airfoils_nominal = []
+
+        self.project_components = []
+        self.components_nominal = []
 
     def newProject(self):
         """Create a new project."""
@@ -315,7 +322,7 @@ def saveProject(fileName):
     with open(fileName, "w") as f:
         json.dump(data, f, indent=2)
 
-    print("DEADALUS > Project archive successfully saved")
+    PROJECT.logger.info("Project archive successfully saved")
 
 def loadProject(fileName):
     from src.arfdes.tools_airfoil import load_airfoil_from_json
@@ -324,7 +331,7 @@ def loadProject(fileName):
     base_name = os.path.basename(fileName)
     warning_count = 0
 
-    print(f"DEADALUS > open archive project: {base_name}")
+    PROJECT.logger.info(f"Open archive project: {fileName}")
     # Open the JSON file directly (as saved by saveProject)
     with open(fileName, "r") as f:
         data = json.load(f)
@@ -339,7 +346,7 @@ def loadProject(fileName):
             program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
             if program_version[1] != file_version[1] or program_version[0] != file_version[0]:
-                print("WARNING: Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
+                PROJECT.logger.warning("Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
                 warning_count += 1
 
     # Restore PROJECT info
@@ -395,11 +402,6 @@ def loadProject(fileName):
                 component.wings.append(wing)
             PROJECT.project_components.append(component)
 
-    if warning_count == 0:
-        print(f"DEADALUS > Project archive '{base_name}' successfully loaded")
-    else: 
-        print(f"DEADALUS > Project archive '{base_name}' loaded with ({warning_count}) warnings, check might be necessary!")
-
     airf_no = 0
     comp_no = 0
     wing_no = 0
@@ -416,22 +418,25 @@ def loadProject(fileName):
         comp_no += 1
 
     objects_to_update = comp_no + wing_no + segm_no + airf_no
-    print("----------------------")
-    print("|   LOADED OBJECTS   |")
-    print("----------------------")
-    print("|   Components: ", comp_no, "  |")
-    print("|   Wings:      ", wing_no, "  |")
-    print("|   Segments:   ", segm_no, "  |")
-    print("|   Airfoils:   ", airf_no, "  |")
-    print("----------------------")
-    print("|  ALL OBJECTS: ", airf_no, "  |")
-    print("----------------------")
-    print(f"\nRebuilidng geometries...")
+    report = [
+    ("Objects found inside saved file:\n"),
+    (f"----------------------"),
+    (f"|   LOADED OBJECTS   |"),
+    (f"----------------------"),
+    (f"|   Components:   {comp_no}  |"),
+    (f"|   Wings:        {wing_no}  |"),
+    (f"|   Segments:     {segm_no}  |"),
+    (f"|   Airfoils:     {airf_no}  |"),
+    (f"----------------------"),
+    (f"|  ALL OBJECTS:   {objects_to_update}  |"),
+    (f"----------------------")]
+
+    PROJECT.logger.info(f"Rebuilidng geometries...")
 
     for airfoil in PROJECT.project_airfoils:
         airfoil.update()
         objects_updated += 1
-        print(f"{objects_updated} / {objects_to_update}")
+        PROJECT.logger.debug(f"{objects_updated} / {objects_to_update}")
     for c in range(len(PROJECT.project_components)):
         component = PROJECT.project_components[c]
         for w in range(len(component.wings)):
@@ -441,16 +446,21 @@ def loadProject(fileName):
                 segment.airfoil.update()
                 segment.update(c, w, s)
                 objects_updated += 1
-                print(f"{objects_updated} / {objects_to_update}")
+                PROJECT.logger.debug(f"{objects_updated} / {objects_to_update}")
             wing.update(c, w, s)
             objects_updated += 1
-            print(f"{objects_updated} / {objects_to_update}")
+            PROJECT.logger.debug(f"{objects_updated} / {objects_to_update}")
         component.update(c, w, s)
         objects_updated += 1
-        print(f"{objects_updated} / {objects_to_update}")
-    print("Update finished!")
+        PROJECT.logger.debug(f"{objects_updated} / {objects_to_update}")
+    PROJECT.logger.debug("Update finished!")
 
-    print(f"DEADALUS > Project successfully loaded from {fileName}")
+    if warning_count == 0:
+        report.insert(0, (f"Project archive '{base_name}' successfully loaded")) 
+    else: 
+        report.insert(0, (f"Project archive '{base_name}' loaded with ({warning_count}) warnings, check might be necessary!"))
+        
+    PROJECT.logger.info("\n".join(report))
 
     return True
 

@@ -131,8 +131,8 @@ class PreferencesWindow(QDialog):
         self.a_viewport_show_grid = QCheckBox("Show grid")
         self.a_viewport_show_grid.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['grid']['show'])
 
-        self.a_viewport_show_ruller = QCheckBox("Show ruller")
-        self.a_viewport_show_ruller.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['ruller']['show'])
+        self.a_viewport_show_ruller = QCheckBox("Show ruler")
+        self.a_viewport_show_ruller.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['ruler']['show'])
 
         airfoil_text = QLabel("Airfoil:")
         airfoil_text.setToolTip("")
@@ -203,7 +203,7 @@ class PreferencesWindow(QDialog):
 
         # --- AIRFOIL DESIGNER TAB --- #
         DEADALUS.preferences['airfoil_designer']["viewport"]["grid"]['show'] = self.a_viewport_show_grid.isChecked()
-        DEADALUS.preferences['airfoil_designer']["viewport"]["ruller"]['show'] = self.a_viewport_show_ruller.isChecked()
+        DEADALUS.preferences['airfoil_designer']["viewport"]["ruler"]['show'] = self.a_viewport_show_ruller.isChecked()
 
         DEADALUS.preferences['airfoil_designer']["airfoil"]["control_points"]['show'] = self.airfoil_show_control_points.isChecked()
         DEADALUS.preferences['airfoil_designer']["airfoil"]["construction"]['show'] = self.airfoil_show_construction.isChecked()
@@ -211,7 +211,7 @@ class PreferencesWindow(QDialog):
 
         # --- WING DESIGNER TAB --- #
         DEADALUS.preferences['wing_designer']["viewport"]["grid"]['show'] = self.w_viewport_show_grid.isChecked()
-        #DEADALUS.preferences['wing_designer']["viewport"]["ruller"]['show'] = self.w_viewport_show_ruller.isChecked()
+        #DEADALUS.preferences['wing_designer']["viewport"]["ruler"]['show'] = self.w_viewport_show_ruller.isChecked()
 
         DEADALUS.preferences['wing_designer']["wing"]["grid"]['show'] = self.wing_show_grid.isChecked()
         DEADALUS.preferences['wing_designer']["wing"]["wireframe"]['show'] = self.wing_show_wireframe.isChecked()
@@ -235,8 +235,8 @@ class PreferencesWindow(QDialog):
                 "grid": {
                     "show": DEADALUS.preferences['airfoil_designer']['viewport']['grid'].get("show", True)
                     },
-                "ruller": {
-                    "show": DEADALUS.preferences['airfoil_designer']['viewport']['ruller'].get("show", True)
+                "ruler": {
+                    "show": DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True)
                     },
             },
             "airfoil": {
@@ -259,7 +259,7 @@ class PreferencesWindow(QDialog):
                 "grid": {
                     "show": DEADALUS.preferences['wing_designer']['viewport']['grid'].get("show", True)
                     },
-                #"ruller": DEADALUS.preferences['airfoil_designer']['viewport']['ruller'].get("show", True),
+                #"ruler": DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True),
             },
             "wing": {
                 "grid":{

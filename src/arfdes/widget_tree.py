@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
@@ -30,6 +30,7 @@ from tqdm import tqdm
 import json
 import src.obj
 import src.globals as globals  # Import from globals.py
+logger = logging.getLogger(__name__)
 
 def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
     """Add an airfoil to the list and tree menu."""
@@ -38,10 +39,10 @@ def add_airfoil_to_tree(tree_menu=None, name="Unknown", airfoil_obj=None):
     description = airfoil_obj.infos.get('description', 'No description')
     tree_item = QTreeWidgetItem([name, str(modification_date), str(creation_date), description])
     tree_menu.addTopLevelItem(tree_item)
-    print(f"ARFDES > Airfoil '{name}' added to the tree")
+    logger.info(f"Airfoil '{name}' added to the tree")
 
 def refresh_tree(tree_menu=None):
     tree_menu.clear()  # Clear existing items
     for airfoil in globals.PROJECT.project_airfoils:
         add_airfoil_to_tree(tree_menu, airfoil.infos['name'], airfoil)
-    print("ARFDES > tree is refreshed")
+    logger.info("Tree is refreshed")

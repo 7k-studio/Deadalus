@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
     QPushButton, QLineEdit, QHeaderView, QApplication
@@ -32,12 +32,12 @@ import src.globals as globals  # Import from globals.py
 class Tabele(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None, canvas=None, open_gl=None, tree_menu=None, project=None):
+    def __init__(self, parent=None, open_gl=None, tree_menu=None, project=None):
         super(Tabele, self).__init__(parent)
-        self.canvas = canvas
         self.open_gl = open_gl
         self.project = project
         self.tree_menu = tree_menu
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.Up_ref_points = None  # Add attribute to store Up_ref_points
         self.Dwn_ref_points = None  # Add attribute to store Dwn_ref_points
         self.init_tabele()
@@ -48,8 +48,8 @@ class Tabele(QTableWidget):
 
         # Properly initialize the table without overwriting `self`
         self.setRowCount(len(self.params))
-        self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal"])
+        self.setColumnCount(4)
+        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal", "Unit"])
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setStretchLastSection(True)
         #self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -95,11 +95,10 @@ class Tabele(QTableWidget):
             new_value = float(value_input.text())
             self.airfoil['params'][param_name] = new_value
             # Pass reference points to update_plot
-            #self.canvas.update_plot(self.airfoil, self.Up_ref_points, self.Dwn_ref_points)
             self.save_current_airfoil_state()
         except ValueError:
             # Restore the last valid value if input is invalid
-            print("WARNING: Invalid input, restoring last valid value.")
+            self.logger.warning("Invalid input, restoring last valid value.")
             value_input.setText(str(self.airfoil['params'][param_name]))
     
     def _adjust_value_with_modifiers(self, row, direction):
@@ -125,12 +124,15 @@ class Tabele(QTableWidget):
         new_value = format(new_value, '.4f')  # Format value to 2 decimal places
         value_input.setText(str(new_value))
         # Pass reference points to update_plot
-        #self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)
         self.save_current_airfoil_state()  # Save changes to the airfoil list
 
     def populate_table(self, airfoil_obj):
         """Populate the table with data from an airfoil object."""
         self.setRowCount(0)  # Clear existing rows
+        param_units = airfoil_obj.unit.items()
+
+        self.logger.debug(param_units)
+
         for key, value in airfoil_obj.params.items():
             row = self.rowCount()
             self.insertRow(row)
@@ -140,6 +142,15 @@ class Tabele(QTableWidget):
             nominal_value = QTableWidgetItem(str(value))
             nominal_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
+            unit = airfoil_obj.unit.get(key, '')
+            if unit == 'length':
+                unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
+            if unit == 'angle':
+                unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+            unit_value = QTableWidgetItem(str(unit))
+            unit_value.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 3, unit_value)
+
 
     def display_selected_airfoil(self, item):
         """Display the selected airfoil's data in the table."""
@@ -149,7 +160,6 @@ class Tabele(QTableWidget):
             self.populate_table(selected_airfoil)
             # Update self.params with the selected airfoil's parameters
             self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
-            #self.canvas.update_plot(index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
             self.open_gl.set_airfoil_to_display(selected_airfoil)
 
     def save_current_airfoil_state(self):
@@ -178,9 +188,8 @@ class Tabele(QTableWidget):
                             value = float(value_input.text())
                             self.params[key] = value
                         except ValueError:
-                            print(f"ARFDES > Invalid value for parameter '{key}', skipping update.")
+                            self.logger.error(f"Invalid value for parameter '{key}', skipping update.")
         
-        #self.canvas.update_plot(airfoil_index, self.Up_ref_points, self.Dwn_ref_points)  # Update the plot
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
         self.open_gl.update()

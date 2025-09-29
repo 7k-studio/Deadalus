@@ -18,12 +18,10 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
-# Redirect stdout and stderr to a log file
-log_file = open("toolout.log", "w")
-sys.stdout = log_file
-sys.stderr = log_file
+import os
+
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
@@ -33,7 +31,6 @@ import datetime
 
 def main():
     app = QApplication(sys.argv)
-
     icon = QIcon("src/assets/logo.png")
     app.setWindowIcon(icon)
 
@@ -42,37 +39,46 @@ def main():
     
     sys.exit(app.exec_())
 
-def header_old():
-    print("      ____________     ___                 _________    ___          ___________     ___           ___  ")
-    print("     /  ______   /\   /__/\               /  ______/\  /  /\        /  _____   /\   /  /\         /  /\ ")
-    print("    /  /\____/  / /   \__\/  _______     /  /\_____\/ /  / /       /  /\___/  / /  /  / /        /  / / ")
-    print("   /  /_/___/  / /  ___     /  ____/\   /  /_/___    /  / /       /  / /  /  / /  /  / / ___    /  / /  ")
-    print("  /  ______   / /  /  /\   /  /\___\/  /  ______/\  /  / /       /  / /  /  / /  /  / / /  /\  /  / /   ")
-    print(" /  /\____/  / /  /  / /  /  / /      /  /\_____\/ /  /_/____   /  /_/__/  / /  /  /_/_/  /_/_/  / /    ")
-    print("/__/ /   /__/ /  /__/ /  /__/ /      /__/ /       /_________/\ /__________/ /  /________________/ /     ")
-    print("\__\/    \__\/   \__\/   \__\/       \__\/        \_________\/ \__________\/   \________________\/      ")
-    print(" ")
-    print(f"Program version: {globals.DEADALUS.program_version}")
-    print("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/|")
-    print("")
-    print(f"Program opened on: {datetime.datetime.now()}")
-
-def header():
-    print("       ________        __________    ____________    ________        ____________    ___            ___      ___    ___________  ")
-    print("      /  ____  \      /  _______/\  /  ______   /\  /  ____  \      /  ______   /\  /  /\          /  /\    /  /\  /  ________/\ ")
-    print("     /  /\___\  \    /  /\______\/ /  /\____/  / / /  /\___\  \    /  /\____/  / / /  / /         /  / /   /  / / /  /\_______\/ ")
-    print("    /  / /   /  /\  /  /_/____    /  /_/___/  / / /  / /   /  /\  /  /_/___/  / / /  / /         /  / /   /  / / /  /_/______    ")
-    print("   /  / /   /  / / /  _______/\  /  ______   / / /  / /   /  / / /  ______   / / /  / /         /  / /   /  / / /________   /\   ")
-    print("  /  / /   /  / / /  /\______\/ /  /\____/  / / /  / /   /  / / /  /\____/  / / /  / /         /  / /   /  / /  \_______/  / /   ")
-    print(" /  /_/___/  / / /  /_/_____   /  / /   /  / / /  /_/___/  / / /  / /   /  / / /  /_/______   /  /_/___/  / / _________/  / /    ")
-    print("/___________/ / /__________/\ /__/ /   /__/ / /___________/ / /__/ /   /__/ / /___________/\ /___________/ / /___________/ /     ")
-    print("\___________\/  \__________\/ \__\/    \__\/  \___________\/  \__\/    \__\/  \___________\/ \___________\/  \___________\/      ")
-    print("")
-    print("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\|")
-    print(f"Program version: {globals.DEADALUS.program_version}")
-    print(f"Program opened on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+def header(file):
+    file.write("       ________        __________    ____________    ________        ____________    ___            ___      ___    ___________  \n")
+    file.write("      /  ____  \      /  _______/\  /  ______   /\  /  ____  \      /  ______   /\  /  /\          /  /\    /  /\  /  ________/\ \n")
+    file.write("     /  /\___\  \    /  /\______\/ /  /\____/  / / /  /\___\  \    /  /\____/  / / /  / /         /  / /   /  / / /  /\_______\/ \n")
+    file.write("    /  / /   /  /\  /  /_/____    /  /_/___/  / / /  / /   /  /\  /  /_/___/  / / /  / /         /  / /   /  / / /  /_/______    \n")
+    file.write("   /  / /   /  / / /  _______/\  /  ______   / / /  / /   /  / / /  ______   / / /  / /         /  / /   /  / / /________   /\   \n")
+    file.write("  /  / /   /  / / /  /\______\/ /  /\____/  / / /  / /   /  / / /  /\____/  / / /  / /         /  / /   /  / /  \_______/  / /   \n")
+    file.write(" /  /_/___/  / / /  /_/_____   /  / /   /  / / /  /_/___/  / / /  / /   /  / / /  /_/______   /  /_/___/  / / _________/  / /    \n")
+    file.write("/___________/ / /__________/\ /__/ /   /__/ / /___________/ / /__/ /   /__/ / /___________/\ /___________/ / /___________/ /     \n")
+    file.write("\___________\/  \__________\/ \__\/    \__\/  \___________\/  \__\/    \__\/  \___________\/ \___________\/  \___________\/      \n")
+    file.write("\n")
+    file.write("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\|\n")
+    file.write(f"Program version: {globals.DEADALUS.program_version}\n")
+    file.write(f"Program opened on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
     
+def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        # To allow Ctrl+C clean exit
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    sys.exit()
 
 if __name__ == "__main__":
-    header()
+
+    log_file = 'toolout.log'
+
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    with open(log_file, "w") as file:
+        header(file)
+    
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
+    logger = logging.getLogger(__name__)
+
+    sys.excepthook = log_uncaught_exceptions
+
+    
+    logger.info
+    logger.info
+
     main()

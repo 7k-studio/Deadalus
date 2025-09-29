@@ -86,7 +86,7 @@ class ViewportOpenGL(QGLWidget):
         #Drawing background elements
         if self.viewport_settings["grid"]["show"] == True:
             self.draw_grid()
-        if self.viewport_settings["ruller"]["show"] == True:
+        if self.viewport_settings["ruler"]["show"] == True:
             self.draw_ruler()
 
         if self.airfoil:

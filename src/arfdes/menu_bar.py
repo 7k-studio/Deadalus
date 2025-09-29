@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication, QLabel, QInputDialog, QDialog, QVBoxLayout, QTextEdit, QDialogButtonBox
 import sys
 from PyQt5 import QtWidgets, QtCore
@@ -53,13 +53,13 @@ import src.arfdes.widget_tree as widget_tree
 class MenuBar(QMenuBar):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, program=None, project=None, parent=None, canvas=None, program_info=None, tree_menu=None):
+    def __init__(self, program=None, project=None, parent=None, program_info=None, tree_menu=None):
         super(MenuBar, self).__init__(parent)
         self.DEADALUS = program
         self.PROJECT = project
         self.main_window = parent
-        self.canvas = canvas
         self.tree_menu = tree_menu
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.program_info = globals.Program()  # Store the Program instance
         self.createMenu()
 
@@ -154,7 +154,7 @@ class MenuBar(QMenuBar):
     def newFile(self):
         msg = QMessageBox.question(self, "New Project", "Do you want to create a new project?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("DEADALUS: Creating new project...")
+            self.logger.info("Creating new project...")
             # Reset the project components
             globals.PROJECT.newProject()
             widget_tree.refresh_tree(self.tree_menu)
@@ -164,7 +164,7 @@ class MenuBar(QMenuBar):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
-            print(f"DEADALUS: opened file '{fileName}'")
+            self.logger.debug(f"Opened file '{fileName}'")
             widget_tree.refresh_tree(self.tree_menu)
 
     def saveFile(self):
@@ -172,25 +172,25 @@ class MenuBar(QMenuBar):
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
-            print(f"Saved file: {fileName}")
+            self.logger.debug(f"Saved file: {fileName}")
     
     def quitApp(self):
         msg = QMessageBox.question(self, "Exit program", "Do you really want to quit a program?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("DEADALUS > exit")
+            self.logger.info("Exit")
             QApplication.quit()
     
     """Airfoil menu actions"""
     
     def newAirfoil(self):
-        print("ARFDES > Creating new airfoil")
+        self.logger.info("Creating new airfoil")
         if self.main_window:  # Ensure main_window is set
             #add_airfoil_to_tree(self.main_window.tree_menu, self.main_window.airfoils_list, "Default Airfoil", Airfoil()) is set
             self.main_window.add_airfoil("Airfoil")
 
     def appendAirfoil(self):
         """load the airfoil data from a JSON format file."""
-        print("ARFDES > appendAirfoil > Appending airfoil...")
+        self.logger.info("Appending airfoil...")
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
 
@@ -198,18 +198,18 @@ class MenuBar(QMenuBar):
             airfoil_obj, _ = tools_airfoil.load_airfoil_from_json(fileName)
             # Add the airfoil to the tree menu
             globals.PROJECT.project_airfoils.append(airfoil_obj)
-            print(airfoil_obj)
+            self.logger.debug(airfoil_obj)
             if airfoil_obj:
                 add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
             else:
-                print("ARFDES ERROR: Airfoil import failed!")
+                self.logger.error("Airfoil import failed!")
 
     def deleteAirfoil(self):
-        print("ARFDES > deleteAirfoil > Deleting selected airfoil...")
+        self.logger.info("Deleting selected airfoil...")
         if self.main_window:  # Ensure main_window is set
             selected_item = self.main_window.tree_menu.currentItem()
             if not selected_item:
-                print("ARFDES > deleteAirfoil > No airfoil selected for deletion.")
+                self.logger.error("No airfoil selected for deletion.")
                 return
 
             # Find the index of the selected item
@@ -218,16 +218,15 @@ class MenuBar(QMenuBar):
                 # Remove the item from the tree menu
                 self.main_window.tree_menu.takeTopLevelItem(index)
                 # Remove the corresponding airfoil from the airfoils_list
-                print(self.PROJECT.project_airfoils)
+                self.logger.debug(self.PROJECT.project_airfoils)
                 del self.PROJECT.project_airfoils[index]
-                print(f"ARFDES > deleteAirfoil > Deleted airfoil at index {index}.")
-                self.canvas.clear_plot()
+                self.logger.info(f"Deleted airfoil at index {index}.")
             else:
-                print("ARFDES > deleteAirfoil > Invalid selection.")
+                self.logger.error("Invalid selection.")
             
     def saveAirfoil(self):
         """Save the airfoil data to a JSON format file."""
-        print("ARFDES > saveAirfoil > Saving selected airfoil...")
+        self.logger.info("Saving selected airfoil...")
         selected_item = self.main_window.tree_menu.currentItem()
         if not selected_item:
             return  # No airfoil selected
@@ -244,11 +243,11 @@ class MenuBar(QMenuBar):
         if fileName:
             with open(f"{fileName}", "w") as outfile:
                 outfile.write(json_object)
-                print(f"ARFDES > saveAirfoil > Saved file: {fileName}")
+                self.logger.info(f"Saved file: {fileName}")
  
     def exportAirfoil(self):
         """Export the airfoil data to a DXF format file."""
-        print("ARFDES > exportAirfoil > Exporting selected airfoil...")
+        self.logger.info("Exporting selected airfoil...")
         selected_item = self.main_window.tree_menu.currentItem()
         if not selected_item:
             return  # No airfoil selected
@@ -262,11 +261,11 @@ class MenuBar(QMenuBar):
         fileName, _ = QFileDialog.getSaveFileName(self, "Export File to DXF format", "", "DXF Format (*.dxf);;All Files (*)", options=options)
         if fileName:
             dxf.export_airfoil_to_dxf(airfoil_index, fileName)
-            print(f"ARFDES > exportAirfoil > Exported file: {fileName}")
+            self.logger.info(f"Exported file: {fileName}")
 
     def renameAirfoil(self):
         """Rename currently selected airfoil."""
-        print("ARFDES > renameAirfoil > Renaming selected airfoil...")
+        self.logger.info("Renaming selected airfoil...")
         self.le = QLabel(self)
         selected_item = self.tree_menu.currentItem()
         if not selected_item:
@@ -290,11 +289,11 @@ class MenuBar(QMenuBar):
             
         # Optionally, update the tree menu display
         selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-        print("Done")
+        self.logger.info("Airfoil renamed")
     
     def flipAirfoil(self):
         """Flip the currently selected airfoil."""
-        print("ARFDES > flipAirfoil > Flipping selected airfoil...")
+        self.logger.info("Flipping selected airfoil...")
         selected_item = self.tree_menu.currentItem()
         if not selected_item:
             return  # No airfoil selected
@@ -310,11 +309,11 @@ class MenuBar(QMenuBar):
 
         if flipped_airfoil:
             self.PROJECT.project_airfoils[airfoil_index] = flipped_airfoil
-        print('Done')
+        self.logger.info(f'Airfoil {flipped_airfoil.name} flipped...')
 
     def editDescriptionAirfoil(self):
         """Edit the description of an airfoil."""
-        print("ARFDES > editDescriptionAirfoil > Editing selected airfoil description...")
+        self.logger.info("Editing selected airfoil description...")
         selected_item = self.tree_menu.currentItem()
         if not selected_item:
             return  # No airfoil selected
@@ -349,18 +348,18 @@ class MenuBar(QMenuBar):
             if new_description:
                 # Update the airfoil object with the new description
                 current_airfoil.infos['description'] = new_description
-                print(f"Updated description for airfoil: {current_airfoil.infos['name']}")
+                self.logger.info(f"Updated description for airfoil: {current_airfoil.infos['name']}")
 
             # Optionally, update the tree menu display
             selected_item.setText(0, f"{current_airfoil.infos['name']}*")
 
     def fit2ref(self):
         """Fit the currently selected airfoil in tree_menu to the reference_airfoil by optimizing its parameters."""
-        print("ARFDES > fit2ref > Opening Fit2Ref window...")
+        self.logger.info("Opening Fit2Ref window...")
         # Get selected item and corresponding airfoil object
         selected_items = self.tree_menu.selectedItems()
         if not selected_items:
-            print("No airfoil selected in the tree menu.")
+            self.logger.warning("No airfoil selected in the tree menu.")
             return None
         selected_item = selected_items[0]
         airfoil_name = selected_item.text(0)
@@ -371,7 +370,7 @@ class MenuBar(QMenuBar):
                 current_airfoil = af
                 break
         if current_airfoil is None:
-            print("Selected airfoil object not found.")
+            self.logger.warning("Selected airfoil object not found.")
             return None
         
         # Open the Fit2RefWindow dialog
@@ -380,7 +379,7 @@ class MenuBar(QMenuBar):
 
     def preferencesWindow(self):        
         """Open the preferences dialog."""
-        print("DEADALUS > Preferences")
+        self.logger.info("Open preferences window")
         from src.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
@@ -395,16 +394,16 @@ class MenuBar(QMenuBar):
         sender = self.sender()
         if hasattr(sender, 'isChecked') and callable(sender.isChecked):
             if sender.isChecked():
-                print("Show reference")
+                self.logger.info("Show reference")
                 options = QFileDialog.Options()
                 fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "All Files (*);;Text Files (*.txt)", options=options)
                 if fileName:
-                    print(f"Opened file: {fileName}")
+                    self.logger.info(f"Opened file: {fileName}")
                     #AirfoilCoord, UP_points, DW_points, name = DataBase_load(fileName, os.getcwd())
                     referenceState = True
                     self.referenceStatus.emit(referenceState, fileName)
             else:
-                print("Hide reference")
+                self.logger.info("Hide reference")
                 referenceState = False
                 self.referenceStatus.emit(referenceState, None)
 
