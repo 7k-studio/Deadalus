@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
@@ -30,13 +30,14 @@ from tqdm import tqdm
 import json
 import src.obj
 import src.globals as globals  # Import from globals.py
+logger = logging.getLogger(__name__)
 
 def Reference_load(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
     UP_points = []
     DW_points = []
-    print("Loading airfoil from database...")
+    logger.info("Loading airfoil from database...")
     try:
         with open(file) as file:
             for line in file:
@@ -48,11 +49,11 @@ def Reference_load(file):
                 except ValueError: # skip lines that dont contain numeric data
                     continue
     except FileNotFoundError:
-        print("No file found!")
+        logger.error("No file found!")
         pass
             
     np.array(AirfoilCoord)
-    print("Chosen airfoils data read sucessfully!")
+    logger.info("Chosen airfoils data read sucessfully!")
     
     i=0
     while AirfoilCoord[i][1] >= 0:
@@ -70,15 +71,19 @@ def Reference_load(file):
     
     DW_points = np.array(DW_points).T
 
-    #print(UP_points)
-    #print(DW_points)
+    logger.debug(UP_points)
+    logger.debug(DW_points)
     
     airfoil = src.obj.objects2D.Airfoil_selig_format()
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
-    airfoil.infos['name'] = airfoil_name
-    print(f"Finished loading {airfoil.name} in selig format")
+    
+    if airfoil_name:
+        airfoil.infos['name'] = airfoil_name
+    else:
+        airfoil.infos['name'] = 'UNKNOWN'
+    logger.info(f"Finished loading {airfoil.infos['name']} in selig format")
     
     return airfoil
 
@@ -182,17 +187,16 @@ def load_airfoil_from_json(fileName):
             with open(f"{fileName}", "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
-            print("ERROR: File not found!")
+            logger.error("File not found!")
         except json.JSONDecodeError:
-            print("ERROR: During decoding JSON!")
+            logger.error("During decoding JSON!")
 
     if data:
         try:
             airfoil_version = data["program version"]
             objects2D = data["airfoil"]
         except KeyError as e:
-            print(f"ERROR: Missing key in ARF data - {e}")
-            print("File may not load properly or is not compatible with DEADALUS")
+            logger.error(f"Missing key in ARF data - {e} \n File may not load properly or is not compatible with DEADALUS")
             return None
         
         if airfoil_version:
@@ -201,7 +205,7 @@ def load_airfoil_from_json(fileName):
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
-                print("WARNING: Current program version is different from the saved airfoil version. Import may not be compatible.")
+                logger.warning("Current program version is different from the saved airfoil version. Import may not be compatible.")
                 is_version_different = True
 
         try:
@@ -234,14 +238,14 @@ def load_airfoil_from_json(fileName):
                 "description": objects2D["infos"]["description"]
             }
         except KeyError as e:
-            print(f"ERROR: Missing key in ARF data - {e}")
+            logger.error(f"Missing key in ARF data - {e}")
             return None
         
         if is_version_different == True:
-            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
+            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
             error_count += 1
         else:
-            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
 
         Airfoil.update()
 

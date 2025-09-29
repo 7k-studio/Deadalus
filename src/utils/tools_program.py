@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
+import math
 import src.globals as globals
 import numpy as np
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
@@ -35,11 +36,9 @@ def lerp(start, end, t):
     return start + (end - start) * t
 
 def deg2rad(degrees):
-    import math
     return degrees * (math.pi / 180)
 
 def rad2deg(radians):
-    import math
     return radians * (180 / math.pi)
 
 def convert_ndarray_to_list(obj):
@@ -124,3 +123,12 @@ def safe_date(val):
     if isinstance(val, (datetime.date, datetime.datetime)):
         return val.strftime("%Y-%m-%d %H:%M:%S")
     return val
+
+def vec_translate(points, magnitude, angle):
+    angle_radians = deg2rad(angle)
+    dx = magnitude * math.cos(angle_radians)
+    dy = magnitude * math.sin(angle_radians)
+
+    translated_points = [points[0] + dx, points[1] + dy]
+
+    return translated_points

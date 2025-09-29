@@ -22,6 +22,7 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 #System imports
 import sys
 from datetime import date
+import logging
 
 #PyQt5 imports
 from PyQt5.QtCore import Qt
@@ -33,15 +34,6 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QPushButton
 )
 from PyQt5.QtGui import QIcon
-
-#MatPlotLib imports
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from matplotlib.patches import Circle, Rectangle
 
 #Math/Physics imports
 import numpy as np
@@ -62,10 +54,10 @@ from src.arfdes.tools_airfoil import CreateBSpline
 from src.arfdes.widget_tree import add_airfoil_to_tree
 import src.globals as globals
 
-from src.arfdes.plot_canvas import PlotCanvas
 from src.opengl.viewport2d import ViewportOpenGL
 
 Airfoil_0 = src.obj.objects2D.Airfoil()
+
 
 class AirfoilDesigner(QMainWindow):
 
@@ -73,9 +65,9 @@ class AirfoilDesigner(QMainWindow):
 
     def __init__(self, program=None, project=None):
         super().__init__()
-        print("DEADALUS > module: Airfoil Designer")
         self.program = program
         self.project = project
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.setWindowTitle("DEADALUS: Airfoil Designer")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
@@ -91,10 +83,6 @@ class AirfoilDesigner(QMainWindow):
         # Canvas and Table Layout
         content_layout = QHBoxLayout()  # Horizontal layout for canvas and table/tree
 
-        # Matplotlib Canvas
-        self.canvas = PlotCanvas(self.program, self.project, self.params)
-        # self.toolbar << placeholder
-
         # Add the OpenGL viewport to the inner splitter
         self.viewport = QWidget()
         self.open_gl = ViewportOpenGL(parent=self.viewport)
@@ -109,15 +97,14 @@ class AirfoilDesigner(QMainWindow):
         tree_table_layout.addWidget(self.tree_menu)
 
         # Add tabele
-        self.table = Tabele(self, canvas=self.canvas, open_gl=self.open_gl, tree_menu=self.tree_menu, project=self.project)
+        self.table = Tabele(self, open_gl=self.open_gl, tree_menu=self.tree_menu, project=self.project)
         self.update_tree_menu()
 
         # Create the menu bar
-        self.menu_bar = MenuBar(self, project=self.project, parent=self, canvas=self.canvas, tree_menu=self.tree_menu)  # Use the MenuBar class
+        self.menu_bar = MenuBar(self, project=self.project, parent=self, tree_menu=self.tree_menu)  # Use the MenuBar class
         self.setMenuBar(self.menu_bar)
 
         # Add canvas to the horizontal layout
-        #content_layout.addWidget(self.canvas, 2)
         content_layout.addWidget(self.open_gl, 2)
 
         # Add table to the vertical layout
@@ -138,6 +125,7 @@ class AirfoilDesigner(QMainWindow):
         if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
             self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
+        self.logger.info("Initialization completed")
     
     def add_airfoil(self, name, dscr='designed from scratch in airfoil designer'):
         airfoil_obj = src.obj.objects2D.Airfoil()
@@ -161,19 +149,17 @@ class AirfoilDesigner(QMainWindow):
         #current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
 
         if state:
-            print(f"ARFDES > Reference enabled with file: '{filename}'")
-            #self.canvas.ax.clear()  # Clear the plot
+            self.logger.info(f"Reference enabled with file: '{filename}'")
             reference_airfoil = Reference_load(filename)
             self.open_gl.set_reference_to_display(reference_airfoil)
-            #self.canvas.plot_airfoil(current_airfoil)
-            
+
             #self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
-            #self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
+
         else:
-            print("ARFDES > Reference disabled")
-            #self.canvas.ax.clear()  # Clear the plot
+            self.logger.info("Reference disabled")
+
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
-            #self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil
+
             self.open_gl.set_reference_to_display(None)
 
     def update_tree_menu(self):
