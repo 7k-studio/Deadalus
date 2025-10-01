@@ -1,0 +1,157 @@
+{
+ "general": {
+  "units": {
+   "length": "m",
+   "angle": "rad"
+  },
+  "performance": 46,
+  "beta_features": false
+ },
+ "airfoil_designer": {
+  "viewport": {
+   "grid": {
+    "show": true
+   },
+   "ruler": {
+    "show": true
+   }
+  },
+  "airfoil": {
+   "control_points": {
+    "show": true,
+    "color": {
+     "le": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "te": [
+      1.0,
+      0.8,
+      0.2
+     ],
+     "ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "ss": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "construction": {
+    "show": true,
+    "color": {
+     "le": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "te": [
+      1.0,
+      0.8,
+      0.2
+     ],
+     "ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "ss": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "wireframe": {
+    "show": true,
+    "color": {
+     "le": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "te": [
+      1.0,
+      0.8,
+      0.2
+     ],
+     "ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "ss": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    }
+   }
+  }
+ },
+ "wing_designer": {
+  "viewport": {
+   "grid": {
+    "show": true
+   }
+  },
+  "wing": {
+   "grid": {
+    "show": true
+   },
+   "wireframe": {
+    "show": true,
+    "color": {
+     "le": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "te": [
+      1.0,
+      1.0,
+      0.0
+     ],
+     "ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "ss": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "le_ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "le_ss": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "te_ps": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "te_ss": [
+      1.0,
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "solid": {
+    "show": true
+   }
+  }
+ }
+}

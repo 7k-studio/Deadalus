@@ -195,14 +195,15 @@ class MenuBar(QMenuBar):
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
 
         if fileName:
-            airfoil_obj, _ = tools_airfoil.load_airfoil_from_json(fileName)
-            # Add the airfoil to the tree menu
-            globals.PROJECT.project_airfoils.append(airfoil_obj)
-            self.logger.debug(airfoil_obj)
-            if airfoil_obj:
-                add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
-            else:
-                self.logger.error("Airfoil import failed!")
+            try:
+                airfoil_obj, _ = tools_airfoil.load_airfoil_from_json(fileName)
+                globals.PROJECT.project_airfoils.append(airfoil_obj)
+                if airfoil_obj:
+                    self.logger.debug(airfoil_obj)
+                    add_airfoil_to_tree(self.tree_menu, airfoil_obj.infos['name'], airfoil_obj)
+                    self.logger.info("Appending an airfoil was sucessful!")
+            except TypeError:
+                self.logger.error("Failed to append airfoil")
 
     def deleteAirfoil(self):
         self.logger.info("Deleting selected airfoil...")

@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
@@ -31,28 +31,34 @@ import json
 import src.obj
 import src.globals as globals  # Import from globals.py
 
+logger = logging.getLogger(__name__)
+
 def Reference_load(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
     UP_points = []
     DW_points = []
-    print("Loading airfoil from database...")
+    logger.info("Loading airfoil from database...")
     try:
+        is_name_set = False
         with open(file) as file:
             for line in file:
-                if line.startswith("Name:"):
-                    airfoil_name = line.replace("Name:", '', 1)
                 try:
                     x, y = map(float, line.split()) # split X and Y values into 
                     AirfoilCoord.append([x,y])
                 except ValueError: # skip lines that dont contain numeric data
+                    if is_name_set == False:
+                        if isinstance(line, str):
+                            airfoil_name = line.replace("\n", '', 1)
+                            airfoil_name = " ".join(line.split())
+                            is_name_set = True
                     continue
     except FileNotFoundError:
-        print("No file found!")
+        logger.error("No file found!")
         pass
             
     np.array(AirfoilCoord)
-    print("Chosen airfoils data read sucessfully!")
+    logger.info("Chosen airfoils data read sucessfully!")
     
     i=0
     while AirfoilCoord[i][1] >= 0:
@@ -70,19 +76,19 @@ def Reference_load(file):
     
     DW_points = np.array(DW_points).T
 
-    #print(UP_points)
-    #print(DW_points)
+    #logger.debug(UP_points)
+    #logger.debug(DW_points)
     
     airfoil = src.obj.objects2D.Airfoil_selig_format()
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
     airfoil.infos['name'] = airfoil_name
-    print(f"Finished loading {airfoil.name} in selig format")
+    logger.info(f"Finished loading {airfoil.infos['name']} in selig format")
     
     return airfoil
 
-def CreateBSpline(const_points, f=int(globals.DEADALUS.preferences['general']['performance'])):
+def CreateBSpline(const_points, force_resolution=None):
 
     l=len(const_points[0])
 
@@ -92,7 +98,10 @@ def CreateBSpline(const_points, f=int(globals.DEADALUS.preferences['general']['p
 
     tck=[t,[const_points[0],const_points[1]],3]
     
-    #f = int(globals.DEADALUS.preferences['general']['performance'])
+    
+    f = int(globals.DEADALUS.preferences['general']['performance'])
+    if force_resolution:
+        f = force_resolution
 
     u3=np.linspace(0,1,(max(l*f/100,f)),endpoint=True)
 
@@ -172,27 +181,24 @@ def find_t_for_x(desired_x, tck):
 
 def load_airfoil_from_json(fileName):
     """load the airfoil data from a JSON format file."""
-    is_version_different =  False
     error_count = 0
-    import src.obj.objects2D as objects2D
-    Airfoil = objects2D.Airfoil()
 
     if fileName:
         try:
             with open(f"{fileName}", "r") as file:
                 data = json.load(file)
         except FileNotFoundError:
-            print("ERROR: File not found!")
+            logger.error("File not found!")
         except json.JSONDecodeError:
-            print("ERROR: During decoding JSON!")
+            logger.error("During decoding JSON!")
 
     if data:
+        logger.debug("JSON decoded and data loaded to variable")
         try:
             airfoil_version = data["program version"]
-            objects2D = data["airfoil"]
         except KeyError as e:
-            print(f"ERROR: Missing key in ARF data - {e}")
-            print("File may not load properly or is not compatible with DEADALUS")
+            logger.error(f"Missing key in ARF data - {e}")
+            logger.warning("File may not load properly or is not compatible with DEADALUS")
             return None
         
         if airfoil_version:
@@ -201,8 +207,26 @@ def load_airfoil_from_json(fileName):
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
-                print("WARNING: Current program version is different from the saved airfoil version. Import may not be compatible.")
-                is_version_different = True
+                logger.warning("Current program version is different from the saved airfoil version. Import may not be compatible.")
+                if airfoil_version[1] == 1:
+                    logger.info("Trying to load using 0.1.X version")
+                    airfoil, error_count = load_from_ddls_010(data)
+            else:
+                logger.info("Trying to load using 0.3.X version")
+                airfoil, error_count = load_from_ddls_030(data)
+
+        logger.debug(airfoil)
+
+        return airfoil, error_count
+
+def load_from_ddls_010(data):
+    """load the airfoil data from a JSON format file."""
+    is_version_different =  False
+    error_count = 0
+    import src.obj.objects2D as objects2D
+    Airfoil = objects2D.Airfoil()
+
+    if data:
 
         try:
             # Set parameters in Airfoil.params dictionary
@@ -234,19 +258,86 @@ def load_airfoil_from_json(fileName):
                 "description": objects2D["infos"]["description"]
             }
         except KeyError as e:
-            print(f"ERROR: Missing key in ARF data - {e}")
+            logger.error(f"ERROR: Missing key in ARF data - {e}")
+            return None
+
+        Airfoil.update()
+
+        logger.debug(Airfoil)
+        logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+
+        return Airfoil, error_count
+    
+def load_from_ddls_030(data):
+    """load the airfoil data from a JSON format file."""
+    is_version_different =  False
+    error_count = 0
+    import src.obj.objects2D as objects2D
+    Airfoil = objects2D.Airfoil()
+
+    if data:
+        try:
+            airfoil_version = data["program version"]
+            airfoil_data = data["airfoil"]
+            airfoil_params = airfoil_data["params"]
+            airfoil_infos   = airfoil_data["infos"]
+        except KeyError as e:
+            logger.error(f"Missing key in ARF data - {e}")
+            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            return None
+        
+        if airfoil_version:
+            airfoil_version = airfoil_version.split("-")[0].split(".")
+            program_version = globals.DEADALUS.program_version
+            program_version = program_version.split("-")[0].split(".")
+
+            if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
+                logger.warning("Current program version is different from the saved airfoil version. Import may not be compatible.")
+                is_version_different = True
+
+        try:
+            # Set parameters in Airfoil.params dictionary
+            Airfoil.params = {
+                "chord":        airfoil_params["chord"],
+                "origin_X":     airfoil_params["origin_X"],
+                "origin_Y":     airfoil_params["origin_Y"],
+                "le_thickness": airfoil_params["le_thickness"],
+                "le_depth":     airfoil_params["le_depth"],
+                "le_offset":    airfoil_params["le_offset"],
+                "le_angle":     airfoil_params["le_angle"],
+                "te_thickness": airfoil_params["te_thickness"],
+                "te_depth":     airfoil_params["te_depth"],
+                "te_offset":    airfoil_params["te_offset"],
+                "te_angle":     airfoil_params["te_angle"],
+                "ps_fwd_angle": airfoil_params["ps_fwd_angle"],
+                "ps_rwd_angle": airfoil_params["ps_rwd_angle"],
+                "ps_fwd_accel": airfoil_params["ps_fwd_accel"],
+                "ps_rwd_accel": airfoil_params["ps_rwd_accel"],
+                "ss_fwd_angle": airfoil_params["ss_fwd_angle"],
+                "ss_rwd_angle": airfoil_params["ss_rwd_angle"],
+                "ss_fwd_accel": airfoil_params["ss_fwd_accel"],
+                "ss_rwd_accel": airfoil_params["ss_rwd_accel"]
+            }
+            Airfoil.infos = {
+                "name":              airfoil_infos["name"],
+                "creation_date":     airfoil_infos["creation_date"],
+                "modification_date": airfoil_infos["modification_date"],
+                "description":       airfoil_infos["description"]
+            }
+        except KeyError as e:
+            logger.error(f"Missing key in ARF data - {e}")
             return None
         
         if is_version_different == True:
-            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
+            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
             error_count += 1
         else:
-            print(f"DEADALUS > Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
 
         Airfoil.update()
 
         return Airfoil, error_count
-
+    
 def save_airfoil_to_json(airfoil_idx=None):
     """Save the airfoil data to a JSON format file."""
  

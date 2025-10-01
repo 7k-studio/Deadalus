@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox, QSlider
@@ -32,6 +32,7 @@ class PreferencesWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Preferences")
         self.resize(300, 200)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.tabs = QTabWidget()
         self.general_tab = QWidget()
@@ -88,8 +89,9 @@ class PreferencesWindow(QDialog):
         self.general_performance_slider = QSlider(Qt.Horizontal)
         self.general_performance_slider.setMinimum(10)
         self.general_performance_slider.setMaximum(100)
-        self.general_performance_slider.setTickInterval(DEADALUS.preferences['general']['performance'])
+        self.general_performance_slider.setTickInterval(10)
         self.general_performance_slider.setSingleStep(10)
+        self.general_performance_slider.setValue(DEADALUS.preferences['general']['performance'])  # Set initial value
 
         # Label to show % value
         self.general_performance_label = QLabel(f"{self.general_performance_slider.value()}%")
@@ -279,7 +281,7 @@ class PreferencesWindow(QDialog):
 
         with open(f"src/settings", "w") as outfile:
             outfile.write(json_object)
-            print(f"Saved file: settings")
+            self.logger.info(f"Saved file: settings")
 
 # For testing the dialog independently
 if __name__ == "__main__":

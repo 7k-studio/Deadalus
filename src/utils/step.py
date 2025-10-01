@@ -18,14 +18,16 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+#sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import src.globals as globals
 import numpy as np
 import datetime
 import src.utils.tools_program as tools
+
+logger = logging.getLogger(__name__)
 
 class Deadalus2Step:
     def __init__(self):
@@ -493,7 +495,7 @@ def _write_control_points(current_idx=None, uv_grid=None, key=None, ps_cp_grid=N
     rows = len(uv_grid)
     cols = len(uv_grid[0])
 
-    print(f"Recognized {rows}x{cols} UV grid")
+    logger.info(f"Recognized {rows}x{cols} UV grid")
 
     tmp_control_points_grid = [[0 for col in range(cols)] for row in range(rows)]
 
@@ -529,7 +531,7 @@ def _write_control_points(current_idx=None, uv_grid=None, key=None, ps_cp_grid=N
     #     for k in range(cols):
     #         tmp_control_points_grid[-1][k] = ps_cp_grid[-1][k]
     
-    print('\nControl Points')
+    logger.info('\nControl Points')
     for i in range(rows):
         s = ""
         for j in range(cols):
@@ -542,7 +544,7 @@ def _write_control_points(current_idx=None, uv_grid=None, key=None, ps_cp_grid=N
                     s += str(" ↕ ")
                 else:
                     s += str(" X ")
-        print(s)
+        logger.info(s)
 
     return current_idx, cp_store, tmp_control_points_grid
     
@@ -552,7 +554,7 @@ def _write_vertex_point(current_idx: int=None, uv_grid_of_objects: list=None, ke
     rows = len(uv_grid_of_objects)
     cols = len(uv_grid_of_objects[0])
 
-    print(rows, cols)
+    logger.debug(rows, cols)
 
     max_u = cols - 1
     max_v = rows - 1
@@ -929,29 +931,29 @@ def ensure_grid_connectivity(parent, child, key):
     rows = len(grid)
     cols = len(grid[0])
 
-    print(grid)
+    logger.debug(grid)
 
     # --- Modify first column ---
     for j in range(rows):
-        print(parent.control_points[key[0]].T[j].tolist())
+        logger.debug(parent.control_points[key[0]].T[j].tolist())
         grid[j][0] = parent.control_points[key[0]].T[j].tolist()
 
     # --- Modify first row ---
     for j in range(cols):
-        print(parent.control_points[key[1]].T[j].tolist())
+        logger.debug(parent.control_points[key[1]].T[j].tolist())
         grid[0][j] = parent.control_points[key[1]].T[j].tolist()
 
     # --- Modify last column ---
     for j in range(rows):
-        print(child.control_points[key[2]].T[j].tolist())
+        logger.debug(child.control_points[key[2]].T[j].tolist())
         grid[j][-1] = child.control_points[key[2]].T[j].tolist()
 
     # --- Modify last row ---
     for j in range(cols):
-        print(parent.control_points[key[3]].T[j].tolist())
+        logger.debug(parent.control_points[key[3]].T[j].tolist())
         grid[-1][j] = parent.control_points[key[3]].T[j].tolist()
 
-    print(grid)
+    logger.debug(grid)
 
     return grid
 
@@ -986,13 +988,13 @@ def export_3d_segment_wing(filepath, base_name):
     ]
 
     for component in PROJECT.project_components:
-        print(f"WNGWB > STEP_export >> Exporting component: {component.infos['name']} with {len(component.wings)} wings.")
+        logger.info(f"Exporting component: {component.infos['name']} with {len(component.wings)} wings.")
         for wing in component.wings:
-            print(f"WNGWB > STEP_export >> Exporting wing: {wing.infos['name']} with {len(wing.segments)} segments.")
+            logger.info(f"Exporting wing: {wing.infos['name']} with {len(wing.segments)} segments.")
             wing_elements_store = {}
             tmp_wing_store = []
             if len(wing.segments) > 1:
-                print('WNGWB > STEP_export >> NOTE: Wing has more than 1 segment, exporting to 3D.')
+                logger.info('NOTE: Wing has more than 1 segment, exporting to 3D.')
                 for i in range(len(wing.segments)-1):
 
                     segment_elements_store = {}
@@ -1020,7 +1022,7 @@ def export_3d_segment_wing(filepath, base_name):
                     segment_elements_store['ps_face_outer_bound']  = ps_face_outer_bound
                     segment_elements_store['ps_advanced_face']     = ps_advanced_face
 
-                    print(f'WNGWB > STEP_Export_3D > PS >>> CP: {len(ps_c_point_store)}, VE: {len(ps_v_point_store)}, B-spline: {1 if ps_b_splin_store != None else 0}, EC: {1 if ps_e_curve_store != None else 0}, OE: {1 if ps_o_edges_store != None else 0}')
+                    logger.info(f'PS >>> CP: {len(ps_c_point_store)}, VE: {len(ps_v_point_store)}, B-spline: {1 if ps_b_splin_store != None else 0}, EC: {1 if ps_e_curve_store != None else 0}, OE: {1 if ps_o_edges_store != None else 0}')
 
                     # === SUCTION SIDE ===
                     uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['ss','le_ss', 'ss', 'te_ss'])
@@ -1042,7 +1044,7 @@ def export_3d_segment_wing(filepath, base_name):
                     segment_elements_store['ss_face_outer_bound']  = ss_face_outer_bound
                     segment_elements_store['ss_advanced_face']     = ss_advanced_face
 
-                    print(f'WNGWB > STEP_Export_3D > SS >>> CP: {len(ss_c_point_store)}, VE: {len(ss_v_point_store)}, B-spline: {1 if ss_b_splin_store != None else 0}, EC: {1 if ss_e_curve_store != None else 0}, OE: {1 if ss_o_edges_store != None else 0}')
+                    logger.info(f'SS >>> CP: {len(ss_c_point_store)}, VE: {len(ss_v_point_store)}, B-spline: {1 if ss_b_splin_store != None else 0}, EC: {1 if ss_e_curve_store != None else 0}, OE: {1 if ss_o_edges_store != None else 0}')
 
                     # === LEADING EDGE ===
                     uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['le','le_ss', 'le', 'le_ps'])
@@ -1064,7 +1066,7 @@ def export_3d_segment_wing(filepath, base_name):
                     segment_elements_store['le_face_outer_bound']  = le_face_outer_bound
                     segment_elements_store['le_advanced_face']     = le_advanced_face
 
-                    print(f'WNGWB > STEP_Export_3D > LE >>> CP: {len(le_c_point_store)}, VE: {len(le_v_point_store)}, B-spline: {1 if le_b_splin_store != None else 0}, EC: {1 if le_e_curve_store != None else 0}, OE: {1 if le_o_edges_store != None else 0}')
+                    logger.info(f'LE >>> CP: {len(le_c_point_store)}, VE: {len(le_v_point_store)}, B-spline: {1 if le_b_splin_store != None else 0}, EC: {1 if le_e_curve_store != None else 0}, OE: {1 if le_o_edges_store != None else 0}')
 
                     # === TRAILING EDGE ===
                     uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['te','te_ss', 'te', 'te_ps'])
@@ -1086,7 +1088,7 @@ def export_3d_segment_wing(filepath, base_name):
                     segment_elements_store['te_face_outer_bound']  = te_face_outer_bound
                     segment_elements_store['te_advanced_face']     = te_advanced_face
 
-                    print(f'WNGWB > STEP_Export_3D > TE >>> CP: {len(te_c_point_store)}, VE: {len(te_v_point_store)}, B-splines: {len(te_b_splin_store)}, Edge Curves: {len(te_e_curve_store)}, Oriented Edges: {len(te_o_edges_store)}')
+                    logger.info(f'TE >>> CP: {len(te_c_point_store)}, VE: {len(te_v_point_store)}, B-splines: {len(te_b_splin_store)}, Edge Curves: {len(te_e_curve_store)}, Oriented Edges: {len(te_o_edges_store)}')
 
                     # === Directions ===
                     current_idx, seg_direction_nor, seg_direction_tan = _write_direction(current_idx, segment)
@@ -1125,7 +1127,7 @@ def export_3d_segment_wing(filepath, base_name):
                     
                     
                     wing_elements_store[f"segment {i}"] = segment_elements_store
-                    #print('Wing Elements Store:', wing_elements_store)
+                    #logger.debug('Wing Elements Store:', wing_elements_store)
 
                 open_shell = OpenShell(current_idx, 'Wing from segment', tmp_surface_store)
                 wing_elements_store['open_shell'] = open_shell

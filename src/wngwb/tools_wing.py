@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import math
 import sys
 import src.obj.objects2D as objects2D
@@ -46,6 +46,8 @@ import src.globals as globals
 
 import datetime
 
+logger = logging.getLogger(__name__)
+
 #import sympy as sym
 def DataBase_info(default_loc):
     default_loc = default_loc
@@ -59,13 +61,13 @@ def DataBase_load(file, default_loc):
     AirfoilCoord = []
     UP_points = []
     DW_points = []
-    print("Loading airfoil from database...")
+    logger.info("Loading airfoil from database...")
     os.chdir('data')
-    print(os.getcwd())
+    logger.debug(os.getcwd())
     try:
         with open(file) as file:
             for line in file:
-                print(line)
+                logger.debug(line)
                 if line.startswith("Name:"):
                     airfoil_name = line.replace("Name:", '', 1)
                 try:
@@ -74,14 +76,14 @@ def DataBase_load(file, default_loc):
                 except ValueError: # skip lines that dont contain numeric data
                     continue
     except FileNotFoundError:
-        print("No file found!")
+        logger.error("No file found!")
         quit()
     os.chdir(default_loc)
             
     np.array(AirfoilCoord)
-    print("Chosen airfoils data read sucessfully!")
-    print("{} Coordinates".format(file))
-    #print(AirfoilCoord)
+    logger.info("Chosen airfoils data read sucessfully!")
+    logger.info("{} Coordinates".format(file))
+    #logger.debug(AirfoilCoord)
     
     i=0
     while AirfoilCoord[i][1] >= 0:
@@ -116,9 +118,9 @@ def Convert(le_depth, te_depth, UP_points, DW_points):
     le_chord = airfoil_chord * le_perc
     te_chord = airfoil_chord - airfoil_chord * te_perc
 
-    print('Cieciwa aerodynamiczna: ', airfoil_chord)
-    print('Glebokosc krawedzi natarcia: ', le_chord)
-    print('Glebokosc krawedzi splywu: ', te_chord)
+    logger.info(f'Cieciwa aerodynamiczna: {airfoil_chord}')
+    logger.info(f'Glebokosc krawedzi natarcia: {le_chord}')
+    logger.info(f'Glebokosc krawedzi splywu: {te_chord}')
 
     # Utworzenie splajnu przy uzyciu funkcji splprep (k=3 dla splajnu kubicznego)
     #full, u = splprep([FullAirfoil[0], FullAirfoil[1]], s=0, k=3, per=True)
@@ -179,7 +181,7 @@ def Convert(le_depth, te_depth, UP_points, DW_points):
     #new_u = np.linspace(0, 1, 2 * len(u) - 1)  # Dwukrotna liczba punktów w równych odstępach
     #new_points = splev(new_u, top)  # Obliczenie nowych punktów na splajnie
     
-    print('le: ', le.dtype, ' ps: ', ps.dtype, ' ss: ', ss.dtype, ' te: ', te.dtype)
+    logger.debug('le: ', le.dtype, ' ps: ', ps.dtype, ' ss: ', ss.dtype, ' te: ', te.dtype)
        
     return le, ps, ss, te
 
@@ -201,7 +203,7 @@ def AddAirfoil(Current_Airfoil, airfoils_list, default_loc):
 def EditAirfoil(Current_Airfoil, airfoils_list):
     while True:
         
-        print('Current size {} [mm]'.format(Current_Airfoil.scale))
+        logger.info('Current size {} [mm]'.format(Current_Airfoil.scale))
         value = input("/Transform/Scale [mm] -> ")
         #value = 110
         
@@ -209,9 +211,9 @@ def EditAirfoil(Current_Airfoil, airfoils_list):
             Current_Airfoil.scale, Current_Airfoil.le, Current_Airfoil.ps, Current_Airfoil.ss, Current_Airfoil.te = scale_airfoil(value, Current_Airfoil.le_org, Current_Airfoil.ps_org, Current_Airfoil.ss_org, Current_Airfoil.te_org, Current_Airfoil.scale)
             #Preview(False, [Current_Airfoil], airfoil_count)
         except ValueError:
-            print('Must be a number (float)!')
+            logger.error('Must be a number (float)!')
 
-        print('Current incidence {} [mm]'.format(Current_Airfoil.incidence))
+        logger.info('Current incidence {} [mm]'.format(Current_Airfoil.incidence))
         value = input("/Transform/Rotation ccw [deg] -> ")
         #value = -5
 
@@ -219,9 +221,9 @@ def EditAirfoil(Current_Airfoil, airfoils_list):
             Current_Airfoil.incidence, Current_Airfoil.le, Current_Airfoil.ps, Current_Airfoil.ss, Current_Airfoil.te = rotate_airfoil(value, Current_Airfoil.le, Current_Airfoil.ps, Current_Airfoil.ss, Current_Airfoil.te, Current_Airfoil.incidence)
             #Preview(False, [Current_Airfoil], airfoil_count)
         except ValueError:
-            print('Must be a number (float)!')
+            logger.error('Must be a number (float)!')
         
-        print('Current position {} [mm]'.format(Current_Airfoil.origin))
+        logger.info('Current position {} [mm]'.format(Current_Airfoil.origin))
         value = input("/Transform/Move [insert values seperated by space x y ] -> ")
         #value = "-1500 100"
         value = value.split()
@@ -231,7 +233,7 @@ def EditAirfoil(Current_Airfoil, airfoils_list):
             Current_Airfoil.origin, Current_Airfoil.le, Current_Airfoil.ps, Current_Airfoil.ss, Current_Airfoil.te = move_airfoil(origin, Current_Airfoil.le, Current_Airfoil.ps, Current_Airfoil.ss, Current_Airfoil.te, Current_Airfoil.origin)
             #Preview(True, airfoils_list, airfoil_count)
         except ValueError:
-            print('Must be a number (float)!')    
+            logger.error('Must be a number (float)!')    
             
         #satisfied = input("Are you satisfied with transformations? ")
         satisfied = "y"

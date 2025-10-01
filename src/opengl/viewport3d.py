@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 import math
 from PyQt5 import QtWidgets, QtCore, QtGui
@@ -57,6 +57,7 @@ class Viewport3D(QOpenGLWidget):
         super().__init__(parent)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setMouseTracking(True)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.viewport_settings = DEADALUS.preferences["wing_designer"]["viewport"]
         self.wing_settings = DEADALUS.preferences["wing_designer"]["wing"]
@@ -138,7 +139,7 @@ class Viewport3D(QOpenGLWidget):
                         # Check for errors before drawing
                         error = glGetError()
                         if error != GL_NO_ERROR:
-                            print(f"OpenGL Error before airfoil: {(error)}") #gluErrorString
+                            self.logger.error(f"OpenGL Error before airfoil: {(error)}") #gluErrorString
                         
                         #print(f"{k}:", segment.uv_grid)
                         if self.wing_settings["wireframe"]["show"]:
@@ -157,7 +158,7 @@ class Viewport3D(QOpenGLWidget):
                         # Check for errors after drawing
                         error = glGetError()
                         if error != GL_NO_ERROR:
-                            print(f"OpenGL Error after airfoil: {(error)}") #gluErrorString
+                            self.logger.error(f"OpenGL Error after airfoil: {(error)}") #gluErrorString
                     except IndexError:
                         #print("No airfoil data available to draw.")
                         pass

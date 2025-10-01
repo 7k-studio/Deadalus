@@ -18,13 +18,15 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import ezdxf
 import ezdxf.layouts
 from ezdxf.math import ConstructionArc, Vec3, BSpline
 import numpy as np
 import math
 import src.globals as globals
+
+logger = logging.getLogger(__name__)
 
 def CurvatureComb(element, density):
     ct = element.construction_tool()
@@ -74,7 +76,7 @@ def export_airfoil_to_dxf(airfoil_idx, file_name=None):
     msp = doc.modelspace()
 
     airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
-    print(f"Exporting airfoil {airfoil_idx} to DXF...")
+    logger.info(f"Exporting airfoil {airfoil_idx} to DXF...")
     
     #for idx, airfoil in enumerate(export_airfoil):
 
@@ -84,22 +86,22 @@ def export_airfoil_to_dxf(airfoil_idx, file_name=None):
         if len(airfoil.constr['le'][0]) > 0 and len(airfoil.constr['le'][1]) > 0:
             exp_le = airfoil.constr['le']
         else:
-            print(f"Airfoil {airfoil_idx} has an empty or insufficient LE array.")
+            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient LE array.")
 
         if len(airfoil.constr['ps'][0]) > 0 and len(airfoil.constr['ps'][1]) > 0:
             exp_ps = airfoil.constr['ps']
         else:
-            print(f"Airfoil {airfoil_idx} has an empty or insufficient PS array.")
+            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient PS array.")
 
         if len(airfoil.constr['ss'][0]) > 0 and len(airfoil.constr['ss'][1]) > 0:
             exp_ss = airfoil.constr['ss']
         else:
-            print(f"Airfoil {airfoil_idx} has an empty or insufficient SS array.")
+            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient SS array.")
 
         if len(airfoil.constr['te'][0]) > 0 and len(airfoil.constr['te'][1]) > 0:
             exp_te = airfoil.constr['te']
         else:
-            print(f"Airfoil {airfoil_idx} has an empty or insufficient TE array.")
+            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient TE array.")
 
     ps_Z_row = np.full((1, exp_ps.shape[1]), Z)
     ps = np.vstack((exp_ps, ps_Z_row)).T

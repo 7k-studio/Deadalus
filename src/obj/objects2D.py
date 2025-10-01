@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import math
 import numpy as np
 
@@ -27,6 +27,7 @@ import src.globals as globals
 
 class Airfoil_selig_format:
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.infos = {'name': 'N/A'}
         self.format = 'selig'
         self.top_curve = []
@@ -34,7 +35,7 @@ class Airfoil_selig_format:
 
 class Airfoil:
     def __init__(self):
-
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.id = ''
         self.format = 'ddls-parametric'
 
@@ -161,5 +162,5 @@ class Airfoil:
         return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
 
     def update(self):
-        #print("Recalculating airfoil geometry...")
+        self.logger.info("Recalculating airfoil geometry...")
         self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct()

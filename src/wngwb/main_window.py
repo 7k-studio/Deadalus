@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 import math
 import os
@@ -60,7 +60,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None, flags=Qt.WindowFlags()):
         super(MainWindow, self).__init__(parent, flags)
-        print("DEADALUS > module: Wing Workbench")
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
         self.setWindowTitle("DEADALUS: Wing Workbench")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
@@ -113,6 +114,7 @@ class MainWindow(QMainWindow):
 
         # Connect tree widget selection to display function
         self.tree_menu.itemClicked.connect(self.tabele.display_selected_element)
+        self.logger.info("Module: Wing Workbench initialized")
 
     def initializeOpenGL(self):
         """Initialize OpenGL settings."""

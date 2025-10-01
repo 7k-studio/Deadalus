@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
@@ -29,6 +29,8 @@ from numpy import array, linalg
 from src.obj.car import Wheels
 from src.globals import PROJECT
 
+logger = logging.getLogger(__name__)
+
 def draw_cp_net(object, zoom):
     
     glPointSize(8.0)
@@ -38,7 +40,7 @@ def draw_cp_net(object, zoom):
     for i in range(len(object.segments)):
         for key in object.segments[i].control_points:
             points = np.array(object.segments[i].control_points[key]).T
-            #print(f"{key}: ", points)
+            logger.debug(f"{key}: ", points)
             for point in points:
                 glVertex3f(point[0], point[1], point[2])
     glEnd()
@@ -47,7 +49,7 @@ def draw_cp_net(object, zoom):
     for i in range(len(object.segments)):
         for key in object.segments[i].control_points:
             points = np.array(object.segments[i].control_points[key]).T
-            #print(f"{key}: ", points)
+            logger.debug(f"{key}: ", points)
             z = object.segments[i].params['origin_Z'] if key in ['le', 'ps', 'ss', 'te'] else None
             for j in range(len(points) - 1):
                 p1 = points[j]
@@ -55,7 +57,7 @@ def draw_cp_net(object, zoom):
                 if z is not None:
                     p1 = [p1[0], p1[1], p1[2]]
                     p2 = [p2[0], p2[1], p2[2]]
-                #print(f"{key}: ", points)
+                logger.debug(f"{key}: ", points)
                 draw_dashed_line(p1, p2, zoom=zoom)
 
 def draw_cp_grid(control_points, point_size=8):
@@ -131,7 +133,7 @@ def draw_wireframe(self, component_idx, wing_idx, segment_idx):
     ss = segment.geom['ss']
 
     if not all(arr is not None and len(arr) > 0 for arr in [le, te, ps, ss]):
-        print("Invalid airfoil data:")
+        logger.error("Invalid airfoil data")
         return
     
     color = {'le': [0.0, 0.0, 1.0], 

@@ -22,7 +22,6 @@ import logging
 import sys
 import os
 
-
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
 from src.splash.splash_screen import SplashScreen
@@ -72,13 +71,9 @@ if __name__ == "__main__":
     with open(log_file, "w") as file:
         header(file)
     
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
     logger = logging.getLogger(__name__)
 
     sys.excepthook = log_uncaught_exceptions
-
-    
-    logger.info
-    logger.info
 
     main()

@@ -49,7 +49,7 @@ class Program:
                     "length": "m",
                     "angle":  "rad"
                 }, # Options: "meters / radians", (future: "milimeters / degrees", "feet / degrees")
-                "performance": 10,  # Options: 10 - 100
+                "performance": 50,  # Options: 10 - 100
                 "beta_features": False,  # Enable beta features
             },
             'airfoil_designer': {

@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QMouseEvent
@@ -46,6 +46,7 @@ import src.obj.objects2D as objects2D
 class ViewportOpenGL(QGLWidget):
     def __init__(self, parent=None):
         super(ViewportOpenGL, self).__init__(parent)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.zoom = 2.0
         self.translation = [-0.5, 0, 0]
         self.lastPos = QPoint()
