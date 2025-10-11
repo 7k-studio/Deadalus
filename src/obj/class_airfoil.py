@@ -31,72 +31,100 @@ class LeadingEdge:
     def __init__(self):
         self.params = {
             "thickness": 0.05,
-            "depth": 0.04,
             "offset": 0,
             "angle": 0.02,
+            "ps_tan": 0.02,
+            "ps_slope": 10,
+            "ps_curv": 0.01,
+            "ss_tan": 0.02,
+            "ss_slope": 10,
+            "ss_curv": 0.01,
         }
 
         self.unit = {
             "thickness": "m",
-            "depth":     "m",
             "offset":    "m",
             "angle":     "deg",
+            "ps_tan":    "m",
+            "ps_slope":  "deg",
+            "ps_curv":   "m",
+            "ss_tan":    "m",
+            "ss_slope":  "deg",
+            "ss_curv":   "m",
         }
 
 class TrailingEdge:
     def __init__(self):
         self.params = {
-            "thickness": 0.01,
-            "depth": 0.01,
+            "thickness": 0.05,
             "offset": 0,
-            "angle": 0.05,
+            "angle": 0.02,
+            "ps_tan": 0.02,
+            "ps_slope": 10,
+            "ps_curv": 0.01,
+            "ss_tan": 0.02,
+            "ss_slope": 10,
+            "ss_curv": 0.01,
         }
 
         self.unit = {
             "thickness": "m",
-            "depth":     "m",
             "offset":    "m",
             "angle":     "deg",
+            "ps_tan":    "m",
+            "ps_slope":  "deg",
+            "ps_curv":   "m",
+            "ss_tan":    "m",
+            "ss_slope":  "deg",
+            "ss_curv":   "m",
         }
 
 class PressureSide:
     def __init__(self):
         self.params = {
-            "fwd_wedge": 22,
+            "fwd_wedge": 0,
             "fwd_tan":   0.20,
-            "fwd_sigma": 20.0,
+            "fwd_slope": 0,
             "fwd_curv":  0.20,
-            "rwd_wedge": -15,
+            "rwd_wedge": 0,
             "rwd_tan":   0.10,
-            "rwd_sigma": 10.0,
+            "rwd_slope": 0,
             "rwd_curv":  0.10,
         }
 
         self.unit = {
             "fwd_wedge": "deg",
             "fwd_tan":   "m",
-            "fwd_sigma": "deg",
+            "fwd_slope": "deg",
             "fwd_curv":  "m",
             "rwd_wedge": "deg",
             "rwd_tan":   "m",
-            "rwd_sigma": "deg",
+            "rwd_slope": "deg",
             "rwd_curv":  "m"
         }
 
 class SuctionSide:
     def __init__(self):
         self.params = {
-            "fwd_angle": -11,
-            "rwd_angle": -3,
-            "fwd_accel": 0.16,
-            "rwd_accel": 0.40
+            "fwd_wedge": 0,
+            "fwd_tan":   0.20,
+            "fwd_slope": 0,
+            "fwd_curv":  0.20,
+            "rwd_wedge": 0,
+            "rwd_tan":   0.10,
+            "rwd_slope": 0,
+            "rwd_curv":  0.10,
         }
 
         self.unit = {
-            "fwd_angle": "deg",
-            "rwd_angle": "deg",
-            "fwd_accel": "m",
-            "rwd_accel": "m"
+            "fwd_wedge": "deg",
+            "fwd_tan":   "m",
+            "fwd_slope": "deg",
+            "fwd_curv":  "m",
+            "rwd_wedge": "deg",
+            "rwd_tan":   "m",
+            "rwd_slope": "deg",
+            "rwd_curv":  "m"
         }
 
 class Airfoil:
@@ -114,16 +142,16 @@ class Airfoil:
             'description': ''}
 
         self.params = {
-            "origin_X": 0,
-            "origin_Y": 0,
-            "chord": 1,
+            "origin_X":  0,
+            "origin_Y":  0,
+            "stretch":   1,
             "incidence": 0,
         }
 
         self.unit = {
             "origin_X":     "m",
             "origin_Y":     "m",
-            "chord":        "m",
+            "stretch":      "m",
             "incidence":    "deg",
         }
 
@@ -147,54 +175,117 @@ class Airfoil:
         }
 
     def construct(self):
-        # Leading Edge calculations
-        p_le_start = [self.params['origin_X'], self.params['origin_Y']+self.LE.params['offset']]
-        p_le_end = tools.vec_translate(p_le_start, self.LE.params['depth'], self.LE.params['angle'])
+        # Creating orignin points
+        p_le_org = [self.params['origin_X'], self.params['origin_Y']+self.LE.params['offset']]
+        p_te_org = tools.vec_translate(p_le_org, self.params['stretch'], self.params["incidence"])
 
-        a0 = math.tan(np.radians(90+self.params['angle'])) # Directional param of the leading edge straight and the pararel one
-        a1 = math.tan(np.radians(self.PS.params['fwd_angle']+self.LE.params['angle'])) # Directional param of the pressure side forward slope
-        a2 = math.tan(np.radians(self.SS.params['fwd_angle']+self.LE.params['angle'])) # Directional param of the suction side forward slope
+        # Creating up (u) and down (d) point for Leading Edge PS and SS handle 
+        p_le_u = tools.vec_translate(p_le_org, self.LE.params['thickness']/2, 90+self.LE.params["angle"])
+        p_le_d = tools.vec_translate(p_le_org, -self.LE.params['thickness']/2, 90+self.LE.params["angle"])
 
-        b0 = p_le_start[1]-a0*p_le_start[0] # Positional parameter of the leading edge straight 'Origin Point'
-        b0p = p_le_end[1]-a0*p_le_end[0]
-        b1 = p_le_end[1]+(self.LE.params['thickness']/2*math.cos(np.radians(self.LE.params['angle'])))-a1*(p_le_end[0]-self.LE.params['thickness']/2*math.sin(np.radians(self.LE.params['angle'])))
-        b2 = p_le_end[1]-(self.LE.params['thickness']/2*math.cos(np.radians(self.LE.params['angle'])))-a2*(p_le_end[0]+self.LE.params['thickness']/2*math.sin(np.radians(self.LE.params['angle'])))
+        # Creating up (u) and down (d) point for Trailing Edge PS and SS handle 
+        p_te_u = tools.vec_translate(p_te_org, self.TE.params['thickness']/2, 90+self.TE.params["angle"])
+        p_te_d = tools.vec_translate(p_te_org, -self.TE.params['thickness']/2, 90+self.TE.params["angle"])
 
-        p_le_t = [(b1-b0)/(a0-a1),a0*((b1-b0)/(a0-a1))+b0] # G1 upper point
-        p_le_d = [(b2-b0)/(a0-a2),a0*((b2-b0)/(a0-a2))+b0] # G1 lower point
-        p_le_ps = [(b1-b0p)/(a0-a1),a0*((b1-b0p)/(a0-a1))+b0p] # G0 with with the pressure side
-        p_le_ss = [(b2-b0p)/(a0-a2),a0*((b2-b0p)/(a0-a2))+b0p] # G0 with with the suction side
+        #===================================
+        # Creating handle for Pressure Side
+        #===================================
+        try:
+            p_ps_fwd_tan = tools.vec_translate(p_le_u, self.PS.params['fwd_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+        except ZeroDivisionError:
+            p_ps_fwd_tan = p_le_u
 
-        le_constr = np.vstack([p_le_ss, p_le_d, p_le_t, p_le_ps]).T
+        try:
+            p_ps_rwd_tan = tools.vec_translate(p_te_u, -self.PS.params['rwd_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+        except ZeroDivisionError:
+            p_ps_fwd_tan = p_te_u
 
-        p_te_start = tools.vec_translate(p_le_start, self.params['chord'], self.params["incidence"]) ,
-        p_te_start = [p_te_start[0], p_te_start[1]+self.TE.params['te_offset']]
-        p_te_end = [p_te_start[0]-self.TE.params['depth']*math.cos(np.radians(self.TE.params['angle'])), p_te_start[1]-(self.TE.params['depth']*math.sin(np.radians(self.TE.params['angle'])))]
-        a3 = math.tan(np.radians(90+self.TE.params['angle']))
-        a4 = math.tan(np.radians(self.PS.params['rwd_angle']+self.TE.params['angle']))
-        a5 = math.tan(np.radians(self.SS.params['rwd_angle']+self.TE.params['angle']))
-        b3 = p_te_start[1]-a3*p_te_start[0]
-        b3p = p_te_end[1]-a3*p_te_end[0]
-        b4 = p_te_end[1]+(self.TE.params['thickness']/2*math.cos(np.radians(self.TE.params['angle'])))-a4*(p_te_end[0]-self.TE.params['thickness']/2*math.sin(np.radians(self.TE.params['angle'])))
-        b5 = p_te_end[1]-(self.TE.params['thickness']/2*math.cos(np.radians(self.TE.params['angle'])))-a5*(p_te_end[0]+self.TE.params['thickness']/2*math.sin(np.radians(self.TE.params['angle'])))
+        try:
+            p_ps_fwd_crv = tools.vec_translate(p_ps_fwd_tan, self.PS.params['fwd_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.PS.params["fwd_slope"]))
+        except ZeroDivisionError:
+            p_ps_fwd_crv = p_ps_fwd_tan
 
-        p_te_t = [(b4-b3)/(a3-a4),a3*((b4-b3)/(a3-a4))+b3] # G1 upper point
-        p_te_d = [(b5-b3)/(a3-a5),a3*((b5-b3)/(a3-a5))+b3] # G1 lower point
-        p_te_ps = [(b4-b3p)/(a3-a4),a3*((b4-b3p)/(a3-a4))+b3p] # G0 with with the pressure side
-        p_te_ss = [(b5-b3p)/(a3-a5),a3*((b5-b3p)/(a3-a5))+b3p] # G0 with with the suction side
+        try:
+            p_ps_rwd_crv = tools.vec_translate(p_ps_rwd_tan, -self.PS.params['rwd_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.PS.params["rwd_slope"]))
+        except ZeroDivisionError:
+            p_ps_fwd_tan = p_ps_rwd_tan
 
-        te_constr = np.vstack([p_te_ss, p_te_d, p_te_t, p_te_ps]).T
+        #===================================
+        # Creating handle for Suction Side
+        #===================================
+        try:
+            p_ss_fwd_tan = tools.vec_translate(p_le_d, self.SS.params['fwd_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
+        except ZeroDivisionError:
+            p_ss_fwd_tan = p_le_d
 
-        p_ps_le = p_le_ps
-        p_ps_te = p_te_ps
-        p_ps_1 = [self.params['origin_X']+self.PS.params['fwd_accel'], a1*(self.params['origin_X']+self.PS.params['fwd_accel'])+b1]
-        p_ps_2 = [p_ps_te[0]-self.PS.params['rwd_accel'], a4*(p_ps_te[0]-self.PS.params['rwd_accel'])+b4]   
-        ps_constr = np.vstack([p_ps_le, p_ps_1, p_ps_2, p_ps_te]).T
-        p_ss_le = p_le_ss
-        p_ss_te = p_te_ss
-        p_ss_1 = [self.params['origin_X']+self.SS.params['fwd_accel'], a2*(self.params['origin_X']+self.SS.params['fwd_accel'])+b2]
-        p_ss_2 = [p_ss_te[0]-self.SS.params['rwd_accel'], a5*(p_ss_te[0]-self.SS.params['rwd_accel'])+b5]   
-        ss_constr = np.vstack([p_ss_le, p_ss_1, p_ss_2, p_ss_te]).T
+        try:
+            p_ss_rwd_tan = tools.vec_translate(p_te_d, -self.SS.params['rwd_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
+        except ZeroDivisionError:
+            p_ss_fwd_tan = p_te_d
+
+        try:
+            p_ss_fwd_crv = tools.vec_translate(p_ss_fwd_tan, self.SS.params['fwd_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.SS.params["fwd_slope"]))
+        except ZeroDivisionError:
+            p_ss_fwd_tan = p_ss_fwd_tan
+
+        try:
+            p_ss_rwd_crv = tools.vec_translate(p_ss_rwd_tan, -self.SS.params['rwd_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.SS.params["rwd_slope"]))
+        except ZeroDivisionError:
+            p_ss_rwd_crv = p_ss_rwd_tan
+
+        #===================================
+        # Creating handle for Leading Edge
+        #===================================
+        try:
+            p_le_ps_tan = tools.vec_translate(p_le_u, -self.LE.params['ps_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+        except ZeroDivisionError:
+            p_le_ps_tan = p_le_u
+
+        try:
+            p_le_ss_tan = tools.vec_translate(p_le_d, -self.LE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["rwd_wedge"]))
+        except ZeroDivisionError:
+            p_le_ss_tan = p_le_d
+
+        try:
+            p_le_ps_crv = tools.vec_translate(p_le_ps_tan, -self.LE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.LE.params["ps_slope"]))
+        except ZeroDivisionError:
+            p_le_ps_crv = p_le_ps_tan
+
+        try:
+            p_le_ss_crv = tools.vec_translate(p_le_ss_tan, -self.LE.params['ss_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["rwd_wedge"]+self.LE.params["ss_slope"]))
+        except ZeroDivisionError:
+            p_le_ss_tan = p_le_ss_tan
+
+        #===================================
+        # Creating handle for Trailing Edge
+        #===================================
+        try:
+            p_te_ps_tan = tools.vec_translate(p_te_u, self.TE.params['ps_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]))
+        except ZeroDivisionError:
+            p_te_ps_tan = p_te_u
+
+        try:
+            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+        except ZeroDivisionError:
+            p_te_ss_tan = p_te_d
+
+        try:
+            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]+self.TE.params["ps_slope"]))
+        except ZeroDivisionError:
+            p_te_ps_crv = p_te_ps_tan
+
+        try:
+            p_te_ss_crv = tools.vec_translate(p_te_ss_tan, self.TE.params['ss_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ss_slope"]))
+        except ZeroDivisionError:
+            p_te_ss_tan = p_te_ss_tan
+
+        le_constr = np.vstack([p_le_u, p_le_ps_tan, p_le_ps_crv, p_le_ss_crv, p_le_ss_tan, p_le_d]).T
+
+        te_constr = np.vstack([p_te_u, p_te_ps_tan, p_te_ps_crv, p_te_ss_crv, p_te_ss_tan, p_te_d]).T
+
+        ps_constr = np.vstack([p_le_u, p_ps_fwd_tan, p_ps_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_u]).T
+
+        ss_constr = np.vstack([p_le_d, p_ps_fwd_tan, p_ps_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_d]).T
 
         # Generate Splines
         le_spline = tools.CreateBSpline(le_constr)
