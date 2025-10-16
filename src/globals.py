@@ -40,7 +40,7 @@ import src.obj.objects2D as objects2D
 class Program:
     def __init__(self):
         self.program_name = "Deadalus"
-        self.program_version = "0.3.0-beta"
+        self.program_version = "0.3.3-beta"
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferences = {
@@ -186,6 +186,9 @@ class Program:
     def showUserManual(self):
         file_path = os.path.abspath("src/assets/user_manual.html")
         webbrowser.open(f"file://{file_path}")
+    
+    def showRealiseNotes(self):
+        webbrowser.open(f"https://github.com/7k-studio/Deadalus/releases")
 
 class Project:
     def __init__(self):

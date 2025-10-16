@@ -66,7 +66,7 @@ class SplashScreen(QWidget):
         
 
         # Add buttons
-        button_layout = QHBoxLayout()
+        program_button_layout = QHBoxLayout()
         button1 = QPushButton("New Project")
         button1.setStyleSheet("background-color: lightgrey;")
         button1.clicked.connect(self.new_project)
@@ -77,12 +77,27 @@ class SplashScreen(QWidget):
         button2.clicked.connect(self.open_project)
         button2.setFixedSize(220, 30)  # Set fixed size for the button
 
-        button_layout.addWidget(button1)
-        button_layout.addWidget(button2)
-        layout.addLayout(button_layout)
+        info_button_layout = QHBoxLayout()
+        button3 = QPushButton("User Manual")
+        button3.setStyleSheet("background-color: lightgrey;")
+        button3.clicked.connect(self.open_manual)
+        button3.setFixedSize(220, 30)  # Set fixed size for the button
+
+        button4 = QPushButton("Reales Notes")
+        button4.setStyleSheet("background-color: lightgrey;")
+        button4.clicked.connect(self.open_notes)
+        button4.setFixedSize(220, 30)  # Set fixed size for the button
+
+        program_button_layout.addWidget(button1)
+        program_button_layout.addWidget(button2)
+        info_button_layout.addWidget(button3)
+        info_button_layout.addWidget(button4)
+        layout.addLayout(program_button_layout)
+        layout.addLayout(info_button_layout)
 
         # Center the buttons
-        button_layout.setAlignment(Qt.AlignCenter)
+        program_button_layout.setAlignment(Qt.AlignCenter)
+        info_button_layout.setAlignment(Qt.AlignCenter)
 
         # Add close button
         close_button = QPushButton(self)
@@ -120,3 +135,9 @@ class SplashScreen(QWidget):
             self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
             self.airfoil_designer_window.show()
             self.close()
+
+    def open_manual(self):
+        manual = globals.DEADALUS.showUserManual()
+
+    def open_notes(self):
+        manual = globals.DEADALUS.showRealiseNotes()

@@ -132,15 +132,15 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- Top Header -->
   <header>
-      <img src="logo.png" alt="Program Logo" height="40"/>
+      <img src="assets/logo.png" alt="Program Logo" height="40"/>
       <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
   </header>
 
   <!-- Top Navigation Menu -->
   <div class="section-menu">
     <button onclick="showSection('Deadalus')">Deadalus</button>
-    <button onclick="showSection('designer')">Airfoil Designer</button>
-    <button onclick="showSection('wing')">Wing Workbench</button>
+    <button onclick="showSection('airfoil')">Airfoil Designer</button>
+    <button onclick="showSection('wing')">Wing Designer</button>
     <button onclick="showSection('changelog')">Changelog</button>
   </div>
 
@@ -155,13 +155,15 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
         <li><a href="#Deadalus">Deadalus</a></li>
         <li><a href="#FileMenu">File Menu</a></li>
         <li><a href="#ProgramMenu">Program Menu</a></li>
-        <li><a href="#todo">ToDo</a></li>
+        <!-- <li><a href="#todo">ToDo</a></li> -->
       </ul>
 
-      <ul id="menu-designer" class="context-menu" style="display: none;">
-        <li><a href="#create">Create Airfoil</a></li>
-        <li><a href="#edit">Edit Geometry</a></li>
-        <li><a href="#export">Export</a></li>
+      <ul id="menu-airfoil" class="context-menu" style="display: none;">
+        <li><a href="#ADoverview">Overview</a></li>
+        <li><a href="#ADMenuBar">Menu Bar</a></li>
+        <li><a href="#ADViewport">Viewport</a></li>
+        <li><a href="#ADStorage">Airfoil Storage</a></li>
+        <li><a href="#ADParamTab">Parameter Table</a></li>
       </ul>
 
       <ul id="menu-wing" class="context-menu" style="display: none;">
@@ -184,108 +186,159 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
       <div id="Deadalus" class="page-section active">
           <h2>Introduction</h2>
           <p>
-              Welcome to the Deadalus user manual. Deadalus is a program for designing and editing airfoils and wings. This manual will guide you through the main features and help you get started with your projects.
+              Welcome to the Deadalus user manual. 
+              Deadalus is a program for designing and editing airfoils and wings. 
+              This manual will guide you through the main features and help you get started with your projects.
           </p>
           <ul>
               <li>Design and modify airfoils with intuitive tools.</li>
               <li>Import/export airfoil files in various formats.</li>
               <li>Use the Wing Workbench for advanced wing design.</li>
           </ul>
+          <img src="assets/Deadalus/STEP_export.jpg" alt="Wing Workbench" height="500"/>
 
           <h2>Deadalus</h2>
-          <p>Deadalus consists of two modules: 2D airfoil design and 3D wing design.
-            Each Deadalus module is equipped with the <span class="highlight">File</span>, <span class="highlight">Edit</span>, <span class="highlight">View</span>, <span class="highlight">Module</span>, and <span class="highlight">About</span> menus.
-            Global program interactions can be made through the File and About menus.
+          <p>Deadalus consists of two modules: 
+            <button onclick="showSection('airfoil')">2D airfoil designer</button> and
+            <button onclick="showSection('wing')">3D wing designer</button>.
+            Each module is equipped with Menu Bar which allows for usage of functions and interaction with program objects and program itself.
+            Global program interactions can be made through the <span class="highlight">File</span> and <span class="highlight">Program</span> menus.
           </p>
 
-          <h2>Getting Started</h2>
-          <p>Once you start DEADALUS program you will be welcome by Splash Screen of the program. With splash screen you can:</p>
+          <h3>Getting Started</h3>
+          <p>Once DEADALUS program is started user will be welcomed by Splash Screen of the program. With splash screen you can:</p>
           <ul>
               <li><b>Create new project:</b> Start a new project.</li>
               <li><b>Open existing project:</b> Load an existing project file.</li>
+              <li><b>Open user manual:</b> Go directly to user manual without closing the Splash Screen</li>
+              <li><b>Open realise notes:</b> Opens web browser with latest realise notes (reqires ethernet connection)</li>
           </ul>
-          <img src="splashscreen.png" alt="Splash Screen"/>
+          <img src="assets/Deadalus/splashscreen.png" alt="Splash Screen"/> <br>
 
+          Once new File or Open Project is clicked an <button onclick="showSection('airfoil')">Airfoil Designer</button> window opens.
+          In every module user can interact with bar menu sections:
 
-          <h3>File Menu</h3>
-          <p> Allows user to interact with <span class="highlight">PROJECT</span> itself. Basic interactions are:</p>
+          <h3 id="FileMenu">File Menu</h3>
+          <p> Allows user to interact with <span class="highlight">PROJECT</span> itself. Available interactions and functions are:</p>
           <ul>
               <li><b>New:</b> Start a new project.</li>
               <li><b>Open:</b> Load an existing project file.</li>
               <li><b>Save:</b> Save your current project.</li>
+              <li><b>Exit:</b> Closes program after clarification.</li>
           </ul>
 
-          <h3>About Menu</h3>
-          <p> Allows user to interact with <span class="highlight">PROGRAM</span> itself. Basic interactions are:</p>
+          <h3 id="ProgramMenu">Program Menu</h3>
+          <p> Allows user to interact and get information about <span class="highlight">PROGRAM</span> itself. Basic interactions are:</p>
           <ul>
-              <li><b>Preferences:</b> Adjust program settings.</li>
+              <li><b>User Manual:</b> If user gets lost while using program, user manual can be displyed from here.</li>
               <li><b>About:</b> Show information about the program.</li>
+              <li><b>Preferences:</b> Adjust program settings.</li>
           </ul>
 
           <h4>Preferences</h4>
-          <p>Preferences window allows you to customize the program settings according to your needs.
-            <h5>General performance</h5>
-            Allows a user to choose the details level in graphics rendering. user can choose between three options:
+          <p>Preferences window allows user to customize the program settings according to needs.<br>
+            <strong>Units</strong> - sets units <span class="highlight">FOR STEP EXPORT ONLY! (at least for now)</span>
             <ul>
-              <li><b>Fast:</b> Lowest graphical setting.</li>
-              <li><b>Normal:</b> Default graphical setting.</li>
-              <li><b>Good:</b> Highest graphical setting.</li>
+              <li><strong>Length:</strong> allows to set length unit (for now only meters available)</li>
+              <li><strong>Angle:</strong> allows to set angle unit (for now only radians)</li>
             </ul>
-            <img src="preferences_general_performance.png" alt="preferences general performance"/>
+            <strong>General performance: </strong> Allows user to choose the details level in graphics rendering. Performace level is set using slider where 10 is lowest and 100 is highest detail level.<br>
+            <img src="assets/Deadalus/preferences_general_performance.png" alt="preferences general performance"/>
+
             <h5>Beta features</h5>
             Unlocks functions that are not well tested or stable. Used at user's own risk!
           </p>
           
-          <h2>ToDo</h2>
-          <ul>
-              <li><s>1. Improve .STEP export: for non spline wings / Step for multi element wing / Step for 4x3 grid</s></li>
-              <li><s>2. Reopening of project from working Deadalus instance causes problems</s></li>
-              <li><s>3. Improve transformation of Component, Wing, Section</s></li>
-              <li>4.a. Create ErrorOut file</li>
-              <li>4.b. Create better ToolOut file output</li>
-              <li><s>5. Additional Segment rotation options should be available</s></li>
-              <li><s>6. Improvement/Change of Airfoil Designer viewport from MatPlotLib to OpenGL</s></li>
-              <li><s>7. Refreshing of 3D viewport on update</s></li>
-              <li><s>8. Multi segment wing mess - surfaces go mad</s></li>
-              <li><s>9. Segments of G0 connection and wings of one G1 connection</s></li>
-              <li><s>10. Update preferences window</s></li>
-              <li><s>11. Reference handling in new OpenGL 2D viewport</s></li>
-
-          </ul>
-          <img src="STEP_export.jpg" alt="Wing Workbench" height="500"/>
+          
       </div>
 
       <!-- Airfoil Designer Section -->
-      <div id="designer" class="page-section">
-        <h2>Airfoil Designer</h2>
-        <p>Design and modify airfoils using control points and geometry tools.</p>
-        <img src="airfoil_designer.png" alt="Airfoil Designer" height="500"/>
+      <div id="airfoil" class="page-section">
+        <div id="ADoverview">
+          <h2>Airfoil Designer overview</h2>
+          <p>Airfoil designer module allows useer to design, modify and export airfoils using control points and geometry tools. <br>
+            Airfoils are defined as 4 splines, each for:
+            <ul>
+              <li>Pressure Side</li>
+              <li>Suction Side</li>
+              <li>Leading Edge</li>
+              <li>Trailing Edge</li>
+            </ul>
+            It is belived that with such definition it would be easier to create such airfoil and ensure clean geometry to any CFD software as well as manufacturing.
+            To Help with creation of airfoil, designer consists of elements such as:
+            <ul>
+              <li>Menu Bar</li>
+              <li>Viewport</li>
+              <li>Airfoil storage</li>
+              <li>Parameters tabele</li>
+            </ul>
+          </p>
+          <img src="assets/AirfoilDesigner/airfoil_designer_elements.jpg" alt="Airfoil Designer Elements" height="500"/>
+        </div>
 
-        <h3 id="create">Edit menu</h3>
-        <p>Allows user to interact with Airfoil Designer. Contains basic functinality required to create, recreate, reload an airfoils</p>
-          <ul>
-              <li><b>Create:</b> Add a new airfoil to your project.</li>
-              <li><b>Append:</b> Import an airfoil from a file.</li>
-              <li><b>Delete:</b> Remove the selected airfoil.</li>
-              <li><b>Save:</b> Save the selected airfoil to a file.</li>
-              <li><b>Export:</b> Export the airfoil as a DXF file.</li>
-              <li><b>Flip Airfoil:</b> Flip the selected airfoil horizontally.</li>
-              <li><b>Rename:</b> Change the name of the selected airfoil.</li>
-              <li><b>Edit Description:</b> Edit the airfoil's description.</li>
-              <li><b>Fit2Reference:</b> Fit the airfoil to a reference (beta feature).</li>
-          </ul>
+        <div id="ADMenuBar">
+          <h2>Meanu Bar overview</h2>
 
-        <h3 id="edit">View menu</h3>
-        <p>Allows user to add elements to displayed airfoil preview</p>
+          <h3>File menu</h3>
+          use following link to check out <a href="#FileMenu">File menu details</a>
+          <h3>Edit menu</h3>
+          <p>Allows user to interact with Airfoil Designer. Contains basic functinality required to create, recreate, reload an airfoils</p>
+            <ul>
+                <li><b>Create:</b> Add a new airfoil to your project.</li>
+                <li><b>Append:</b> Import an airfoil from a file.</li>
+                <li><b>Delete:</b> Remove the selected airfoil.</li>
+                <li><b>Save:</b> Save the selected airfoil to a file.</li>
+                <li><b>Export:</b> Export the airfoil as a DXF file.</li>
+                <li><b>Flip Airfoil:</b> Flip the selected airfoil horizontally.</li>
+                <li><b>Rename:</b> Change the name of the selected airfoil.</li>
+                <li><b>Edit Description:</b> Edit the airfoil's description.</li>
+                <li><b>Fit2Reference:</b> Fit the airfoil to a reference (beta feature).</li>
+            </ul>
+
+          <h3>View menu</h3>
+          <p>Allows user to add elements to displayed airfoil preview</p>
+            <ul>
+                <li><b>Show Reference:</b> Toggle display of a reference airfoil.</li>
+            </ul>
+          
+          <h3>Module menu</h3>
+          Allows user to change module menu. Available modules are:
+          <button onclick="showSection('wing')">Wing Designer</button>
+
+          <h3>Program menu</h3>
+          use following link to check out <a href="#ProgramMenu">Program menu details</a>
+
+        </div>
+        
+        <div id="ADViewport">
+          <h2>Viewport overview</h2>
+          <img src="assets/AirfoilDesigner/AD_Viewport.jpg" alt="Airfoil Designer Elements" height="500"/>
+        </div>
+        
+        <div id="ADStorage">
+          <h2>Airfoil storage overview</h2>
+          <img src="assets/AirfoilDesigner/AD_Storage.png" alt="Airfoil Designer Elements" height="500"/>
+        </div>
+        
+        <div id="ADParamTab">
+          <h2>Parameter Table overview</h2>
+          <img src="assets/AirfoilDesigner/AD_ParamTable.png" alt="Airfoil Designer Elements" height="500"/><br>
+          Use arrow up <button>⯅</button> to increase value and arrow down <button>⯆</button> to decrease value of parameter in the same row.
+          It is possible to change the increasement/decreasement value by holding keyboard keys while clicking on Left Mouse Button. Allowed modifiers are:
           <ul>
-              <li><b>Show Reference:</b> Toggle display of a reference airfoil.</li>
+            <li><strong>LMB:</strong> 0.1</li>
+            <li><strong>LMB+Shift:</strong> 1.0</li>
+            <li><strong>LMB+Ctrl:</strong> 0.01</li>
           </ul>
+        </div>
+        
       </div>
+
       <!-- Wing Workbench Section -->
       <div id="wing" class="page-section">
         <h2>Wing Workbench</h2>
         <p>Assemble full wings from created / established in Airfoil Designer profiles.</p>
-        <img src="wing_workbench.png" alt="Wing Workbench" height="500"/>
+        <img src="assets/WingDesigner/wing_workbench.png" alt="Wing Workbench" height="500"/>
         <h3>Edit menu</h3>
             <p>
                 Allows user to interact with Wing Workbench. Contains basic functinality required to create, objects representing airfoil:

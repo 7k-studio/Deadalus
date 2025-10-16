@@ -310,7 +310,7 @@ class MenuBar(QMenuBar):
 
         if flipped_airfoil:
             self.PROJECT.project_airfoils[airfoil_index] = flipped_airfoil
-        self.logger.info(f'Airfoil {flipped_airfoil.name} flipped...')
+            self.logger.info(f"Airfoil {flipped_airfoil.infos['name']} flipped...")
 
     def editDescriptionAirfoil(self):
         """Edit the description of an airfoil."""

@@ -35,15 +35,6 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 
-#MatPlotLib imports
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from matplotlib.patches import Circle, Rectangle
-
 #Math/Physics imports
 import numpy as np
 import math
@@ -67,13 +58,13 @@ from src.opengl.viewport2d import ViewportOpenGL
 
 Airfoil_0 = src.obj.objects2D.Airfoil()
 
+
 class AirfoilDesigner(QMainWindow):
 
     ''' Main window for the Airfoil Designer application. '''
 
     def __init__(self, program=None, project=None):
         super().__init__()
-        
         self.program = program
         self.project = project
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -114,7 +105,6 @@ class AirfoilDesigner(QMainWindow):
         self.setMenuBar(self.menu_bar)
 
         # Add canvas to the horizontal layout
-        #content_layout.addWidget(self.canvas, 2)
         content_layout.addWidget(self.open_gl, 2)
 
         # Add table to the vertical layout
@@ -135,9 +125,8 @@ class AirfoilDesigner(QMainWindow):
         if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
             self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
-        
-        self.logger.info("Module: Airfoil Designer has been initialized")
-
+        self.logger.info("Initialization completed")
+    
     def add_airfoil(self, name, dscr='designed from scratch in airfoil designer'):
         airfoil_obj = src.obj.objects2D.Airfoil()
         airfoil_obj.infos['name'] = name  # Ensure the name is set in infos
@@ -161,18 +150,16 @@ class AirfoilDesigner(QMainWindow):
 
         if state:
             self.logger.info(f"Reference enabled with file: '{filename}'")
-            #self.canvas.ax.clear()  # Clear the plot
             reference_airfoil = Reference_load(filename)
             self.open_gl.set_reference_to_display(reference_airfoil)
-            #self.canvas.plot_airfoil(current_airfoil)
-            
+
             #self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
-            #self.canvas.plot_reference(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)
+
         else:
             self.logger.info("Reference disabled")
-            #self.canvas.ax.clear()  # Clear the plot
+
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
-            #self.canvas.plot_airfoil(current_airfoil)  # Re-plot the airfoil
+
             self.open_gl.set_reference_to_display(None)
 
     def update_tree_menu(self):
