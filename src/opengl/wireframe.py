@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
@@ -26,6 +26,8 @@ import math
 
 from src.obj.car import Wheels
 from src.globals import PROJECT
+
+logger = logging.getLogger(__name__)
 
 def draw_airfoil_wireframe(self, component_idx, wing_idx, segment_idx):
     """Draw an airfoil using coordinates from a file, extruded along the z-axis."""
@@ -38,7 +40,7 @@ def draw_airfoil_wireframe(self, component_idx, wing_idx, segment_idx):
     ss = segment.geom['ss']
 
     if not all(arr is not None and len(arr) > 0 for arr in [le, te, ps, ss]):
-        print("Invalid airfoil data:")
+        logger.error("Invalid airfoil data")
         return
     
     color = {'le': [0.0, 0.0, 1.0], 
@@ -70,7 +72,7 @@ def draw_connection_wireframe(self, segment):
     te_ss = segment.geom['te_ss']
 
     if not all(arr is not None and len(arr) > 0 for arr in [le_ps, te_ps, le_ss, te_ss]):
-        print("Invalid airfoil data:", segment.geom)
+        logger.error("Invalid airfoil data:", segment.geom)
         return
 
     # Draw edges connecting front and back faces

@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import math
 import numpy as np
 from geomdl import BSpline, utilities
@@ -33,6 +33,7 @@ from geomdl import knotvector
 
 class Segment:
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.infos = {'name': 'segment',
                       'creation_date': '',
                       'modification_date': ''}

@@ -35,24 +35,22 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QIcon
 
-#Math/Physics imports
-import numpy as np
-import math
-from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
-from scipy.optimize import minimize, root_scalar
-from scipy import interpolate
-
 #Self imports
 import src.obj as obj
 import src.wngwb.tools_wing
 import src.utils.dxf
-from src.arfdes.widget_tabele import Tabele
+
 from .menu_bar import MenuBar
-from src.obj.objects2D import Airfoil
-from src.arfdes.tools_airfoil import Reference_load
-from src.arfdes.tools_airfoil import CreateBSpline
-from src.arfdes.widget_tree import add_airfoil_to_tree
+from src.obj.class_airfoil import Airfoil
+from src.arfdes.tools_airfoils import Reference_load
+
 import src.globals as globals
+from src.arfdes.widget_airfoils import TreeAirfoil
+from src.arfdes.widget_reference import TreeRererence
+from src.arfdes.widget_parameters import TableParameters
+from src.arfdes.widget_statistics import TableStatistics
+from src.opengl.widget_console import LogViewer
+import src.arfdes.tools_airfoils as tools
 
 from src.opengl.viewport2d import ViewportOpenGL
 
@@ -67,6 +65,7 @@ class AirfoilDesigner(QMainWindow):
         super().__init__()
         self.program = program
         self.project = project
+        self.time = date.today().strftime("%Y-%m-%d")
         self.logger = logging.getLogger(self.__class__.__name__)
         self.setWindowTitle("DEADALUS: Airfoil Designer")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
@@ -88,30 +87,41 @@ class AirfoilDesigner(QMainWindow):
         self.open_gl = ViewportOpenGL(parent=self.viewport)
 
         # Tree and Table Layout
-        tree_table_layout = QVBoxLayout()  # Vertical layout for tree and table
+        input_container_layout = QVBoxLayout()  # Vertical layout for tree and table
+        output_container_layout = QVBoxLayout()
 
-        # Tree Menu
-        self.tree_menu = QTreeWidget()
-        self.tree_menu.setHeaderLabel("Project airfoils")
-        self.tree_menu.setMinimumHeight(100)  # Set minimum height for the tree menu
-        tree_table_layout.addWidget(self.tree_menu)
-
-        # Add tabele
-        self.table = Tabele(self, open_gl=self.open_gl, tree_menu=self.tree_menu, project=self.project)
-        self.update_tree_menu()
+        # Widgets for input container
+        self.airfoil_tree = TreeAirfoil()
+        self.reference_tree = TreeRererence(self)
+        self.parameters = TableParameters(self, open_gl=self.open_gl, airfoils_menu=self.airfoil_tree, project=self.project)
 
         # Create the menu bar
-        self.menu_bar = MenuBar(self, project=self.project, parent=self, tree_menu=self.tree_menu)  # Use the MenuBar class
+        self.menu_bar = MenuBar(self, project=self.project, parent=self, time=self.time, airfoils_menu=self.airfoil_tree)  # Use the MenuBar class
         self.setMenuBar(self.menu_bar)
 
-        # Add canvas to the horizontal layout
-        content_layout.addWidget(self.open_gl, 2)
+        # Add all INPUT widgets to container
+        input_container_layout.addWidget(self.airfoil_tree)
+        input_container_layout.addWidget(self.parameters)
+        
+        # Widgets for output container
+        self.statistics = TableStatistics(self)
 
-        # Add table to the vertical layout
-        tree_table_layout.addWidget(self.table)
+        # Log Viewer Widget
+        self.log_viewer = LogViewer(log_file="toolout.log", parent=self)
 
-        # Add tree and table layout to the horizontal layout
-        content_layout.addLayout(tree_table_layout, 1)
+        # Add all OUTPUT widgets to container
+        output_container_layout.addWidget(self.reference_tree)
+        output_container_layout.addWidget(self.statistics)
+
+        # Canvas and Log Viewer Layout
+        middle_container_layout = QVBoxLayout()  # Vertical layout for OpenGL viewport and log viewer
+        middle_container_layout.addWidget(self.open_gl, 4)  # OpenGL viewport
+        middle_container_layout.addWidget(self.log_viewer, 1)  # Log viewer below OpenGL viewport
+
+        # Add layouts to the horizontal layout
+        content_layout.addLayout(input_container_layout)
+        content_layout.addLayout(middle_container_layout, 2)  # Middle container with OpenGL and log viewer
+        content_layout.addLayout(output_container_layout)
 
         # Add toolbar and content layout to the main layout
         main_layout.addLayout(content_layout)
@@ -120,29 +130,20 @@ class AirfoilDesigner(QMainWindow):
 
         # Connect tree widget selection to display function
         self.menu_bar.referenceStatus.connect(self.handleReferenceToggle)
-        self.tree_menu.itemClicked.connect(self.table.display_selected_airfoil)
+        self.airfoil_tree.itemClicked.connect(self.parameters.display_selected_airfoil)
 
         if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
-            self.add_airfoil( "Airfoil", "New projects: Initialized because of no other airfoil was available")
+            self.airfoil_tree.new("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
         self.logger.info("Initialization completed")
-    
-    def add_airfoil(self, name, dscr='designed from scratch in airfoil designer'):
-        airfoil_obj = src.obj.objects2D.Airfoil()
-        airfoil_obj.infos['name'] = name  # Ensure the name is set in infos
-        airfoil_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
-        airfoil_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
-        airfoil_obj.infos['description'] = dscr
-        globals.PROJECT.project_airfoils.append(airfoil_obj)
-        add_airfoil_to_tree(self.tree_menu, name, airfoil_obj)
 
     def handleReferenceToggle(self, state, filename):
-        selected_item = self.tree_menu.currentItem()
+        selected_item = self.airfoil_tree.currentItem()
         if not selected_item:
             return  # No airfoil selected
 
         # Find the corresponding airfoil object
-        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+        airfoil_index = self.airfoil_tree.indexOfTopLevelItem(selected_item)
         if airfoil_index == -1:
             return  # Invalid selection
 
@@ -157,30 +158,8 @@ class AirfoilDesigner(QMainWindow):
 
         else:
             self.logger.info("Reference disabled")
-
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
-
             self.open_gl.set_reference_to_display(None)
-
-    def update_tree_menu(self):
-        """Update the tree menu based on the current self.project.project_airfoils."""
-        self.tree_menu.clear()  # Clear existing items
-
-        # Set up tree columns
-        self.tree_menu.setColumnCount(4)  # Adjust the number of columns
-        self.tree_menu.setHeaderLabels(["Name", "Last modification", "Creation Date", "Description"])  # Set column headers
-
-        for airfoil in globals.PROJECT.project_airfoils:
-            # Assuming airfoil_list contains objects with 'infos' dictionary
-            name = airfoil.infos.get('name', 'Unknown')
-            modification_date = airfoil.infos.get('modification_date', 'Unknown')
-            creation_date = airfoil.infos.get('creation_date', 'Unknown')
-            description = airfoil.infos.get('description', 'No description')
-
-            # Create a tree item with multiple columns
-            tree_item = QTreeWidgetItem([name, str(modification_date), str(creation_date), description])
-            self.tree_menu.addTopLevelItem(tree_item)
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

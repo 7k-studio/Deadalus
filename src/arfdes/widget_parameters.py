@@ -1,0 +1,197 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of DEADALUS.
+
+DEADALUS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+DEADALUS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+import logging
+from PyQt5.QtWidgets import (
+    QWidget,
+    QVBoxLayout,  QHBoxLayout,
+    QTableWidget, QTableWidgetItem, 
+    QPushButton, QLineEdit, QHeaderView, QApplication
+)
+from PyQt5.QtCore import Qt, pyqtSignal
+
+import src.globals as globals  # Import from globals.py
+
+
+class TableParameters(QTableWidget):
+    referenceStatus = pyqtSignal(bool, str)
+
+    def __init__(self, parent=None, open_gl=None, airfoils_menu=None, project=None):
+        super(TableParameters, self).__init__(parent)
+        self.open_gl = open_gl
+        self.project = project
+        self.airfoils_menu = airfoils_menu
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.Up_ref_points = None  # Add attribute to store Up_ref_points
+        self.Dwn_ref_points = None  # Add attribute to store Dwn_ref_points
+        self.init_tabele()
+
+    def init_tabele(self, params=None):
+        # Initial Parameters
+        self.params = {}
+
+        # Properly initialize the table without overwriting `self`
+        self.setRowCount(len(self.params))
+        self.setColumnCount(4)
+        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal", "Unit"])
+        self.verticalHeader().setVisible(False)
+        self.horizontalHeader().setStretchLastSection(True)
+        #self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.setColumnWidth(1, 100)  # Set minimum width for column 2
+
+    def set_reference_points(self, up_ref_points, dwn_ref_points):
+        """Set reference points for plotting."""
+        self.Up_ref_points = up_ref_points
+        self.Dwn_ref_points = dwn_ref_points
+
+    def add_editable_row(self, row, value):
+        """Add an editable row with up/down buttons and input field."""
+        # Create a custom widget for editing with up/down buttons and input
+        container = QWidget()
+        layout = QHBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        # Input field for direct keyboard input
+        value = format(value, '.4f')  # Format value to 4 decimal places
+        value_input = QLineEdit(str(value))
+        value_input.setAlignment(Qt.AlignCenter)
+        #value_input.setFixedWidth(70)
+        value_input.editingFinished.connect(lambda: self.update_value_from_input(row, value_input))
+        # Up button
+        up_button = QPushButton("▲")
+        up_button.setFixedSize(20, 20)
+        up_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, 1))
+
+        # Down button
+        down_button = QPushButton("▼")
+        down_button.setFixedSize(20, 20)
+        down_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, -1))
+            
+        # Add widgets to layout
+        layout.addWidget(down_button)
+        layout.addWidget(value_input)
+        layout.addWidget(up_button)
+        self.setCellWidget(row, 1, container)
+
+    def update_value_from_input(self, row, value_input):
+        # Update parameter from the input field
+        param_name = self.item(row, 0).text()
+        try:
+            new_value = float(value_input.text())
+            self.airfoil['params'][param_name] = new_value
+            # Pass reference points to update_plot
+            self.save_current_airfoil_state()
+        except ValueError:
+            # Restore the last valid value if input is invalid
+            self.logger.warning("Invalid input, restoring last valid value.")
+            value_input.setText(str(self.airfoil['params'][param_name]))
+    
+    def _adjust_value_with_modifiers(self, row, direction):
+        modifiers = QApplication.keyboardModifiers()
+        if modifiers & Qt.ShiftModifier:
+            delta = 1.0
+        elif modifiers & Qt.ControlModifier:
+            delta = 0.01
+        else:
+            delta = 0.1
+        self.adjust_value(row, direction * delta)
+
+    def adjust_value(self, row, delta):
+        # Adjust parameter value by delta
+        param_name = self.item(row, 0).text()
+        current_value = self.airfoil['params'][param_name]
+        new_value = current_value + delta
+        # Update value
+        self.airfoil['params'][param_name] = new_value
+        # Update the input field display
+        cell_widget = self.cellWidget(row, 1)
+        value_input = cell_widget.findChild(QLineEdit)
+        new_value = format(new_value, '.4f')  # Format value to 2 decimal places
+        value_input.setText(str(new_value))
+        # Pass reference points to update_plot
+        self.save_current_airfoil_state()  # Save changes to the airfoil list
+
+    def populate_table(self, airfoil_obj):
+        """Populate the table with data from an airfoil object."""
+        self.setRowCount(0)  # Clear existing rows
+        param_units = airfoil_obj.unit.items()
+
+        self.logger.debug(param_units)
+
+        for key, value in airfoil_obj.params.items():
+            row = self.rowCount()
+            self.insertRow(row)
+            self.setItem(row, 0, QTableWidgetItem(key))
+            self.add_editable_row(row, value)
+            value = format(value, '.4f')
+            nominal_value = QTableWidgetItem(str(value))
+            nominal_value.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
+            unit = airfoil_obj.unit.get(key, '')
+            if unit == 'length':
+                unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
+            if unit == 'angle':
+                unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+            unit_value = QTableWidgetItem(str(unit))
+            unit_value.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 3, unit_value)
+
+
+    def display_selected_airfoil(self, item):
+        """Display the selected airfoil's data in the table."""
+        index = self.tree_menu.indexOfTopLevelItem(item)
+        if index != -1:
+            selected_airfoil = globals.PROJECT.project_airfoils[index]
+            self.populate_table(selected_airfoil)
+            # Update self.params with the selected airfoil's parameters
+            self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
+            self.open_gl.set_airfoil_to_display(selected_airfoil)
+
+    def save_current_airfoil_state(self):
+        """Overwrite the current table data into the selected airfoil object."""
+        selected_item = self.tree_menu.currentItem()
+        if not selected_item:
+            return  # No airfoil selected
+
+        # Find the corresponding airfoil object
+        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+        if airfoil_index == -1:
+            return  # Invalid selection
+
+        current_airfoil = self.project.project_airfoils[airfoil_index]
+
+        # Update the airfoil object with table data
+        for row in range(self.rowCount()):
+            key = self.item(row, 0).text()
+            if key == "params":  # Skip the 'geom' parameter
+                # Retrieve the value from the QLineEdit inside the custom widget
+                cell_widget = self.cellWidget(row, 1)
+                if cell_widget:
+                    value_input = cell_widget.findChild(QLineEdit)
+                    if value_input:
+                        try:
+                            value = float(value_input.text())
+                            self.params[key] = value
+                        except ValueError:
+                            self.logger.error(f"Invalid value for parameter '{key}', skipping update.")
+        
+        # Optionally, update the tree menu display
+        selected_item.setText(0, f"{current_airfoil.infos['name']}*")
+        self.open_gl.update()
+

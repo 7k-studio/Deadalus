@@ -22,7 +22,7 @@ import logging
 import math
 import sys
 import numpy as np
-import tools_program as tools
+import src.obj.tools_program as tools
 
 #from src.arfdes.tools_airfoil import CreateBSpline
 #import src.globals as globals
@@ -132,11 +132,12 @@ class Airfoil:
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.id = ''
-        self.format = 'ddls-parametric'
+        self.visible = False
 
         #Active parameters
         self.infos = {
             'name': 'Airfoil',
+            'format': 'ddls-parametric',
             'creation_date': '',
             'modification_date': '',
             'description': ''}
@@ -298,3 +299,12 @@ class Airfoil:
     def update(self):
         self.logger.info("Recalculating airfoil geometry...")
         self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct()
+
+class SeligAirfoil:
+    def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.infos = {'name': 'N/A',
+                      'format': 'selig',}
+        self.visible = False
+        self.top_curve = []
+        self.dwn_curve = []

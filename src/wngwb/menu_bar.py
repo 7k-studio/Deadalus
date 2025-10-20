@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication
 import sys
 from PyQt5 import QtWidgets, QtCore
@@ -51,6 +51,7 @@ import src.obj
 class MenuBar(QMenuBar):
     def __init__(self, parent=None, viewport=None):
         super(MenuBar, self).__init__(parent)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.main_window = parent
         self.open_gl = viewport
         self.createMenu()
@@ -168,7 +169,7 @@ class MenuBar(QMenuBar):
     def newFile(self):
         msg = QMessageBox.question(self, "New Project", "Do you want to create a new project?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("Creating new project...")
+            self.logger.info("Creating new project...")
             # Reset the project components
             globals.PROJECT.newProject()
             self.main_window.tree_menu.init_tree()
@@ -179,14 +180,14 @@ class MenuBar(QMenuBar):
         if fileName:
             globals.loadProject(fileName)
             self.main_window.tree_menu.init_tree()
-            print(f"Opened file: {fileName}")
+            self.logger.info(f"Opened file: {fileName}")
 
     def saveFile(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
-            print(f"Saved file: {fileName}")
+            self.logger.info(f"Saved file: {fileName}")
 
     def exportFile(self):
         options = QFileDialog.Options()
@@ -196,12 +197,12 @@ class MenuBar(QMenuBar):
             #step.export_only_control_points(fileName)
             base_name = os.path.basename(fileName)
             step.export_3d_segment_wing(fileName, base_name)
-            print(f"Exported file: {fileName}")
+            self.logger.info(f"Exported file: {fileName}")
 
     def quitApp(self):
         msg = QMessageBox.question(self, "Exit program", "Do you really want to quit a program?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if msg == QMessageBox.Yes:
-            print("DEADALUS > exit")
+            self.logger.info("Normal exit :)")
             QApplication.quit()
 
     def chgPersp(self):
@@ -226,7 +227,7 @@ class MenuBar(QMenuBar):
         self.open_gl.position_view(0.0,180.0)
 
     def placeholder(self):
-        print("Placeholder action triggered")
+        self.logger.info("Placeholder action triggered")
 
     def addComponent(self):
         """Add a new component to the tree menu."""
@@ -251,14 +252,14 @@ class MenuBar(QMenuBar):
                     # Remove the item from the tree menu
                     self.main_window.tree_menu.takeTopLevelItem(index)
                     del globals.PROJECT.project_components[index]
-                    print(f"ARFDES > delete component > Deleted component at index {index}.")
+                    self.logger.info(f"Component > Deleted component at index {index}.")
                     self.main_window.tree_menu.init_tree()
                     self.open_gl.update()
 
                 else:
-                    print("ARFDES > deleteAirfoil > Invalid selection.")
+                    self.logger.error("Invalid selection.")
             else:
-                print("Component NOT selected!")
+                self.logger.error("Component NOT selected!")
 
     def addWing(self):
         """Add a new wing to the selected component."""
@@ -289,11 +290,11 @@ class MenuBar(QMenuBar):
                     #print(f"Found component at index {index}.")
                     tools_wing.add_wing_to_tree(selected_item, wing_name, wing_obj, selected_item)
                     self.open_gl.update()
-                    print(f"WNGWB > Added '{wing_name}' as a part of '{selected_item.infos['name']}'.")
+                    self.logger.info(f"Added '{wing_name}' as a part of '{selected_item.infos['name']}'.")
                 else:
-                    print("Cannot set wing to selected item!")
+                    self.logger.error("Cannot set wing to selected item!")
             else:
-                print("Component NOT selected!")
+                self.logger.error("Component NOT selected!")
         
         #self.airfoil_list.append({"name": name, "data": airfoil_obj.to_dict()})  # Update shared list
 
@@ -317,16 +318,16 @@ class MenuBar(QMenuBar):
                         globals.PROJECT.project_components[component_index].wings[wing_index]
                         # Add the segment as a child of the selected component
                         del globals.PROJECT.project_components[component_index].wings[wing_index]
-                        print(f"ARFDES > delete wing > Deleted wing at index {component_index}:{wing_index}.")
+                        self.logger.info(f"Deleted wing at index {component_index}:{wing_index}.")
                         self.main_window.tree_menu.init_tree()
                         self.open_gl.update()
 
                     else:
-                        print("Cannot set segment to selected item!")
+                        self.logger.error("Cannot set segment to selected item!")
                 else:
-                    print("Wing NOT selected!")
+                    self.logger.error("Wing NOT selected!")
             else:
-                print("Component NOT found!")
+                self.logger.error("Component NOT found!")
 
     def addSegment(self):
         """Add a new Segment to the selected wing."""
@@ -384,11 +385,11 @@ class MenuBar(QMenuBar):
                         self.open_gl.update()
 
                     else:
-                        print("Cannot set segment to selected item!")
+                        self.logger.error("Cannot set segment to selected item!")
                 else:
-                    print("Wing NOT selected!")
+                    self.logger.error("Wing NOT selected!")
             else:
-                print("Component NOT found!")
+                self.logger.error("Component NOT found!")
 
         #print(len(globals.PROJECT.project_components[component_index].wings[wing_index].segments))
         #if len(globals.PROJECT.project_components[component_index].wings[wing_index].segments) > 1:
@@ -412,7 +413,7 @@ class MenuBar(QMenuBar):
                     try:
                         grandparent_item = parent_item.parent()
                     except:
-                        print("ERROR: Segment is not part of the component!")
+                        self.logger.error("Segment is not part of the component!")
 
                     if grandparent_item:
 
@@ -422,16 +423,16 @@ class MenuBar(QMenuBar):
                         component_index = self.main_window.tree_menu.indexOfTopLevelItem(grandparent_item)
 
                         del globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index]
-                        print(f"ARFDES > delete segment > Deleted segment at index {component_index}:{wing_index}:{segment_index}.")
+                        self.logger.info(f"Deleted segment at index {component_index}:{wing_index}:{segment_index}.")
                         self.main_window.tree_menu.init_tree()
                         self.open_gl.update()
 
                     else:
-                        print("Cannot set segment to selected item!")
+                        self.logger.error("Cannot set segment to selected item!")
                 else:
-                    print("Wing NOT selected!")
+                    self.logger.error("Wing NOT selected!")
             else:
-                print("Component NOT found!")
+                self.logger.error("Component NOT found!")
 
     def WingModule(self):
         msg = QMessageBox(self)
@@ -450,7 +451,7 @@ class MenuBar(QMenuBar):
 
     def preferencesWindow(self):        
         """Open the preferences dialog."""
-        print("DEADALUS > Preferences")
+        self.logger.info("Preferences")
         from src.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()

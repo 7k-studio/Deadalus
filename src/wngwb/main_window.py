@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 import math
 import os
@@ -47,6 +47,7 @@ from src.wngwb.menu_bar import MenuBar
 from src.wngwb.widget_tree import TreeMenu
 from src.wngwb.widget_tabele import Tabele
 from src.wngwb.widget_tree import TreeMenu  # Import TreeMenu
+from src.opengl.widget_console import LogViewer
 
 #from globals import airfoil_list  # Import from globals.py
 import src.globals as globals  # Import from globals.py
@@ -60,7 +61,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None, flags=Qt.WindowFlags()):
         super(MainWindow, self).__init__(parent, flags)
-        print("DEADALUS > module: Wing Workbench")
+        self.logger = logging.getLogger(self.__class__.__name__)
+        
         self.setWindowTitle("DEADALUS: Wing Workbench")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
@@ -68,7 +70,7 @@ class MainWindow(QMainWindow):
 
         central_widget = QWidget(self)
         main_layout = QHBoxLayout(central_widget)
-        content_layout = QHBoxLayout()
+        content_layout = QVBoxLayout()
 
         self.setCentralWidget(central_widget)
 
@@ -82,6 +84,9 @@ class MainWindow(QMainWindow):
         # Create the menu bar
         self.menu_bar = MenuBar(self, viewport = self.open_gl)  # Use the MenuBar class
         self.setMenuBar(self.menu_bar)
+
+        # Log Viewer Widget
+        self.log_viewer = LogViewer(log_file="toolout.log", parent=self)
 
         # Use the TreeMenu class directly
         self.tree_menu = TreeMenu(self)
@@ -101,6 +106,7 @@ class MainWindow(QMainWindow):
 
         #content_layout.addWidget(self.tree_menu)
         content_layout.addWidget(self.viewport, stretch=10)
+        content_layout.addWidget(self.log_viewer, 1)  # Log viewer below OpenGL viewport
         #content_layout.addWidget(self.tabele)
 
         main_layout.addLayout(left_layout)
@@ -113,6 +119,7 @@ class MainWindow(QMainWindow):
 
         # Connect tree widget selection to display function
         self.tree_menu.itemClicked.connect(self.tabele.display_selected_element)
+        self.logger.info("Module: Wing Workbench initialized")
 
     def initializeOpenGL(self):
         """Initialize OpenGL settings."""

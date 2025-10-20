@@ -1,0 +1,135 @@
+{
+  "Program": {
+    "program name": "Deadalus",
+    "program version": "0.3.0-beta",
+    "file name": "Test310.ddls"
+  },
+  "Project": {
+    "project name": "Project",
+    "creation date": "2025-10-01",
+    "modification date": "2025-10-01 21:16:48",
+    "project description": "New project created",
+    "project path": "D:/Programy/7kStudio/Deadalus/src/data/Test310.ddls",
+    "project components": [
+      {
+        "infos": {
+          "name": "Component 1",
+          "creation_date": "2025-10-01",
+          "modification_date": "2025-10-01"
+        },
+        "params": {
+          "origin_X": 0.0,
+          "origin_Y": 0.0,
+          "origin_Z": 0.0
+        },
+        "wings": [
+          {
+            "infos": {
+              "name": "Wing 1",
+              "creation_date": "2025-10-01",
+              "modification_date": "2025-10-01"
+            },
+            "params": {
+              "origin_X": 0.0,
+              "origin_Y": 0.0,
+              "origin_Z": 0.0
+            },
+            "segments": [
+              {
+                "infos": {
+                  "name": "Segment 1",
+                  "creation_date": "2025-10-01",
+                  "modification_date": "2025-10-01"
+                },
+                "airfoil": "airfoil_0",
+                "anchor": "G0",
+                "params": {
+                  "origin_X": 0.0,
+                  "origin_Y": 0.0,
+                  "origin_Z": 0.0,
+                  "incidence": 0.0,
+                  "scale": 1.0,
+                  "tan_accel": 0.1
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "project airfoils": [
+      {
+        "id": "airfoil_0",
+        "data": {
+          "program name": "Deadalus",
+          "program version": "0.3.0-beta",
+          "airfoil": {
+            "infos": {
+              "name": "Airfoil",
+              "creation_date": "2025-10-01",
+              "modification_date": "2025-10-01",
+              "description": "New projects: Initialized because of no other airfoil was available"
+            },
+            "params": {
+              "chord": 1,
+              "origin_X": 0,
+              "origin_Y": 0,
+              "le_thickness": 0.05,
+              "le_depth": 0.04,
+              "le_offset": 0,
+              "le_angle": 0.02,
+              "te_thickness": 0.01,
+              "te_depth": 0.01,
+              "te_offset": 0,
+              "te_angle": 0.05,
+              "ps_fwd_angle": 22,
+              "ps_rwd_angle": -15,
+              "ps_fwd_accel": 0.2,
+              "ps_rwd_accel": 0.1,
+              "ss_fwd_angle": -11,
+              "ss_rwd_angle": -3,
+              "ss_fwd_accel": 0.16,
+              "ss_rwd_accel": 0.4
+            }
+          }
+        }
+      },
+      {
+        "id": "airfoil_1",
+        "data": {
+          "program name": "Deadalus",
+          "program version": "0.3.0-beta",
+          "airfoil": {
+            "infos": {
+              "name": "Clark_Y",
+              "creation_date": "2025-10-01",
+              "modification_date": "2025-10-01",
+              "description": "Almost perfect; CLARK Y AIRFOIL CLARK Y airfoil Max thickness 11.7% at 28% chord. Max camber 3.4% at 42% chord"
+            },
+            "params": {
+              "chord": 0.99,
+              "origin_X": -0.01,
+              "origin_Y": 0,
+              "le_thickness": 0.055,
+              "le_depth": 0.041,
+              "le_offset": 2.7755575615628914e-17,
+              "le_angle": 5.719999999999996,
+              "te_thickness": 0.0095,
+              "te_depth": 0.01,
+              "te_offset": 0.003,
+              "te_angle": 0.05,
+              "ps_fwd_angle": 29.900000000000013,
+              "ps_rwd_angle": -14.270000000000008,
+              "ps_fwd_accel": 0.23000000000000004,
+              "ps_rwd_accel": 0.13,
+              "ss_fwd_angle": -18.29999999999999,
+              "ss_rwd_angle": 1.7000000000000006,
+              "ss_fwd_accel": 0.12999999999999998,
+              "ss_rwd_accel": 0.41000000000000014
+            }
+          }
+        }
+      }
+    ]
+  }
+}

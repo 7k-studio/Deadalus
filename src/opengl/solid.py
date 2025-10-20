@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
@@ -27,6 +27,8 @@ import math
 from geomdl import BSpline, utilities
 
 from src.obj.car import Wheels
+
+logger = logging.getLogger(__name__)
 
 def draw_tube(self, origin_x, origin_y, origin_z, diameter, width, quality=32):
     """Draw a tube from given origin."""
@@ -149,7 +151,7 @@ def draw_object_from_file(filepath, extrusion=1.0):
 
 def draw_wing(self, wing, no_of_segments):
     """Draw a wing using coordinates from a file, extruded along the z-axis."""
-    print('Drawing wing')
+    logger.info('Drawing wing')
     glColor3f(0.5, 0.5, 0.5)  # Grey color for the wing
 
     for seg_idx in range(no_of_segments - 1):
@@ -172,7 +174,7 @@ def draw_wing(self, wing, no_of_segments):
         z_child = segment_child.params['origin_Z']
 
         if ps_parent is None or ps_child is None or len(ps_parent) != len(ps_child):
-            print(f"Invalid airfoil data for segments {seg_idx} and {seg_idx + 1}:")
+            logger.error(f"Invalid airfoil data for segments {seg_idx} and {seg_idx + 1}:")
             continue
 
         glBegin(GL_QUADS)

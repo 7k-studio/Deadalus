@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 import src.obj.objects2D as objects2D
 from src.wngwb.tools_wing import add_component_to_tree
@@ -28,6 +28,7 @@ import src.globals as globals
 class TreeMenu(QTreeWidget):
     def __init__(self, parent=None):
         super(TreeMenu, self).__init__(parent)
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.main_window = parent
         self.setHeaderLabel(f"{globals.PROJECT.project_name}")
         self.init_tree()
@@ -56,5 +57,5 @@ class TreeMenu(QTreeWidget):
 
     def on_item_clicked(self, item, column):
         # Handle item click events
-        print(f"Clicked on: {item.text(column)}")
+        self.logger.debug(f"Clicked on: {item.text(column)}")
         

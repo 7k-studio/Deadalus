@@ -19,19 +19,23 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QApplication, QMessageBox
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QApplication, QMessageBox, QFileDialog
+    )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtWidgets import QFileDialog
+
 from src.arfdes.airfoil_designer import AirfoilDesigner  # Import the AirfoilDesigner class from the correct module
 from src.wngwb.main_window import MainWindow
 import src.globals as globals
+import logging
 
 
 class SplashScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__()
         self.DEADALUS = parent
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.setWindowTitle("Splash Screen")
         self.setFixedSize(500, 500)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
@@ -45,7 +49,7 @@ class SplashScreen(QWidget):
         splash_label = QLabel(self)
         pixmap = QPixmap("src/assets/logo.png")
         if pixmap.isNull():
-            print("Error: 'logo.png' not found or invalid path.")
+            self.logger.error(" 'logo.png' not found or invalid path.")
         splash_label.setPixmap(pixmap)
         splash_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(splash_label)
@@ -64,7 +68,7 @@ class SplashScreen(QWidget):
         
 
         # Add buttons
-        button_layout = QHBoxLayout()
+        program_button_layout = QHBoxLayout()
         button1 = QPushButton("New Project")
         button1.setStyleSheet("background-color: lightgrey;")
         button1.clicked.connect(self.new_project)
@@ -75,18 +79,33 @@ class SplashScreen(QWidget):
         button2.clicked.connect(self.open_project)
         button2.setFixedSize(220, 30)  # Set fixed size for the button
 
-        button_layout.addWidget(button1)
-        button_layout.addWidget(button2)
-        layout.addLayout(button_layout)
+        info_button_layout = QHBoxLayout()
+        button3 = QPushButton("User Manual")
+        button3.setStyleSheet("background-color: lightgrey;")
+        button3.clicked.connect(self.open_manual)
+        button3.setFixedSize(220, 30)  # Set fixed size for the button
+
+        button4 = QPushButton("Reales Notes")
+        button4.setStyleSheet("background-color: lightgrey;")
+        button4.clicked.connect(self.open_notes)
+        button4.setFixedSize(220, 30)  # Set fixed size for the button
+
+        program_button_layout.addWidget(button1)
+        program_button_layout.addWidget(button2)
+        info_button_layout.addWidget(button3)
+        info_button_layout.addWidget(button4)
+        layout.addLayout(program_button_layout)
+        layout.addLayout(info_button_layout)
 
         # Center the buttons
-        button_layout.setAlignment(Qt.AlignCenter)
+        program_button_layout.setAlignment(Qt.AlignCenter)
+        info_button_layout.setAlignment(Qt.AlignCenter)
 
         # Add close button
         close_button = QPushButton(self)
         icon = QIcon("src/assets/cross.png")
         if icon.isNull():
-            print("Error: 'cross.png' not found or invalid path.")
+            self.logger.error("Error: 'cross.png' not found or invalid path.")
         close_button.setIcon(icon)
         close_button.setFixedSize(30, 30)
         close_button.setStyleSheet("border: none;")
@@ -98,8 +117,11 @@ class SplashScreen(QWidget):
         close_layout.setAlignment(Qt.AlignRight)
         layout.insertLayout(0, close_layout)  # Insert at the top of the main layout
 
+        self.logger.info("SplashScreen initialized")
+
     def new_project(self):
         """Create new DEADALUS project and open the AirfoilDesigner window."""
+        self.logger.info("Creating new project")
         self.PROJECT = globals.PROJECT.newProject()
         self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
         self.airfoil_designer_window.show()
@@ -107,6 +129,7 @@ class SplashScreen(QWidget):
 
     def open_project(self):
         """Load DEADALUS project and open the AirfoilDesigner window."""
+        self.logger.info("Opening existing project")
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DEADALUS Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
@@ -114,3 +137,9 @@ class SplashScreen(QWidget):
             self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
             self.airfoil_designer_window.show()
             self.close()
+
+    def open_manual(self):
+        manual = globals.DEADALUS.showUserManual()
+
+    def open_notes(self):
+        manual = globals.DEADALUS.showRealiseNotes()

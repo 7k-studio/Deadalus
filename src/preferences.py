@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox, QSlider
@@ -32,6 +32,7 @@ class PreferencesWindow(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Preferences")
         self.resize(300, 200)
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.tabs = QTabWidget()
         self.general_tab = QWidget()
@@ -88,8 +89,9 @@ class PreferencesWindow(QDialog):
         self.general_performance_slider = QSlider(Qt.Horizontal)
         self.general_performance_slider.setMinimum(10)
         self.general_performance_slider.setMaximum(100)
-        self.general_performance_slider.setTickInterval(DEADALUS.preferences['general']['performance'])
+        self.general_performance_slider.setTickInterval(10)
         self.general_performance_slider.setSingleStep(10)
+        self.general_performance_slider.setValue(DEADALUS.preferences['general']['performance'])  # Set initial value
 
         # Label to show % value
         self.general_performance_label = QLabel(f"{self.general_performance_slider.value()}%")
@@ -131,8 +133,8 @@ class PreferencesWindow(QDialog):
         self.a_viewport_show_grid = QCheckBox("Show grid")
         self.a_viewport_show_grid.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['grid']['show'])
 
-        self.a_viewport_show_ruller = QCheckBox("Show ruller")
-        self.a_viewport_show_ruller.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['ruller']['show'])
+        self.a_viewport_show_ruller = QCheckBox("Show ruler")
+        self.a_viewport_show_ruller.setChecked(DEADALUS.preferences['airfoil_designer']['viewport']['ruler']['show'])
 
         airfoil_text = QLabel("Airfoil:")
         airfoil_text.setToolTip("")
@@ -203,7 +205,7 @@ class PreferencesWindow(QDialog):
 
         # --- AIRFOIL DESIGNER TAB --- #
         DEADALUS.preferences['airfoil_designer']["viewport"]["grid"]['show'] = self.a_viewport_show_grid.isChecked()
-        DEADALUS.preferences['airfoil_designer']["viewport"]["ruller"]['show'] = self.a_viewport_show_ruller.isChecked()
+        DEADALUS.preferences['airfoil_designer']["viewport"]["ruler"]['show'] = self.a_viewport_show_ruller.isChecked()
 
         DEADALUS.preferences['airfoil_designer']["airfoil"]["control_points"]['show'] = self.airfoil_show_control_points.isChecked()
         DEADALUS.preferences['airfoil_designer']["airfoil"]["construction"]['show'] = self.airfoil_show_construction.isChecked()
@@ -211,7 +213,7 @@ class PreferencesWindow(QDialog):
 
         # --- WING DESIGNER TAB --- #
         DEADALUS.preferences['wing_designer']["viewport"]["grid"]['show'] = self.w_viewport_show_grid.isChecked()
-        #DEADALUS.preferences['wing_designer']["viewport"]["ruller"]['show'] = self.w_viewport_show_ruller.isChecked()
+        #DEADALUS.preferences['wing_designer']["viewport"]["ruler"]['show'] = self.w_viewport_show_ruller.isChecked()
 
         DEADALUS.preferences['wing_designer']["wing"]["grid"]['show'] = self.wing_show_grid.isChecked()
         DEADALUS.preferences['wing_designer']["wing"]["wireframe"]['show'] = self.wing_show_wireframe.isChecked()
@@ -235,8 +237,8 @@ class PreferencesWindow(QDialog):
                 "grid": {
                     "show": DEADALUS.preferences['airfoil_designer']['viewport']['grid'].get("show", True)
                     },
-                "ruller": {
-                    "show": DEADALUS.preferences['airfoil_designer']['viewport']['ruller'].get("show", True)
+                "ruler": {
+                    "show": DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True)
                     },
             },
             "airfoil": {
@@ -259,7 +261,7 @@ class PreferencesWindow(QDialog):
                 "grid": {
                     "show": DEADALUS.preferences['wing_designer']['viewport']['grid'].get("show", True)
                     },
-                #"ruller": DEADALUS.preferences['airfoil_designer']['viewport']['ruller'].get("show", True),
+                #"ruler": DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True),
             },
             "wing": {
                 "grid":{
@@ -279,7 +281,7 @@ class PreferencesWindow(QDialog):
 
         with open(f"src/settings", "w") as outfile:
             outfile.write(json_object)
-            print(f"Saved file: settings")
+            self.logger.info(f"Saved file: settings")
 
 # For testing the dialog independently
 if __name__ == "__main__":

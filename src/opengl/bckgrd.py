@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import QOpenGLWidget
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QMouseEvent
@@ -30,6 +30,7 @@ from PyQt5.QtOpenGL import QGLWidget
 import math
 
 #from .test_cube import draw_object_from_file  # Import the new function
+logger = logging.getLogger(__name__)
 
 def draw_origin_arrows(self, zoom, origin_x, origin_y, origin_z, quality=32):
     """Draw a tube from given origin."""

@@ -21,7 +21,6 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 logger = logging.getLogger(__name__)

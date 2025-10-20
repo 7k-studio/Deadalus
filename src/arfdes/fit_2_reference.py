@@ -18,11 +18,11 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QTabWidget, QVBoxLayout, QCheckBox, QLabel, QDialog, QPushButton, QHBoxLayout, QComboBox, QLineEdit, QFormLayout
 )
-
+logger = logging.getLogger(__name__)
 
 def fit_2_reference(current_airfoil, reference_airfoil, bounds=None):
     """ Fit the currently selected airfoil to the reference_airfoil by optimizing its parameters. """
@@ -151,9 +151,9 @@ def fit_2_reference(current_airfoil, reference_airfoil, bounds=None):
     if result.success:
         for i, k in enumerate(param_names):
             current_airfoil.params[k] = result.x[i]
-        print(f"Airfoil '{current_airfoil.infos.get('name', '')}' parameters fitted to reference.")
+        logger.info(f"Airfoil '{current_airfoil.infos.get('name', '')}' parameters fitted to reference.")
     else:
-        print("Optimization failed:", result.message)
+        logger.error("Optimization failed:", result.message)
 
     return result
 
@@ -259,7 +259,7 @@ class Fit2RefWindow(QDialog):
     def run_fit(self):
         params = self.current_airfoil.params
         bounds = self.get_bounds(params)
-        print(bounds)
+        logger.debug(bounds)
         result = fit_2_reference(self.current_airfoil, self.reference_airfoil, bounds=bounds)
         if result.success:
             self.accept()
@@ -275,6 +275,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     dlg = Fit2RefWindow()
     if dlg.exec_():
-        print("Preferences saved.")
+        logger.info("Preferences saved.")
     else:
-        print("Cancelled.")
+        logger.info("Cancelled.")
