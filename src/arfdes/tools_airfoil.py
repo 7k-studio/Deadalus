@@ -22,7 +22,6 @@ import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
-import os
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
 from scipy.optimize import minimize, root_scalar
 from scipy import interpolate

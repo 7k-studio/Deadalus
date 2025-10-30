@@ -19,20 +19,11 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
-from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication, QLabel, QInputDialog, QDialog, QVBoxLayout, QTextEdit, QDialogButtonBox
-import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox
 from PyQt5.QtCore import pyqtSignal
-import numpy as np
-import json
-import os
-from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
-from scipy.optimize import minimize, root_scalar
-from scipy import interpolate
-from tqdm import tqdm
 from PyQt5.QtWidgets import (
-    QTableWidget, QTableWidgetItem, QPushButton
+    QLabel, QInputDialog, QDialog, QDialogButtonBox, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, 
+    QTextEdit, QStackedWidget, QMessageBox, QTableWidget, QTableWidgetItem, QPushButton, QTableWidget, QTableWidgetItem, 
+    QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QLineEdit, QHeaderView
 )
 
 import src.utils.dxf as dxf
@@ -41,10 +32,6 @@ from src.arfdes.tools_airfoil import Reference_load
 from src.obj.objects2D import Airfoil
 from src.arfdes.widget_tree import add_airfoil_to_tree
 
-from PyQt5.QtWidgets import (
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout,
-    QPushButton, QLineEdit, QHeaderView
-)
 from datetime import date
 import src.arfdes.fit_2_reference as fit_2_reference  # Import the fitting module
 import src.globals as globals  # Import from globals.py

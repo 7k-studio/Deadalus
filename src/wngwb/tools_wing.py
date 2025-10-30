@@ -28,12 +28,12 @@ import numpy as np
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
 from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
-from PyQt5.QtWidgets import QTreeWidgetItem
 
 #import tools.DXFmodule
 import random
 from tqdm import tqdm
 from PyQt5.QtWidgets import (
+    QTreeWidgetItem,
     QApplication, QVBoxLayout, QTableWidget, QTableWidgetItem, QMainWindow, QWidget, QHBoxLayout, QPushButton, QLabel, QLineEdit
 )
 from PyQt5.QtCore import Qt

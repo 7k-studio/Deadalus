@@ -137,6 +137,7 @@ class SplashScreen(QWidget):
             self.close()
 
     def open_manual(self):
+        self.logger.info("Opening user manual")
         manual = globals.DEADALUS.showUserManual()
 
     def open_notes(self):
