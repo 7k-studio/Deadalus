@@ -40,7 +40,7 @@ import src.obj.objects2D as objects2D
 class Program:
     def __init__(self):
         self.program_name = "Deadalus"
-        self.program_version = "0.3.3-beta"
+        self.program_version = "0.3.2-beta"
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferences = {
