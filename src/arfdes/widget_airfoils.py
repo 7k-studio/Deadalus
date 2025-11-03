@@ -54,6 +54,7 @@ class TreeAirfoil(QTableWidget):
 
     def __init__(self, parent=None):
         super(TreeAirfoil, self).__init__(parent)
+        self.setMinimumSize(200, 200)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.init_tree()
 

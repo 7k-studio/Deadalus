@@ -24,7 +24,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import gluPerspective  # Add this import
 import math
 
-from src.obj.car import Wheels
+from src.obj.class_primitives import Wheels
 from src.globals import PROJECT
 
 logger = logging.getLogger(__name__)

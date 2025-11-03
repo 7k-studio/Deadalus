@@ -48,6 +48,7 @@ class TreeRererence(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
     def __init__(self, parent=None):
         super(TreeRererence, self).__init__(parent)
+        self.setMinimumSize(200, 100)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.init_tree()
 

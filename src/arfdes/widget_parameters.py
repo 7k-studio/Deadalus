@@ -35,6 +35,7 @@ class TableParameters(QTableWidget):
 
     def __init__(self, parent=None, open_gl=None, airfoils_menu=None, project=None):
         super(TableParameters, self).__init__(parent)
+        self.setMinimumSize(200, 300)
         self.open_gl = open_gl
         self.project = project
         self.airfoils_menu = airfoils_menu

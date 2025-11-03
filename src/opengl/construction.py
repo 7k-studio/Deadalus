@@ -26,7 +26,7 @@ import math
 import numpy as np
 from numpy import array, linalg
 
-from src.obj.car import Wheels
+from src.obj.class_primitives import Wheels
 from src.globals import PROJECT
 
 logger = logging.getLogger(__name__)

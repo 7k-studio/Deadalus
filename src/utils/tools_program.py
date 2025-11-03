@@ -132,3 +132,4 @@ def vec_translate(points, magnitude, angle):
     translated_points = [points[0] + dx, points[1] + dy]
 
     return translated_points
+    

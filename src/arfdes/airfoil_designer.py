@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, 
     QMenuBar, QAction, QFileDialog, QTreeWidget, 
     QTreeWidgetItem, QTextEdit, QStackedWidget, QHeaderView,
-    QTableWidget, QTableWidgetItem, QPushButton
+    QTableWidget, QTableWidgetItem, QPushButton, QDockWidget
 )
 from PyQt5.QtGui import QIcon
 
@@ -49,6 +49,7 @@ from src.arfdes.widget_airfoils import TreeAirfoil
 from src.arfdes.widget_reference import TreeRererence
 from src.arfdes.widget_parameters import TableParameters
 from src.arfdes.widget_statistics import TableStatistics
+from src.arfdes.widget_description import TextDescription
 from src.opengl.widget_console import LogViewer
 import src.arfdes.tools_airfoils as tools
 
@@ -75,75 +76,127 @@ class AirfoilDesigner(QMainWindow):
         # Initial Parameters
         self.params = {}
 
-        # Main layout
-        central_widget = QWidget(self)
-        main_layout = QVBoxLayout(central_widget)  # Vertical layout for toolbar and content
+        # Main splitter to hold the viewport and dockable widgets
+        self.main_splitter = QSplitter(self)
+        self.main_splitter.setOrientation(Qt.Horizontal)
 
-        # Canvas and Table Layout
-        content_layout = QHBoxLayout()  # Horizontal layout for canvas and table/tree
-
-        # Add the OpenGL viewport to the inner splitter
+        # Add the OpenGL viewport to the splitter
         self.viewport = QWidget()
         self.open_gl = ViewportOpenGL(parent=self.viewport)
+        self.main_splitter.addWidget(self.open_gl)
 
-        # Tree and Table Layout
-        input_container_layout = QVBoxLayout()  # Vertical layout for tree and table
-        output_container_layout = QVBoxLayout()
+        # Set the splitter as the central widget
+        self.setCentralWidget(self.main_splitter)
 
-        # Widgets for input container
-        self.airfoil_tree = TreeAirfoil()
-        self.reference_tree = TreeRererence(self)
-        self.parameters = TableParameters(self, open_gl=self.open_gl, airfoils_menu=self.airfoil_tree, project=self.project)
+        # central_widget = QWidget(self)
+        # main_layout = QVBoxLayout(central_widget)  # Vertical layout for toolbar and content
 
-        # Create the menu bar
-        self.menu_bar = MenuBar(self, project=self.project, parent=self, time=self.time, airfoils_menu=self.airfoil_tree)  # Use the MenuBar class
-        self.setMenuBar(self.menu_bar)
+        # Canvas and Table Layout
+        # content_layout = QHBoxLayout()  # Horizontal layout for canvas and table/tree
 
-        # Add all INPUT widgets to container
-        input_container_layout.addWidget(self.airfoil_tree)
-        input_container_layout.addWidget(self.parameters)
-        
-        # Widgets for output container
-        self.statistics = TableStatistics(self)
+        # Widgets for INPUT container
+        # Left side tree airfoil
+        self.tree_airfoil = TreeAirfoil()
+        self.dock_airfoil = QDockWidget("Airfoil Tree", self)
+        self.dock_airfoil.setWidget(self.tree_airfoil)
+        self.dock_airfoil.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_airfoil)
+
+        # Left side tree reference
+        self.tree_reference = TreeRererence(self)
+        self.dock_reference = QDockWidget("Reference Tree", self)
+        self.dock_reference.setWidget(self.tree_reference)
+        self.dock_reference.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_reference)
+
+        # Left side parameters table
+        self.table_parameters = TableParameters(self, open_gl=self.open_gl, airfoils_menu=self.tree_airfoil, project=self.project)
+        self.dock_parameters = QDockWidget("Parameters Table", self)
+        self.dock_parameters.setWidget(self.table_parameters)
+        self.dock_parameters.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_parameters)
+
+        # Right side description textarea
+        self.text_description = TextDescription(self)
+        self.text_description.set_description("Default description")
+        self.dock_description = QDockWidget("Description TextArea", self)
+        self.dock_description.setWidget(self.text_description)
+        self.dock_description.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dock_description)
+
+        # Right side statistics table
+        self.table_statistics = TableStatistics(self)
+        self.dock_statistics = QDockWidget("Statistics Table", self)
+        self.dock_statistics.setWidget(self.table_statistics)
+        self.dock_statistics.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dock_statistics)
 
         # Log Viewer Widget
         self.log_viewer = LogViewer(log_file="toolout.log", parent=self)
+        self.dock_logger = QDockWidget("Logger Console", self)
+        self.dock_logger.setWidget(self.log_viewer)
+        self.dock_logger.setAllowedAreas(Qt.BottomDockWidgetArea)
+        self.addDockWidget(Qt.BottomDockWidgetArea, self.dock_logger)
 
-        # Add all OUTPUT widgets to container
-        output_container_layout.addWidget(self.reference_tree)
-        output_container_layout.addWidget(self.statistics)
+        # Connect the visibilityChanged signal to update the menu bar state
+        self.dock_airfoil.visibilityChanged.connect(self.update_menu_bar_state)
+        self.dock_reference.visibilityChanged.connect(self.update_menu_bar_state)
+        self.dock_parameters.visibilityChanged.connect(self.update_menu_bar_state)
+        self.dock_description.visibilityChanged.connect(self.update_menu_bar_state)
+        self.dock_statistics.visibilityChanged.connect(self.update_menu_bar_state)
+        self.dock_logger.visibilityChanged.connect(self.update_menu_bar_state)
+
+        # Create the menu bar
+        self.menu_bar = MenuBar(self, project=self.project, parent=self, time=self.time, airfoils_menu=self.tree_airfoil)  # Use the MenuBar class
+        self.setMenuBar(self.menu_bar)
+
+        # Connect visibilityChanged signals to the menu bar's update_action_state method
+        self.dock_airfoil.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.airfoilWidgetAction, self.dock_airfoil)
+        )
+        self.dock_reference.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.referenceWidgetAction, self.dock_reference)
+        )
+        self.dock_parameters.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.parametersWidgetAction, self.dock_parameters)
+        )
+        self.dock_description.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.descriptionWidgetAction, self.dock_description)
+        )
+        self.dock_statistics.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.statisticsWidgetAction, self.dock_statistics)
+        )
+        self.dock_logger.visibilityChanged.connect(
+            lambda visible: self.menu_bar.update_action_state(self.menu_bar.loggerWidgetAction, self.dock_logger)
+        )
 
         # Canvas and Log Viewer Layout
-        middle_container_layout = QVBoxLayout()  # Vertical layout for OpenGL viewport and log viewer
-        middle_container_layout.addWidget(self.open_gl, 4)  # OpenGL viewport
-        middle_container_layout.addWidget(self.log_viewer, 1)  # Log viewer below OpenGL viewport
+        # middle_container_layout = QVBoxLayout()  # Vertical layout for OpenGL viewport and log viewer
+        # middle_container_layout.addWidget(self.open_gl, 4)  # OpenGL viewport
+        # middle_container_layout.addWidget(self.log_viewer, 1)  # Log viewer below OpenGL viewport
 
-        # Add layouts to the horizontal layout
-        content_layout.addLayout(input_container_layout)
-        content_layout.addLayout(middle_container_layout, 2)  # Middle container with OpenGL and log viewer
-        content_layout.addLayout(output_container_layout)
+        # # Add layouts to the horizontal layout
+        # content_layout.addLayout(middle_container_layout, 2)  # Middle container with OpenGL and log viewer
 
-        # Add toolbar and content layout to the main layout
-        main_layout.addLayout(content_layout)
-
-        self.setCentralWidget(central_widget)
+        # # Add toolbar and content layout to the main layout
+        # main_layout.addLayout(content_layout)
 
         # Connect tree widget selection to display function
         self.menu_bar.referenceStatus.connect(self.handleReferenceToggle)
-        self.airfoil_tree.itemClicked.connect(self.parameters.display_selected_airfoil)
+        self.tree_airfoil.itemClicked.connect(self.table_parameters.display_selected_airfoil)
 
         if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
-            self.airfoil_tree.new("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
+            self.tree_airfoil.new("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
         self.logger.info("Initialization completed")
 
     def handleReferenceToggle(self, state, filename):
-        selected_item = self.airfoil_tree.currentItem()
+        selected_item = self.tree_airfoil.currentItem()
         if not selected_item:
             return  # No airfoil selected
 
         # Find the corresponding airfoil object
-        airfoil_index = self.airfoil_tree.indexOfTopLevelItem(selected_item)
+        airfoil_index = self.tree_airfoil.indexOfTopLevelItem(selected_item)
         if airfoil_index == -1:
             return  # Invalid selection
 
@@ -160,6 +213,63 @@ class AirfoilDesigner(QMainWindow):
             self.logger.info("Reference disabled")
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
             self.open_gl.set_reference_to_display(None)
+    
+    def toggle_airfoil(self):
+        """Toggle the airfoil widget."""
+        if self.dock_airfoil.isVisible():
+            self.dock_airfoil.close()  # Close the dock widget
+        else:
+            self.dock_airfoil.show()  # Show the dock widget
+
+    def toggle_parameters(self):
+        """Toggle the parameters widget."""
+        if self.dock_parameters.isVisible():
+            self.dock_parameters.close()  # Close the dock widget
+        else:
+            self.dock_parameters.show()  # Show the dock widget
+
+    def toggle_reference(self):
+        """Toggle the reference widget."""
+        if self.dock_reference.isVisible():
+            self.dock_reference.close()  # Close the dock widget
+        else:
+            self.dock_reference.show()  # Show the dock widget
+
+    def toggle_statistics(self):
+        """Toggle the statistics widget."""
+        if self.dock_statistics.isVisible():
+            self.dock_statistics.close()  # Close the dock widget
+        else:
+            self.dock_statistics.show()  # Show the dock widget
+    
+    def toggle_description(self):
+        """Toggle the description widget."""
+        if self.dock_description.isVisible():
+            self.dock_description.close()  # Close the dock widget
+        else:
+            self.dock_description.show()  # Show the dock widget
+
+    def toggle_logger(self):
+        """Toggle the logger widget."""
+        if self.dock_logger.isVisible():
+            self.dock_logger.close()  # Close the dock widget
+        else:
+            self.dock_logger.show()  # Show the dock widget
+
+    def update_menu_bar_state(self, dock_widget):
+        """Update the menu bar state when a dock widget's visibility changes."""
+        if dock_widget == self.dock_airfoil:
+            self.menu_bar.update_action_state(self.menu_bar.airfoilWidgetAction, self.dock_airfoil)
+        elif dock_widget == self.dock_reference:
+            self.menu_bar.update_action_state(self.menu_bar.referenceWidgetAction, self.dock_reference)
+        elif dock_widget == self.dock_parameters:
+            self.menu_bar.update_action_state(self.menu_bar.parametersWidgetAction, self.dock_parameters)
+        elif dock_widget == self.dock_description:
+            self.menu_bar.update_action_state(self.menu_bar.descriptionWidgetAction, self.dock_description)
+        elif dock_widget == self.dock_statistics:
+            self.menu_bar.update_action_state(self.menu_bar.statisticsWidgetAction, self.dock_statistics)
+        elif dock_widget == self.dock_logger:
+            self.menu_bar.update_action_state(self.menu_bar.loggerWidgetAction, self.dock_logger)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

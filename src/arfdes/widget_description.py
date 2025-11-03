@@ -21,64 +21,62 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 #System imports
 import logging
 
-#PyQt5 imports
-from PyQt5.QtWidgets import (
-    QWidget, QLabel, QAction, QMenuBar,
-    QVBoxLayout, QHBoxLayout,
-    QLineEdit, QTextEdit, 
-    QApplication, QMainWindow, QSplitter, 
-    QFormLayout, 
-    QFileDialog, QTreeWidget, 
-    QTreeWidgetItem, QStackedWidget, QHeaderView,
-    QTableWidget, QTableWidgetItem, QPushButton, QDialog, QDialogButtonBox
-    )
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QPushButton, QHBoxLayout, QDialog, QDialogButtonBox
+from PyQt5.QtCore import pyqtSignal
 
-#Self imports
-import src.obj as obj
-import src.wngwb.tools_wing
+class TextDescription(QWidget):
+    closed = pyqtSignal()  # Signal emitted when the widget is closed
 
-from src.obj.objects2D import Airfoil
-from src.arfdes.tools_airfoils import Reference_load
-import src.arfdes.tools_reference as tools
-import src.globals as globals
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Description Widget")
+        self.setMinimumSize(200, 100)
 
-from src.opengl.viewport2d import ViewportOpenGL
-
-logger = logging.getLogger(__name__)
-
-class TextDescription(QDialog):
-
-    def __init__(self, parent=None, target_airfoil=None):
-        super(TextDescription, self).__init__(parent)
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.airfoil_obj = target_airfoil
-        self.setWindowTitle("Edit Airfoil Description")
-        self.init_ui()
-
-    def init_ui(self):
-        # Create a custom dialog with QTextEdit
+        # Layout
         layout = QVBoxLayout(self)
 
-        label = QLabel("Edit the description below:", self)
-        layout.addWidget(label)
+        # Text area
+        self.text_area = QTextEdit(self)
+        self.text_area.setReadOnly(False)  # Initially read-only
+        layout.addWidget(self.text_area)
 
-        self.text = QTextEdit(self)
-        self.text.setText(self.airfoil_obj.infos.get('description', ''))  # Pre-fill with current description
-        layout.addWidget(self.text)
+        # Buttons
+        # button_layout = QHBoxLayout()
+        # self.edit_button = QPushButton("Edit", self)
+        # self.edit_button.clicked.connect(self.edit_description)
+        # button_layout.addWidget(self.edit_button)
 
-        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
-        layout.addWidget(button_box)
+        # layout.addLayout(button_layout)
 
-        button_box.accepted.connect(self.accept)
-        button_box.rejected.connect(self.reject)
-    
-    def accept(self):
-        new_description = self.text.toPlainText()
-        if new_description:
-            # Update the airfoil object with the new description
-            self.airfoil_obj.infos['description'] = new_description
-            self.logger.info(f"Updated description for airfoil: {self.airfoil_obj.infos['name']}")
-        super().accept()
+    def set_description(self, text):
+        """Set the description text."""
+        self.text_area.setPlainText(text)
+
+    def edit_description(self):
+        """Open a dialog to edit the description."""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Edit Description")
+        dialog.setMinimumSize(400, 300)
+
+        dialog_layout = QVBoxLayout(dialog)
+        edit_area = QTextEdit(dialog)
+        edit_area.setPlainText(self.text_area.toPlainText())
+        dialog_layout.addWidget(edit_area)
+
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, dialog)
+        dialog_layout.addWidget(button_box)
+
+        button_box.accepted.connect(lambda: self._save_description(edit_area, dialog))
+        button_box.rejected.connect(dialog.reject)
+
+        dialog.exec_()
+
+    def _save_description(self, edit_area, dialog):
+        """Save the edited description."""
+        self.text_area.setPlainText(edit_area.toPlainText())
+        dialog.accept()
+
+    def closeEvent(self, event):
+        """Handle the close event and emit the closed signal."""
+        self.closed.emit()
+        super().closeEvent(event)

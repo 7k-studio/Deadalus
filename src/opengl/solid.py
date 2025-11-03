@@ -26,7 +26,7 @@ import numpy as np
 import math
 from geomdl import BSpline, utilities
 
-from src.obj.car import Wheels
+from src.obj.class_primitives import Wheels
 
 logger = logging.getLogger(__name__)
 

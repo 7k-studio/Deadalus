@@ -125,6 +125,46 @@ class MenuBar(QMenuBar):
 
         viewMenu.addAction(referenceAction)
 
+        """Window menu creation"""
+        windowMenu = self.addMenu('Window')
+
+        self.airfoilWidgetAction = QAction('Airfoil Tree', self)
+        self.airfoilWidgetAction.setCheckable(True)
+        self.airfoilWidgetAction.setChecked(True)
+        self.airfoilWidgetAction.triggered.connect(self.toggle_airfoil)
+
+        self.parametersWidgetAction = QAction('Parameters Table', self)
+        self.parametersWidgetAction.setCheckable(True)
+        self.parametersWidgetAction.setChecked(True)
+        self.parametersWidgetAction.triggered.connect(self.toggle_parameters)
+
+        self.referenceWidgetAction = QAction('Reference Tree', self)
+        self.referenceWidgetAction.setCheckable(True)
+        self.referenceWidgetAction.setChecked(True)
+        self.referenceWidgetAction.triggered.connect(self.toggle_reference)
+
+        self.statisticsWidgetAction = QAction('Statistics Table', self)
+        self.statisticsWidgetAction.setCheckable(True)
+        self.statisticsWidgetAction.setChecked(True)
+        self.statisticsWidgetAction.triggered.connect(self.toggle_statistics)
+
+        self.descriptionWidgetAction = QAction('Description Widget', self)
+        self.descriptionWidgetAction.setCheckable(True)
+        self.descriptionWidgetAction.setChecked(True)
+        self.descriptionWidgetAction.triggered.connect(self.toggle_description)
+
+        self.loggerWidgetAction = QAction('Logger Console', self)
+        self.loggerWidgetAction.setCheckable(True)
+        self.loggerWidgetAction.setChecked(True)
+        self.loggerWidgetAction.triggered.connect(self.toggle_logger)
+
+        windowMenu.addAction(self.airfoilWidgetAction)
+        windowMenu.addAction(self.parametersWidgetAction)
+        windowMenu.addAction(self.referenceWidgetAction)
+        windowMenu.addAction(self.statisticsWidgetAction)
+        windowMenu.addAction(self.descriptionWidgetAction)
+        windowMenu.addAction(self.loggerWidgetAction)
+
         """Module menu creation"""
         moduleMenu = self.addMenu('Module')
         WingModule = QAction('Wing Module', self)
@@ -376,6 +416,40 @@ class MenuBar(QMenuBar):
                 self.logger.info("Hide reference")
                 referenceState = False
                 self.referenceStatus.emit(referenceState, None)
+
+    def toggle_airfoil(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_airfoil()  # Call the correct method in AirfoilDesigner
+
+    def toggle_parameters(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_parameters()  # Call the correct method in AirfoilDesigner
+
+    def toggle_statistics(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_statistics()  # Call the correct method in AirfoilDesigner
+
+    def toggle_reference(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_reference()  # Call the correct method in AirfoilDesigner
+
+    def toggle_description(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_description()  # Call the correct method in AirfoilDesigner
+    
+    def toggle_logger(self):
+        """Toggle the description widget."""
+        if self.parent():
+            self.parent().toggle_logger()  # Call the correct method in AirfoilDesigner
+    
+    def update_action_state(self, action, dock_widget):
+        """Update the state of the given action based on the dock widget's visibility."""
+        action.setChecked(dock_widget.isVisible())
 
     def open_wing_module(self):
         
