@@ -20,14 +20,6 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
-import numpy as np
-import math
-import os
-from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
-from scipy.optimize import minimize, root_scalar
-from scipy import interpolate
-from tqdm import tqdm
-import json
 import src.obj
 import src.globals as globals  # Import from globals.py
 logger = logging.getLogger(__name__)

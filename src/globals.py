@@ -30,7 +30,7 @@ import os
 import uuid
 import datetime
 import numpy as np  # Add this import for numpy
-from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy
+from PyQt5.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QHBoxLayout, QSpacerItem, QSizePolicy, QTextEdit
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtCore import Qt
 import webbrowser
@@ -40,7 +40,7 @@ import src.obj.objects2D as objects2D
 class Program:
     def __init__(self):
         self.program_name = "Deadalus"
-        self.program_version = "0.3.1-beta"
+        self.program_version = "0.3.2-beta"
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferences = {
@@ -141,7 +141,7 @@ class Program:
     def showAboutDialog(self, parent=None):
         dialog = QDialog(parent)
         dialog.setWindowTitle("About")
-        dialog.setFixedSize(400, 250)
+        dialog.setFixedSize(400, 400)
 
         # Logo
         logo_label = QLabel(dialog)
@@ -149,15 +149,37 @@ class Program:
         #logo_label.setPixmap(pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
 
-        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
-        copyright_label.setFont(QFont("Arial", 8))
-        copyright_label.setAlignment(Qt.AlignCenter)
+        title_label = QLabel('DEADALUS')
+        title_label.setFont(QFont("Cambria", 36))
+        title_label.setAlignment(Qt.AlignCenter)
 
         version_label = QLabel(f"Version: {self.program_version}")
         version_label.setFont(QFont("Arial", 12))
         version_label.setAlignment(Qt.AlignCenter)
 
+        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
+        copyright_label.setFont(QFont("Arial", 8))
+        copyright_label.setAlignment(Qt.AlignCenter)
+
         # Optional description
+        about_text = ["Program is created using Python: 3.11.8",
+                      "STEP export is done via proprietary script",
+                      "There are some exteral librieries used:",
+                      "PyQt5: https://doc.qt.io/qtforpython-6/", 
+                      "PyOpenGL",
+                      "PyOpenGL_accelerate",
+                      "ezdxf: https://ezdxf.readthedocs.io/en/stable/",
+                      "matplotlib",
+                      "scipy",
+                      "tqdm",
+                      "geomdl",
+                      "numpy",
+                      "logger","webbrowser", "json", "tempfile", "shutil", "tarfile", "struct", "os", "uuid", "datetime"]
+
+        description_text = QTextEdit()
+        description_text.setReadOnly(True)
+        description_text.setPlainText('\n'.join(about_text))
+        
         description_label = QLabel("DEADALUS is a program for parametricaly designing airfoils and wings.")
         description_label.setAlignment(Qt.AlignCenter)
         description_label.setWordWrap(True)
@@ -170,9 +192,10 @@ class Program:
         # Layout
         layout = QVBoxLayout()
         layout.addWidget(logo_label)
-        layout.addWidget(copyright_label)
+        layout.addWidget(title_label)
         layout.addWidget(version_label)
-        layout.addWidget(description_label)
+        layout.addWidget(copyright_label)
+        layout.addWidget(description_text)
 
         bottom_layout = QHBoxLayout()
         bottom_layout.addSpacerItem(QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
@@ -184,8 +207,11 @@ class Program:
         dialog.exec_()
     
     def showUserManual(self):
-        file_path = os.path.abspath("src/assets/user_manual.html")
+        file_path = os.path.abspath("src/assets/user_manual/user_manual.html")
         webbrowser.open(f"file://{file_path}")
+    
+    def showRealiseNotes(self):
+        webbrowser.open(f"https://github.com/7k-studio/Deadalus/releases")
 
 class Project:
     def __init__(self):

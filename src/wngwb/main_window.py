@@ -24,7 +24,6 @@ import math
 import os
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget
 from PyQt5.QtCore import Qt
 
 import numpy as np
@@ -35,6 +34,8 @@ import src.utils.dxf as dxf
 import random
 
 from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, 
+    QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget,
     QTableWidget, QTableWidgetItem, QPushButton, QSizePolicy
 )
 from PyQt5.QtGui import QIcon

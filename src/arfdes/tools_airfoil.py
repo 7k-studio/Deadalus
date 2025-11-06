@@ -22,7 +22,6 @@ import logging
 from PyQt5.QtWidgets import QTreeWidgetItem
 import numpy as np
 import math
-import os
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
 from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
@@ -33,7 +32,7 @@ import src.globals as globals  # Import from globals.py
 
 logger = logging.getLogger(__name__)
 
-def Reference_load(file):
+def SeligReference(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
     UP_points = []
@@ -85,6 +84,18 @@ def Reference_load(file):
     airfoil.dwn_curve = DW_points
     airfoil.infos['name'] = airfoil_name
     logger.info(f"Finished loading {airfoil.infos['name']} in selig format")
+    
+    return airfoil
+
+def Reference_load(file):
+    """Load airfoil coordinates from a file and return upper and lower points."""
+    format = file.split('.')[1]
+    airfoil = None
+    
+    if format =="arf":
+        airfoil, _ = load_airfoil_from_json(file)
+    else:
+        airfoil = SeligReference(file)
     
     return airfoil
 

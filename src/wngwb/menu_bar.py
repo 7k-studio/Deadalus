@@ -19,10 +19,8 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
-from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication
 import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 import numpy as np
 import math
@@ -33,6 +31,9 @@ from scipy import interpolate
 import random
 from tqdm import tqdm
 from PyQt5.QtWidgets import (
+    QMenuBar, QAction, QFileDialog, QApplication,
+    QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel,
+    QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox,
     QTableWidget, QTableWidgetItem, QPushButton
 )
 

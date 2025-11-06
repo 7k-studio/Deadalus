@@ -1,0 +1,178 @@
+<!--
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of Deadalus.
+
+Deadalus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Deadalus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deadalus User Manual</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+      <img src="assets/logo.png" alt="Program Logo" height="40"/>
+      <p style="font-size: xx-large; margin-top: 0px; margin-bottom: 0px;">Deadalus User Manual</p>
+      <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
+  </header>
+
+  <!-- Top Navigation Menu -->
+  <div class="section-menu">
+    <button onclick="showSection('Deadalus')">Deadalus</button>
+    <a href="assets/airfoil_designer.html" class="button-link">Airfoil Designer</a>
+    <a href="assets/wing_designer.html" class="button-link">Wing Designer</a>
+    <a href="assets/changelog.html" class="button-link">Changelog</a>
+  </div>
+
+  <!-- Main App Area -->
+  <div class="container">
+    <!-- Sidebar Menu -->
+    <nav class="sidebar">
+      <h3>Contents</h3>
+
+      <ul id="menu-Deadalus" class="context-menu">
+        <li><a href="#intro">Introduction</a></li>
+        <li><a href="#Deadalus">Deadalus</a></li>
+        <li><a href="#FileMenu">File Menu</a></li>
+        <li><a href="#ProgramMenu">Program Menu</a></li>
+        <!-- <li><a href="#todo">ToDo</a></li> -->
+      </ul>
+
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- Deadalus Section -->
+      <div id="Deadalus" class="page-section active">
+          <h2>Introduction</h2>
+          <p>
+              Welcome to the Deadalus user manual. 
+              Deadalus is a program for designing and editing airfoils and wings. 
+              This manual will guide you through the main features and help you get started with your projects.
+          </p>
+          <ul>
+              <li>Design and modify airfoils with intuitive tools.</li>
+              <li>Import/export airfoil files in various formats.</li>
+              <li>Use the Wing Workbench for advanced wing design.</li>
+          </ul>
+          <img src="assets/Deadalus/STEP_export.jpg" alt="Wing Workbench" height="500"/>
+
+          <h2>Deadalus</h2>
+          <p>Deadalus consists of two modules: 
+            <a href="assets/airfoil_designer.html">2D airfoil designer</a> and
+            <a href="assets/wing_designer.html">3D wing designer</a>.
+            Each module is equipped with Menu Bar which allows for usage of functions and interaction with program objects and program itself.
+            Global program interactions can be made through the <span class="highlight">File</span> and <span class="highlight">Program</span> menus.
+          </p>
+
+          <h3>Getting Started</h3>
+          <p>Once DEADALUS program is started user will be welcomed by Splash Screen of the program. With splash screen you can:</p>
+          <ul>
+              <li><b>Create new project:</b> Start a new project.</li>
+              <li><b>Open existing project:</b> Load an existing project file.</li>
+              <li><b>Open user manual:</b> Go directly to user manual without closing the Splash Screen</li>
+              <li><b>Open realise notes:</b> Opens web browser with latest realise notes (reqires ethernet connection)</li>
+          </ul>
+          <img src="assets/Deadalus/splashscreen.png" alt="Splash Screen"/> <br>
+
+          Once new File or Open Project is clicked an <a href="assets/airfoil_designer.html">Airfoil Designer</a> window opens.
+          In every module user can interact with bar menu sections:
+
+          <h3 id="FileMenu">File Menu</h3>
+          <p> Allows user to interact with <span class="highlight">PROJECT</span> itself. Available interactions and functions are:</p>
+          <ul>
+              <li><b>New:</b> Start a new project.</li>
+              <li><b>Open:</b> Load an existing project file.</li>
+              <li><b>Save:</b> Save your current project.</li>
+              <li><b>Exit:</b> Closes program after clarification.</li>
+          </ul>
+
+          <h3 id="ProgramMenu">Program Menu</h3>
+          <p> Allows user to interact and get information about <span class="highlight">PROGRAM</span> itself. Basic interactions are:</p>
+          <ul>
+              <li><b>User Manual:</b> If user gets lost while using program, user manual can be displyed from here.</li>
+              <li><b>About:</b> Show information about the program.</li>
+              <li><b>Preferences:</b> Adjust program settings.</li>
+          </ul>
+
+          <h4>Preferences</h4>
+          <p>Preferences window allows user to customize the program settings according to needs.<br>
+            <strong>Units</strong> - sets units <span class="highlight">FOR STEP EXPORT ONLY! (at least for now)</span>
+            <ul>
+              <li><strong>Length:</strong> allows to set length unit (for now only meters available)</li>
+              <li><strong>Angle:</strong> allows to set angle unit (for now only radians)</li>
+            </ul>
+            <strong>General performance: </strong> Allows user to choose the details level in graphics rendering. Performace level is set using slider where 10 is lowest and 100 is highest detail level.<br>
+            <img src="assets/Deadalus/preferences_general_performance.png" alt="preferences general performance"/>
+
+            <h5>Beta features</h5>
+            Unlocks functions that are not well tested or stable. Used at user's own risk!
+          </p>
+          
+          
+      </div>
+
+<script>
+  function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+    // Show selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.classList.add('active');
+    }
+
+    // Hide all context menus
+    document.querySelectorAll('.context-menu').forEach(el => el.style.display = 'none');
+
+    // Show relevant context menu
+    const menu = document.getElementById(`menu-${sectionId}`);
+    if (menu) menu.style.display = 'block';
+  }
+
+  function loadTestHtml() {
+    const changelogSection = document.getElementById('changelog');
+    const container = document.getElementById('markdown-container');
+
+    // Fetch the test.html content
+    fetch('changelog/test.html')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load test.html');
+        }
+        return response.text();
+      })
+      .then(htmlContent => {
+        // Replace the changelog container content with the fetched HTML
+        container.innerHTML = htmlContent;
+
+        // Apply the same styles as the user manual
+        changelogSection.classList.add('page-section', 'active');
+      })
+      .catch(error => {
+        container.innerHTML = `<p>Error loading test.html: ${error.message}</p>`;
+      });
+  }
+</script>
+</body>
+</html>
