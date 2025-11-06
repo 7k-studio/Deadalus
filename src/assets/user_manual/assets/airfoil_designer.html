@@ -53,7 +53,7 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
         <li><a href="#ADoverview">Overview</a></li>
         <li><a href="#ADMenuBar">Menu Bar</a></li>
         <li><a href="#ADViewport">Viewport</a></li>
-        <li><a href="#ADStorage">Airfoil Storage</a></li>
+        <li><a href="#ADArfTree">Airfoil Storage</a></li>
         <li><a href="#ADParamTab">Parameter Table</a></li>
       </ul>
 
@@ -107,8 +107,14 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
           <h3>View menu</h3>
           <p>Allows user to add elements to be displayed</p>
             <ul>
-                <li><b>Show Reference:</b> Chooses a reference airfoil and makes it visible in viewport (works for selig format airfoils)</li>
+                <li><b>Show Reference:</b> Chooses a reference airfoil and makes it visible in viewport (works for selig format airfoils (.txt) and for ddls-parametric (.arf))</li>
             </ul>
+            <div class="note">
+              <div class="inside">
+                <h3>NOTE</h3>
+                To toggle a reference you must first select an airfoil from Airfoil Tree
+              </div>
+            </div>
           
           <h3>Module menu</h3>
           Allows user to change module menu. Available modules are:
@@ -132,9 +138,9 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
           <img src="AirfoilDesigner/AD_Viewport.jpg" alt="Airfoil Designer Elements" height="500"/>
         </div>
         
-        <div id="ADStorage">
-          <h2>Airfoil storage overview</h2>
-          <p>Airfoil storage widget display all the airfoils in current project. To perform some operations (e.g. delete an airfoil, fit2reference or flip) it is neccessary to select one airfoil in the widget. 
+        <div id="ADArfTree">
+          <h2>Airfoil Tree overview</h2>
+          <p>Airfoil tree widget display all the airfoils in current project. To perform some operations (e.g. delete an airfoil, fit2reference or flip) it is neccessary to select one airfoil in the widget. 
           <br><strong>It is possible to have several airfoils under the same name</strong>
           </p>
           <ul>

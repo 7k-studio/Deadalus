@@ -60,7 +60,6 @@ Airfoil_0 = src.obj.objects2D.Airfoil()
 
 
 class AirfoilDesigner(QMainWindow):
-
     ''' Main window for the Airfoil Designer application. '''
 
     def __init__(self, program=None, project=None):
@@ -149,17 +148,19 @@ class AirfoilDesigner(QMainWindow):
         #current_airfoil = globals.PROJECT.project_airfoils[airfoil_index]
 
         if state:
-            self.logger.info(f"Reference enabled with file: '{filename}'")
+            
             reference_airfoil = Reference_load(filename)
-            self.open_gl.set_reference_to_display(reference_airfoil)
+            if reference_airfoil != None:
+                self.logger.info(f"Reference enabled with file: '{filename}'")
+                self.open_gl.set_reference_to_display(reference_airfoil)
+            else:
+                self.logger.error('Failed to load refrence!')
 
             #self.table.set_reference_points(self.reference_airfoil.top_curve, self.reference_airfoil.dwn_curve)  # Pass reference points to the table
 
         else:
             self.logger.info("Reference disabled")
-
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
-
             self.open_gl.set_reference_to_display(None)
 
     def update_tree_menu(self):

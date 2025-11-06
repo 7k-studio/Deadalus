@@ -55,6 +55,11 @@ class ViewportOpenGL(QGLWidget):
         self.viewport_settings = globals.DEADALUS.preferences["airfoil_designer"]["viewport"]
         self.airfoil_settings = globals.DEADALUS.preferences["airfoil_designer"]["airfoil"]
     
+    def clear(self):
+        self.airfoil = None
+        self.reference = None
+        self.update()
+
     def set_airfoil_to_display(self, airfoil):
         self.airfoil = airfoil
         self.update()
@@ -99,6 +104,10 @@ class ViewportOpenGL(QGLWidget):
         if self.reference: 
             if self.reference.format == 'selig':
                 self.draw_airfoil_selig_format(self.reference)
+                self.logger.info("Drawing selig format airfoil")
+            if self.reference.format == 'ddls-parametric':
+                self.draw_airfoil(self.reference, color='grey')
+                self.logger.info("Drawing .ddls-parametric reference model")
             #self.fit_to_airfoil(self.airfoil)
 
     def draw_cor(self, position, size=5):
@@ -234,7 +243,7 @@ class ViewportOpenGL(QGLWidget):
         self.update()
         #return super().keyPressEvent(a0)
 
-    def draw_airfoil(self, Current_Airfoil):
+    def draw_airfoil(self, Current_Airfoil, line_style="solid", color=None):
         '''
         Plots an airfoil based on objects Airfoil stored in obj.arf.py defined by folowing gorup of parameters:
 
@@ -253,20 +262,92 @@ class ViewportOpenGL(QGLWidget):
         # Extract parameters
         Current_Airfoil.update()
         glDisable(GL_DEPTH_TEST)
-    
-        color = self.airfoil_settings['wireframe']['color']
+
+        if color == "grey":
+            color ={'le': [0.5,0.5,0.5],
+                    'te': [0.5,0.5,0.5],
+                    'ps': [0.5,0.5,0.5],
+                    'ss': [0.5,0.5,0.5]
+                }
+        else:
+            color = self.airfoil_settings['wireframe']['color']
 
         for key in ['le', 'te', 'ps', 'ss']:
             vec_length = len(Current_Airfoil.geom[key][0])
             if vec_length > 0:
-                # Draw edges connecting front and back faces
-                glColor3f(*color[key])
-                glBegin(GL_LINE_STRIP)
-                for i in range(vec_length):
-                    x = Current_Airfoil.geom[key][0][i]
-                    y = Current_Airfoil.geom[key][1][i]
-                    glVertex3f(x, y, 0.0)  # force z=0
-                glEnd()             
+                points = [(Current_Airfoil.geom[key][0][i], Current_Airfoil.geom[key][1][i]) for i in range(vec_length)]
+                if line_style == "solid":
+                    self._draw_solid_line(points, color[key])
+                if line_style == "dashed":
+                    self._draw_dashed_line(points, color[key])
+                if line_style == "dot-dash":
+                    self._draw_dot_dash_line(points, color[key])
+
+    def _draw_solid_line(self, points, color):
+        """Draw a solid line connecting the given points."""
+        glColor3f(*color)
+        glBegin(GL_LINE_STRIP)
+        for point in points:
+            glVertex3f(point[0], point[1], 0.0)  # force z=0
+        glEnd()
+
+    def _draw_dashed_line(self, points, color, dash_length=0.001):
+        """Draws a dashed line connecting the given points."""
+        from numpy import array, linalg
+
+        glColor3f(*color)
+        # total_len = sum(
+        # linalg.norm(array(points[i+1]) - array(points[i]))
+        # for i in range(len(points)-1)
+        # )
+        # dash_length = total_len * dash_length_scale
+
+        for i in range(len(points) - 1):
+            p1 = array([points[i][0], points[i][1], 0.0])
+            p2 = array([points[i + 1][0], points[i + 1][1], 0.0])
+            vec = p2 - p1
+            length = linalg.norm(vec)
+            if length == 0:
+                continue
+            dir_vec = vec / length
+
+            num_dashes = max(1, int(length / (2 * dash_length)))
+            for j in range(num_dashes):
+                start = p1 + dir_vec * (2 * j) * dash_length
+                end = p1 + dir_vec * (2 * j + 1) * dash_length
+                glBegin(GL_LINES)
+                glVertex3fv(start)
+                glVertex3fv(end)
+                glEnd()
+
+    def _draw_dot_dash_line(self, points, color, dash_length=0.01, dot_size=3.0):
+        """Draws a dot-dash line connecting the given points."""
+        from numpy import array, linalg
+
+        glColor3f(*color)
+        for i in range(len(points) - 1):
+            p1 = array([points[i][0], points[i][1], 0.0])
+            p2 = array([points[i + 1][0], points[i + 1][1], 0.0])
+            vec = p2 - p1
+            length = linalg.norm(vec)
+            dir_vec = vec / length
+
+            num_dashes = int(length / (3 * dash_length))
+            for j in range(num_dashes):
+                # Draw dash
+                start = p1 + dir_vec * (3 * j) * dash_length
+                end = p1 + dir_vec * (3 * j + 1) * dash_length
+                glBegin(GL_LINES)
+                glVertex3fv(start)
+                glVertex3fv(end)
+                glEnd()
+
+                # Draw dot
+                dot = p1 + dir_vec * (3 * j + 2) * dash_length
+                glPointSize(dot_size)
+                glBegin(GL_POINTS)
+                glVertex3fv(dot)
+                glEnd()
     
     def fit_to_airfoil(self, airfoil):
         xs = airfoil.geom['ps'][0] + airfoil.geom['ss'][0]

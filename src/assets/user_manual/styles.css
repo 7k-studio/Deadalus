@@ -343,3 +343,22 @@ along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
     .button-link:hover {
       text-decoration: underline;
     }
+
+    .note {
+      background-color: #ffed9c;
+      border-color: #e6990b;
+      border-style: dashed;
+      border-radius: 10px;
+      border-radius: 4px;
+      
+    }
+
+    .note .inside{
+      padding: 10px;
+      color: #e6990b;
+    }
+
+    .note h3 {
+      font-weight: bold;
+      margin: 0px;
+    }
