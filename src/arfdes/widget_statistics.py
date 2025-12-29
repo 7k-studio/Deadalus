@@ -31,24 +31,30 @@ import src.globals as globals  # Import from globals.py
 class TableStatistics(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None, open_gl=None, tree_menu=None, project=None):
+    def __init__(self, parent=None, open_gl=None, airfoils_menu=None, project=None):
         super(TableStatistics, self).__init__(parent)
+        self.setMinimumSize(200, 300)
         self.open_gl = open_gl
         self.project = project
-        self.tree_menu = tree_menu
+        self.airfoils_menu = airfoils_menu
+        # keep reference to the internal QTreeWidget (used to find top-level selection)
+        self.tree_menu = None
+        if airfoils_menu is not None:
+            # airfoils_menu is TreeAirfoil instance; its tree widget is .tree
+            self.tree_menu = getattr(airfoils_menu, "tree", None)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.Up_ref_points = None  # Add attribute to store Up_ref_points
         self.Dwn_ref_points = None  # Add attribute to store Dwn_ref_points
         self.init_tabele()
 
-    def init_tabele(self, params=None):
+    def init_tabele(self, stats=None):
         # Initial Parameters
-        self.params = {}
+        self.stats = {}
 
         # Properly initialize the table without overwriting `self`
-        self.setRowCount(len(self.params))
+        self.setRowCount(len(self.stats))
         self.setColumnCount(4)
-        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal", "Unit"])
+        self.setHorizontalHeaderLabels(["Statistic", "Value", "Nominal", "Unit"])
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setStretchLastSection(True)
         #self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -59,85 +65,24 @@ class TableStatistics(QTableWidget):
         self.Up_ref_points = up_ref_points
         self.Dwn_ref_points = dwn_ref_points
 
-    def add_editable_row(self, row, value):
-        """Add an editable row with up/down buttons and input field."""
-        # Create a custom widget for editing with up/down buttons and input
-        container = QWidget()
-        layout = QHBoxLayout(container)
-        layout.setContentsMargins(0, 0, 0, 0)
-        # Input field for direct keyboard input
-        value = format(value, '.4f')  # Format value to 4 decimal places
-        value_input = QLineEdit(str(value))
-        value_input.setAlignment(Qt.AlignCenter)
-        #value_input.setFixedWidth(70)
-        value_input.editingFinished.connect(lambda: self.update_value_from_input(row, value_input))
-        # Up button
-        up_button = QPushButton("▲")
-        up_button.setFixedSize(20, 20)
-        up_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, 1))
-
-        # Down button
-        down_button = QPushButton("▼")
-        down_button.setFixedSize(20, 20)
-        down_button.clicked.connect(lambda: self._adjust_value_with_modifiers(row, -1))
-            
-        # Add widgets to layout
-        layout.addWidget(down_button)
-        layout.addWidget(value_input)
-        layout.addWidget(up_button)
-        self.setCellWidget(row, 1, container)
-
-    def update_value_from_input(self, row, value_input):
-        # Update parameter from the input field
-        param_name = self.item(row, 0).text()
-        try:
-            new_value = float(value_input.text())
-            self.airfoil['params'][param_name] = new_value
-            # Pass reference points to update_plot
-            self.save_current_airfoil_state()
-        except ValueError:
-            # Restore the last valid value if input is invalid
-            self.logger.warning("Invalid input, restoring last valid value.")
-            value_input.setText(str(self.airfoil['params'][param_name]))
-    
-    def _adjust_value_with_modifiers(self, row, direction):
-        modifiers = QApplication.keyboardModifiers()
-        if modifiers & Qt.ShiftModifier:
-            delta = 1.0
-        elif modifiers & Qt.ControlModifier:
-            delta = 0.01
-        else:
-            delta = 0.1
-        self.adjust_value(row, direction * delta)
-
-    def adjust_value(self, row, delta):
-        # Adjust parameter value by delta
-        param_name = self.item(row, 0).text()
-        current_value = self.airfoil['params'][param_name]
-        new_value = current_value + delta
-        # Update value
-        self.airfoil['params'][param_name] = new_value
-        # Update the input field display
-        cell_widget = self.cellWidget(row, 1)
-        value_input = cell_widget.findChild(QLineEdit)
-        new_value = format(new_value, '.4f')  # Format value to 2 decimal places
-        value_input.setText(str(new_value))
-        # Pass reference points to update_plot
-        self.save_current_airfoil_state()  # Save changes to the airfoil list
-
     def populate_table(self, airfoil_obj):
         """Populate the table with data from an airfoil object."""
         self.setRowCount(0)  # Clear existing rows
         param_units = airfoil_obj.unit.items()
 
-        self.logger.debug(param_units)
+        self.logger.debug('Populating table')
 
-        for key, value in airfoil_obj.params.items():
+        for key, value in airfoil_obj.stats.items():
             row = self.rowCount()
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem(key))
-            self.add_editable_row(row, value)
+
             value = format(value, '.4f')
+
+            airfoil_value = QTableWidgetItem(str(value))
+            airfoil_value.setTextAlignment(Qt.AlignCenter)
+            self.setItem(row, 1, airfoil_value)  # Optional: Add nominal value column
+
             nominal_value = QTableWidgetItem(str(value))
             nominal_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
@@ -150,46 +95,66 @@ class TableStatistics(QTableWidget):
             unit_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 3, unit_value)
 
+    def display_selected_airfoil(self, item, column=None):
+        """Display the selected airfoil's data in the table.
+        Accepts (item, column) from QTreeWidget.itemClicked. If a child node was clicked,
+        show parameters for the corresponding component (LE/TE/PS/SS).
+        """
+        if self.tree_menu is None:
+            self.logger.warning("No tree_menu assigned to TableParameters")
+            return
 
-    def display_selected_airfoil(self, item):
-        """Display the selected airfoil's data in the table."""
-        index = self.tree_menu.indexOfTopLevelItem(item)
-        if index != -1:
-            selected_airfoil = globals.PROJECT.project_airfoils[index]
-            self.populate_table(selected_airfoil)
-            # Update self.params with the selected airfoil's parameters
-            self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
-            self.open_gl.set_airfoil_to_display(selected_airfoil)
+        # Determine if a child node was clicked
+        component_attr = None
+        if item.parent():
+            # child clicked -> map its label to component attribute
+            child_label = item.text(0).strip().lower()
+            mapping = {
+                "leading edge": "LE", "leading_edge": "LE", "leadingedge": "LE", "le": "LE",
+                "trailing edge": "TE", "trailing_edge": "TE", "trailingedge": "TE", "te": "TE",
+                "pressure side": "PS", "pressure_side": "PS", "pressureside": "PS", "ps": "PS",
+                "suction side": "SS", "suction_side": "SS", "suctionside": "SS", "ss": "SS",
+            }
+            component_attr = mapping.get(child_label)
+            top_item = item.parent()
+        else:
+            top_item = item
 
-    def save_current_airfoil_state(self):
-        """Overwrite the current table data into the selected airfoil object."""
-        selected_item = self.tree_menu.currentItem()
-        if not selected_item:
-            return  # No airfoil selected
+        index = self.tree_menu.indexOfTopLevelItem(top_item)
+        if index == -1:
+            self.logger.debug("Top-level item index not found for selected item")
+            return
 
-        # Find the corresponding airfoil object
-        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            return  # Invalid selection
+        selected_airfoil = globals.PROJECT.project_airfoils[index]
 
-        current_airfoil = self.project.project_airfoils[airfoil_index]
-
-        # Update the airfoil object with table data
-        for row in range(self.rowCount()):
-            key = self.item(row, 0).text()
-            if key == "params":  # Skip the 'geom' parameter
-                # Retrieve the value from the QLineEdit inside the custom widget
-                cell_widget = self.cellWidget(row, 1)
-                if cell_widget:
-                    value_input = cell_widget.findChild(QLineEdit)
-                    if value_input:
-                        try:
-                            value = float(value_input.text())
-                            self.params[key] = value
-                        except ValueError:
-                            self.logger.error(f"Invalid value for parameter '{key}', skipping update.")
-        
-        # Optionally, update the tree menu display
-        selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-        self.open_gl.update()
+        # if component_attr:
+        #     # Show component parameters
+        #     selected_component = getattr(selected_airfoil, component_attr, None)
+        #     if selected_component:
+        #         self.populate_table(selected_component)
+        #         # store component state for edits (child has 'params' and 'unit')
+        #         self.airfoil = {key: value for key, value in vars(selected_component).items()}
+        #         # Tell viewport about parent airfoil and (optionally) component
+        #         if self.open_gl:
+        #             try:
+        #                 self.open_gl.set_airfoil_to_display(selected_airfoil)
+        #                 if hasattr(self.open_gl, "set_component_to_display"):
+        #                     self.open_gl.set_component_to_display(selected_airfoil, component_attr)
+        #                 # force repaint so component selection is visible
+        #                 self.open_gl.update()
+        #             except Exception:
+        #                 self.logger.exception("Failed to update viewport for component")
+        #         self.logger.debug(f"Displayed component '{component_attr}' parameters")
+        #     else:
+        #         self.logger.warning(f"Component '{component_attr}' not found on selected airfoil")
+        # else:
+        #     # Top-level airfoil selected -> show overall params
+        self.populate_table(selected_airfoil)
+        self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
+        if self.open_gl:
+            try:
+                self.open_gl.set_airfoil_to_display(selected_airfoil)
+            except Exception:
+                self.logger.exception("Failed to set airfoil to viewport")
+        self.logger.debug('Displayed parent airfoil parameters')
 

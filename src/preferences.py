@@ -66,6 +66,7 @@ class PreferencesWindow(QDialog):
         perf_layout = QHBoxLayout()
         length_layout = QHBoxLayout()
         angle_layout = QHBoxLayout()
+        color_layout = QHBoxLayout()
 
         units_text = QLabel("Units:")
         units_text.setToolTip("Select the unit for the application.")
@@ -81,6 +82,12 @@ class PreferencesWindow(QDialog):
         self.angle_combo_box = QComboBox()
         self.angle_combo_box.addItems(["rad"])
         self.angle_combo_box.setCurrentText(DEADALUS.preferences['general']['units'].get("angle", "rad"))
+        self.length_combo_box.setCurrentText(DEADALUS.preferences['general']['units'].get("length", "meters"))
+        # ComboBox for Color Scheme
+        color_text = QLabel("Color Scheme:")
+        self.color_combo_box = QComboBox()
+        self.color_combo_box.addItems(["Deadalus-Light", "Light", "Dark", "Deadalus-Dark"])
+        self.color_combo_box.setCurrentText(DEADALUS.preferences['general'].get("color_scheme", "Deadalus-Light"))
 
         perf_text = QLabel("General Performance:")
         perf_text.setToolTip("Select the general performance level for the application.")
@@ -113,9 +120,13 @@ class PreferencesWindow(QDialog):
         perf_layout.addWidget(self.general_performance_slider)
         perf_layout.addWidget(self.general_performance_label)
 
+        color_layout.addWidget(color_text)
+        color_layout.addWidget(self.color_combo_box)
+
         layout.addLayout(length_layout)
         layout.addLayout(angle_layout)
         layout.addLayout(perf_layout)
+        layout.addLayout(color_layout)
         layout.addWidget(self.general_beta_features)
         layout.addStretch()
         self.general_tab.setLayout(layout)
@@ -201,6 +212,7 @@ class PreferencesWindow(QDialog):
             DEADALUS.preferences['general']["units"]["angle"] = 'rad'
 
         DEADALUS.preferences['general']["performance"] = self.general_performance_slider.value()
+        DEADALUS.preferences['general']["color_scheme"] = self.color_combo_box.currentText()
         DEADALUS.preferences['general']["beta_features"] = self.general_beta_features.isChecked()
 
         # --- AIRFOIL DESIGNER TAB --- #
@@ -229,6 +241,7 @@ class PreferencesWindow(QDialog):
                 "angle": DEADALUS.preferences['general']['units'].get("angle", "rad"),
             },
             "performance": self.general_performance_slider.value(),
+            "color_scheme": DEADALUS.preferences['general'].get('color_scheme', "Deadlus-light"),
             "beta_features": DEADALUS.preferences['general'].get("beta_features", False),
         }
 

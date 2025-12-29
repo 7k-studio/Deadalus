@@ -221,7 +221,7 @@ class MenuBar(QMenuBar):
     def newAirfoil(self):
         self.logger.info("Creating new airfoil")
         if self.main_window:  # Ensure main_window is set     
-            self.airfoils_menu.add_airfoil('Airfoil', self.time, 'Airfoil created from scratch')
+            self.airfoils_menu.add('Airfoil', self.time, 'Airfoil created from scratch')
 
     def appendAirfoil(self):
         """load the airfoil data from a JSON format file."""

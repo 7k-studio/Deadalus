@@ -39,6 +39,11 @@ class TableParameters(QTableWidget):
         self.open_gl = open_gl
         self.project = project
         self.airfoils_menu = airfoils_menu
+        # keep reference to the internal QTreeWidget (used to find top-level selection)
+        self.tree_menu = None
+        if airfoils_menu is not None:
+            # airfoils_menu is TreeAirfoil instance; its tree widget is .tree
+            self.tree_menu = getattr(airfoils_menu, "tree", None)
         self.logger = logging.getLogger(self.__class__.__name__)
         self.Up_ref_points = None  # Add attribute to store Up_ref_points
         self.Dwn_ref_points = None  # Add attribute to store Dwn_ref_points
@@ -133,7 +138,7 @@ class TableParameters(QTableWidget):
         self.setRowCount(0)  # Clear existing rows
         param_units = airfoil_obj.unit.items()
 
-        self.logger.debug(param_units)
+        self.logger.debug('Populating table')
 
         for key, value in airfoil_obj.params.items():
             row = self.rowCount()
@@ -153,16 +158,68 @@ class TableParameters(QTableWidget):
             unit_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 3, unit_value)
 
+    def display_selected_airfoil(self, item, column=None):
+        """Display the selected airfoil's data in the table.
+        Accepts (item, column) from QTreeWidget.itemClicked. If a child node was clicked,
+        show parameters for the corresponding component (LE/TE/PS/SS).
+        """
+        if self.tree_menu is None:
+            self.logger.warning("No tree_menu assigned to TableParameters")
+            return
 
-    def display_selected_airfoil(self, item):
-        """Display the selected airfoil's data in the table."""
-        index = self.tree_menu.indexOfTopLevelItem(item)
-        if index != -1:
-            selected_airfoil = globals.PROJECT.project_airfoils[index]
+        # Determine if a child node was clicked
+        component_attr = None
+        if item.parent():
+            # child clicked -> map its label to component attribute
+            child_label = item.text(0).strip().lower()
+            mapping = {
+                "leading edge": "LE", "leading_edge": "LE", "leadingedge": "LE", "le": "LE",
+                "trailing edge": "TE", "trailing_edge": "TE", "trailingedge": "TE", "te": "TE",
+                "pressure side": "PS", "pressure_side": "PS", "pressureside": "PS", "ps": "PS",
+                "suction side": "SS", "suction_side": "SS", "suctionside": "SS", "ss": "SS",
+            }
+            component_attr = mapping.get(child_label)
+            top_item = item.parent()
+        else:
+            top_item = item
+
+        index = self.tree_menu.indexOfTopLevelItem(top_item)
+        if index == -1:
+            self.logger.debug("Top-level item index not found for selected item")
+            return
+
+        selected_airfoil = globals.PROJECT.project_airfoils[index]
+
+        if component_attr:
+            # Show component parameters
+            selected_component = getattr(selected_airfoil, component_attr, None)
+            if selected_component:
+                self.populate_table(selected_component)
+                # store component state for edits (child has 'params' and 'unit')
+                self.airfoil = {key: value for key, value in vars(selected_component).items()}
+                # Tell viewport about parent airfoil and (optionally) component
+                if self.open_gl:
+                    try:
+                        self.open_gl.set_airfoil_to_display(selected_airfoil)
+                        if hasattr(self.open_gl, "set_component_to_display"):
+                            self.open_gl.set_component_to_display(selected_airfoil, component_attr)
+                        # force repaint so component selection is visible
+                        self.open_gl.update()
+                    except Exception:
+                        self.logger.exception("Failed to update viewport for component")
+                self.logger.debug(f"Displayed component '{component_attr}' parameters")
+            else:
+                self.logger.warning(f"Component '{component_attr}' not found on selected airfoil")
+        else:
+            # Top-level airfoil selected -> show overall params
             self.populate_table(selected_airfoil)
-            # Update self.params with the selected airfoil's parameters
             self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
-            self.open_gl.set_airfoil_to_display(selected_airfoil)
+            if self.open_gl:
+                try:
+                    self.open_gl.set_airfoil_to_display(selected_airfoil)
+                except Exception:
+                    self.logger.exception("Failed to set airfoil to viewport")
+            self.logger.debug('Displayed parent airfoil parameters')
 
     def save_current_airfoil_state(self):
         """Overwrite the current table data into the selected airfoil object."""
@@ -170,29 +227,69 @@ class TableParameters(QTableWidget):
         if not selected_item:
             return  # No airfoil selected
 
-        # Find the corresponding airfoil object
-        airfoil_index = self.tree_menu.indexOfTopLevelItem(selected_item)
+        # If the current item is a child, climb to parent and detect component
+        component_attr = None
+        top_item = selected_item
+        if selected_item.parent():
+            child_label = selected_item.text(0).strip().lower()
+            mapping = {
+                "leading edge": "LE", "leading_edge": "LE", "leadingedge": "LE", "le": "LE",
+                "trailing edge": "TE", "trailing_edge": "TE", "trailingedge": "TE", "te": "TE",
+                "pressure side": "PS", "pressure_side": "PS", "pressureside": "PS", "ps": "PS",
+                "suction side": "SS", "suction_side": "SS", "suctionside": "SS", "ss": "SS",
+            }
+            component_attr = mapping.get(child_label)
+            top_item = selected_item.parent()
+
+        airfoil_index = self.tree_menu.indexOfTopLevelItem(top_item)
         if airfoil_index == -1:
             return  # Invalid selection
 
         current_airfoil = self.project.project_airfoils[airfoil_index]
 
-        # Update the airfoil object with table data
+        # Decide target object (parent airfoil or one of its components)
+        if component_attr:
+            target = getattr(current_airfoil, component_attr, None)
+        else:
+            target = current_airfoil
+
+        if target is None:
+            self.logger.error("No target object to save parameters into.")
+            return
+
+        # Update the target's params from the table rows
         for row in range(self.rowCount()):
-            key = self.item(row, 0).text()
-            if key == "params":  # Skip the 'geom' parameter
-                # Retrieve the value from the QLineEdit inside the custom widget
-                cell_widget = self.cellWidget(row, 1)
-                if cell_widget:
-                    value_input = cell_widget.findChild(QLineEdit)
-                    if value_input:
-                        try:
-                            value = float(value_input.text())
-                            self.params[key] = value
-                        except ValueError:
-                            self.logger.error(f"Invalid value for parameter '{key}', skipping update.")
-        
-        # Optionally, update the tree menu display
-        selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-        self.open_gl.update()
+            param_name = self.item(row, 0).text()
+            cell_widget = self.cellWidget(row, 1)
+            if not cell_widget:
+                continue
+            value_input = cell_widget.findChild(QLineEdit)
+            if not value_input:
+                continue
+            try:
+                value = float(value_input.text())
+            except ValueError:
+                self.logger.error(f"Invalid value for parameter '{param_name}', skipping update.")
+                continue
+            # Write back only if target has params dict
+            try:
+                target.params[param_name] = value
+            except Exception:
+                # top-level airfoil stores params directly on .params (same), so this is safe
+                try:
+                    target[param_name] = value
+                except Exception:
+                    self.logger.exception(f"Failed to save parameter '{param_name}'")
+
+        # Update tree label to indicate modification and force viewport repaint
+        current_airfoil.update()
+        top_item.setText(0, f"{current_airfoil.infos['name']}*")
+        try:
+            # ensure viewport reflects changes
+            self.open_gl.set_airfoil_to_display(current_airfoil)
+            if component_attr and hasattr(self.open_gl, "set_component_to_display"):
+                self.open_gl.set_component_to_display(current_airfoil, component_attr)
+            self.open_gl.update()
+        except Exception:
+            self.logger.exception("Failed to request viewport update after saving")
 

@@ -156,6 +156,11 @@ class Airfoil:
             "incidence":    "deg",
         }
 
+        self.stats = {
+            "chord": 1,
+            "thickness max": 1,
+        }
+
         self.LE = LeadingEdge()
         self.TE = TrailingEdge()
         self.PS = PressureSide()
@@ -266,12 +271,12 @@ class Airfoil:
             p_te_ps_tan = p_te_u
 
         try:
-            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_te_ss_tan = p_te_d
 
         try:
-            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]+self.TE.params["ps_slope"]))
+            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ps_slope"]))
         except ZeroDivisionError:
             p_te_ps_crv = p_te_ps_tan
 
@@ -284,9 +289,9 @@ class Airfoil:
 
         te_constr = np.vstack([p_te_u, p_te_ps_tan, p_te_ps_crv, p_te_ss_crv, p_te_ss_tan, p_te_d]).T
 
-        ps_constr = np.vstack([p_le_u, p_ps_fwd_tan, p_ps_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_u]).T
+        ps_constr = np.vstack([p_le_u, p_ps_fwd_tan, p_ps_fwd_crv, p_ps_rwd_crv, p_ps_rwd_tan, p_te_u]).T
 
-        ss_constr = np.vstack([p_le_d, p_ps_fwd_tan, p_ps_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_d]).T
+        ss_constr = np.vstack([p_le_d, p_ss_fwd_tan, p_ss_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_d]).T
 
         # Generate Splines
         le_spline = tools.CreateBSpline(le_constr)
@@ -294,11 +299,19 @@ class Airfoil:
         ps_spline = tools.CreateBSpline(ps_constr)
         ss_spline = tools.CreateBSpline(ss_constr)
 
+        self.logger.debug("LE, TE, PS, SS geometry established")
+
         return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
+    
+    def summarize(self):
+        X_min = min(self.geom['le'][0])
+        X_max = max(self.geom['te'][0])
+        self.stats['chord'] = abs(X_max-X_min)
 
     def update(self):
         self.logger.info("Recalculating airfoil geometry...")
         self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct()
+        self.summarize()
 
 class SeligAirfoil:
     def __init__(self):

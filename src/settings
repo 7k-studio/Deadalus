@@ -43,7 +43,7 @@
     }
    },
    "construction": {
-    "show": true,
+    "show": false,
     "color": {
      "le": [
       0.0,

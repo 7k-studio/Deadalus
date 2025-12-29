@@ -41,6 +41,7 @@ import src.wngwb.tools_wing
 import src.utils.dxf
 
 from .menu_bar import MenuBar
+from .tool_bar import ToolBar
 from src.obj.class_airfoil import Airfoil
 from src.arfdes.tools_airfoils import Reference_load
 
@@ -55,7 +56,7 @@ import src.arfdes.tools_airfoils as tools
 
 from src.opengl.viewport2d import ViewportOpenGL
 
-Airfoil_0 = src.obj.objects2D.Airfoil()
+Airfoil_0 = obj.class_airfoil.Airfoil()
 
 
 class AirfoilDesigner(QMainWindow):
@@ -85,8 +86,19 @@ class AirfoilDesigner(QMainWindow):
         self.open_gl = ViewportOpenGL(parent=self.viewport)
         self.main_splitter.addWidget(self.open_gl)
 
-        # Set the splitter as the central widget
-        self.setCentralWidget(self.main_splitter)
+        # Create top toolbar and register it with the QMainWindow so it sits below the menu bar
+        self.toolbar = ToolBar(self)
+
+        # Add the toolbar to the main window top area (under the menu bar)
+        self.addToolBar(Qt.TopToolBarArea, self.toolbar)
+
+        # Create a central container that hosts only the main splitter (toolbars/docks are managed by QMainWindow)
+        central_widget = QWidget(self)
+        central_layout = QVBoxLayout(central_widget)
+        central_layout.setContentsMargins(0, 0, 0, 0)
+        central_layout.setSpacing(0)
+        central_layout.addWidget(self.main_splitter)
+        self.setCentralWidget(central_widget)
 
         # central_widget = QWidget(self)
         # main_layout = QVBoxLayout(central_widget)  # Vertical layout for toolbar and content
@@ -96,7 +108,7 @@ class AirfoilDesigner(QMainWindow):
 
         # Widgets for INPUT container
         # Left side tree airfoil
-        self.tree_airfoil = TreeAirfoil()
+        self.tree_airfoil = TreeAirfoil(open_gl=self.open_gl)
         self.dock_airfoil = QDockWidget("Airfoil Tree", self)
         self.dock_airfoil.setWidget(self.tree_airfoil)
         self.dock_airfoil.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -125,7 +137,7 @@ class AirfoilDesigner(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock_description)
 
         # Right side statistics table
-        self.table_statistics = TableStatistics(self)
+        self.table_statistics = TableStatistics(self, open_gl=self.open_gl, airfoils_menu=self.tree_airfoil, project=self.project)
         self.dock_statistics = QDockWidget("Statistics Table", self)
         self.dock_statistics.setWidget(self.table_statistics)
         self.dock_statistics.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -184,10 +196,11 @@ class AirfoilDesigner(QMainWindow):
         # Connect tree widget selection to display function
         self.menu_bar.referenceStatus.connect(self.handleReferenceToggle)
         self.tree_airfoil.itemClicked.connect(self.table_parameters.display_selected_airfoil)
+        self.tree_airfoil.itemClicked.connect(self.table_statistics.display_selected_airfoil)
 
         if not globals.PROJECT.project_airfoils:
             # Initialize with a default airfoil
-            self.tree_airfoil.new("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
+            self.tree_airfoil.add("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
         self.logger.info("Initialization completed")
 
     def handleReferenceToggle(self, state, filename):

@@ -42,6 +42,7 @@ from . import bckgrd
 import src.globals as globals
 
 import src.obj.objects2D as objects2D
+import src.obj.class_airfoil as airfoil
 
 class ViewportOpenGL(QGLWidget):
     def __init__(self, parent=None):
@@ -251,7 +252,7 @@ class ViewportOpenGL(QGLWidget):
         '''
 
         # Extract parameters
-        Current_Airfoil.update()
+        # Current_Airfoil.update()
         glDisable(GL_DEPTH_TEST)
     
         color = self.airfoil_settings['wireframe']['color']

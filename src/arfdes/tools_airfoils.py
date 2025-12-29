@@ -34,7 +34,6 @@ from src.obj.class_airfoil import Airfoil
 logger = logging.getLogger(__name__)
 
 
-
 def Reference_load(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []

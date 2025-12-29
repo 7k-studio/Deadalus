@@ -30,6 +30,9 @@ from src.wngwb.main_window import MainWindow
 import src.globals as globals
 import logging
 
+white_color = globals.DEADALUS.style['white']
+highlight_color =  globals.DEADALUS.style['highlight']
+
 
 class SplashScreen(QWidget):
     def __init__(self, parent=None):
@@ -39,6 +42,7 @@ class SplashScreen(QWidget):
         self.setWindowTitle("Splash Screen")
         self.setFixedSize(500, 500)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        self.setStyleSheet(f"background-color: rgb({white_color});")
         #self.setAttribute(Qt.WA_TranslucentBackground, True)
         #self.setAttribute(Qt.WA_DeleteOnClose, True)
 
@@ -69,24 +73,28 @@ class SplashScreen(QWidget):
 
         # Add buttons
         program_button_layout = QHBoxLayout()
-        button1 = QPushButton("New Project")
-        button1.setStyleSheet("background-color: lightgrey;")
+        button1 = QPushButton(icon = QIcon("src/assets/IconPack/NewFile.svg"), text="New Project")
+        button1.setStyleSheet(f"QPushButton {{background-color: rgb({white_color}); border-radius: 10px;}} "
+                              f"QPushButton:hover {{ background-color : rgb({highlight_color});}}")
         button1.clicked.connect(self.new_project)
         button1.setFixedSize(220, 30)  # Set fixed size for the button
 
-        button2 = QPushButton("Open Project")
-        button2.setStyleSheet("background-color: lightgrey;")
+        button2 = QPushButton(icon = QIcon("src/assets/IconPack/OpenFile.svg"), text="Open Project")
+        button2.setStyleSheet(f"QPushButton  {{ background-color: rgb({globals.DEADALUS.style['white']}); border-radius: 10px; }} "
+                              f"QPushButton:hover {{ background-color : rgb({globals.DEADALUS.style['highlight']}); }}")
         button2.clicked.connect(self.open_project)
         button2.setFixedSize(220, 30)  # Set fixed size for the button
 
         info_button_layout = QHBoxLayout()
-        button3 = QPushButton("User Manual")
-        button3.setStyleSheet("background-color: lightgrey;")
+        button3 = QPushButton(icon = QIcon("src/assets/IconPack/Manual.svg"), text="User Manual")
+        button3.setStyleSheet(f"QPushButton {{background-color: rgb({white_color}); border-radius: 10px;}} "
+                              f"QPushButton:hover {{ background-color : rgb({highlight_color});}}")
         button3.clicked.connect(self.open_manual)
         button3.setFixedSize(220, 30)  # Set fixed size for the button
 
-        button4 = QPushButton("Reales Notes")
-        button4.setStyleSheet("background-color: lightgrey;")
+        button4 = QPushButton(icon = QIcon("src/assets/IconPack/Web.svg"), text="Reales Notes")
+        button4.setStyleSheet(f"QPushButton {{background-color: rgb({white_color}); border-radius: 10px;}} "
+                              f"QPushButton:hover {{ background-color : rgb({highlight_color});}}")
         button4.clicked.connect(self.open_notes)
         button4.setFixedSize(220, 30)  # Set fixed size for the button
 
@@ -103,9 +111,8 @@ class SplashScreen(QWidget):
 
         # Add close button
         close_button = QPushButton(self)
-        icon = QIcon("src/assets/cross.png")
-        if icon.isNull():
-            self.logger.error("Error: 'cross.png' not found or invalid path.")
+        icon = QIcon("src/assets/IconPack/ExitCross.svg")
+
         close_button.setIcon(icon)
         close_button.setFixedSize(30, 30)
         close_button.setStyleSheet("border: none;")

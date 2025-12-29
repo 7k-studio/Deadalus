@@ -43,6 +43,16 @@ class Program:
         self.program_version = "0.4.0-beta"
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        self.style = {
+            "darker": "40, 82, 111",
+            "dark":   "64, 132, 171",
+            "light":  "96, 177, 224",
+            "soft":   "192, 214, 226",
+            "highlight": "255, 223, 190",
+            "white": "250, 246, 245",
+            "grey":  "204, 204, 204",
+        }
+
         self.preferences = {
             'general': {
                 "units": {
@@ -50,6 +60,7 @@ class Program:
                     "angle":  "rad"
                 }, # Options: "meters / radians", (future: "milimeters / degrees", "feet / degrees")
                 "performance": 50,  # Options: 10 - 100
+                "color_scheme": "Deadalus-light",
                 "beta_features": False,  # Enable beta features
             },
             'airfoil_designer': {

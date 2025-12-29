@@ -52,10 +52,11 @@ logger = logging.getLogger(__name__)
 class TreeAirfoil(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, open_gl=None):
         super(TreeAirfoil, self).__init__(parent)
         self.setMinimumSize(200, 200)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.open_gl = open_gl
         self.init_tree()
 
     def init_tree(self):
@@ -69,6 +70,62 @@ class TreeAirfoil(QTableWidget):
         self.setColumnWidth(0, 150)
         self.arf_widget.addWidget(self.tree)
         self.setLayout(self.arf_widget)
+
+        # Expose the internal tree's itemClicked signal so external code can connect to TreeAirfoil.itemClicked
+        self.itemClicked = self.tree.itemClicked
+
+        self.logger.debug('Tree initialized')
+        # Connect internal tree signal to the handler
+        self.tree.itemClicked.connect(self.on_select)
+
+    def on_select(self, item, column):
+        # Handle item click events
+        try:
+            click_text = item.text(0)
+            self.logger.info(f"Clicked on: {click_text}")
+        except Exception:
+            self.logger.info("Clicked on tree item")
+
+        # Determine if a child node was clicked (component) or top-level (airfoil)
+        component_attr = None
+        if item.parent():
+            # child node clicked; normalize label and map to attribute name
+            child_label = item.text(0).strip().lower()
+            mapping = {
+                "leading edge": "LE", "leading_edge": "LE", "leadingedge": "LE", "le": "LE",
+                "trailing edge": "TE", "trailing_edge": "TE", "trailingedge": "TE", "te": "TE",
+                "pressure side": "PS", "pressure_side": "PS", "pressureside": "PS", "ps": "PS",
+                "suction side": "SS", "suction_side": "SS", "suctionside": "SS", "ss": "SS",
+            }
+            component_attr = mapping.get(child_label)
+            top_item = item.parent()
+        else:
+            top_item = item
+
+        # Find the corresponding top-level airfoil and update viewport
+        index = self.tree.indexOfTopLevelItem(top_item)
+        if index != -1:
+            try:
+                selected_airfoil = globals.PROJECT.project_airfoils[index]
+                selected_airfoil.update()
+                if self.open_gl:
+                    # Always set the full airfoil; if viewport supports component-highlight, call it
+                    self.open_gl.set_airfoil_to_display(selected_airfoil)
+                    if component_attr and hasattr(self.open_gl, "set_component_to_display"):
+                        try:
+                            self.open_gl.set_component_to_display(selected_airfoil, component_attr)
+                        except Exception:
+                            self.logger.exception("Viewport failed to set component display")
+                    # force repaint so component selection is immediately visible
+                    try:
+                        self.open_gl.update()
+                    except Exception:
+                        self.logger.exception("Failed to request viewport update")
+                    self.logger.debug('Passed airfoil (and component if any) to be displayed')
+            except Exception:
+                self.logger.exception("Failed to set airfoil to viewport")
+        else:
+            self.logger.debug("Top-level item index not found")
 
     def add_airfoil_to_tree(self, airfoil_obj=None, name="Unknown"):
         """Add an airfoil to the list and tree menu."""
@@ -137,7 +194,7 @@ class TreeAirfoil(QTableWidget):
         
         logger.info("Tree is refreshed")
     
-    def new(self, name, time, dscr='designed from scratch in airfoil designer'):
+    def add(self, name, time, dscr='designed from scratch in airfoil designer'):
         """ Creates new airfoil out of initial parameters"""
         airfoil_obj = Airfoil()
         airfoil_obj.infos['name'] = name  # Ensure the name is set in infos
