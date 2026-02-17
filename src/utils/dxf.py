@@ -24,7 +24,6 @@ import ezdxf.layouts
 from ezdxf.math import ConstructionArc, Vec3, BSpline
 import numpy as np
 import math
-import src.globals as globals
 
 logger = logging.getLogger(__name__)
 
@@ -68,14 +67,14 @@ def find_point_at_length(points, target_length):
         length += segment_length
     return Vec3(points[-1])
 
-def export_airfoil_to_dxf(airfoil_idx, file_name=None):
+def export_airfoil_to_dxf(airfoil_obj, file_name=None):
 
     Z = 0
     
     doc = ezdxf.new()
     msp = doc.modelspace()
 
-    airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
+    airfoil = PROJECT.project_airfoils[airfoil_idx]
     logger.info(f"Exporting airfoil {airfoil_idx} to DXF...")
     
     #for idx, airfoil in enumerate(export_airfoil):

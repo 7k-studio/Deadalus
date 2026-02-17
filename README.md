@@ -14,14 +14,20 @@ Deadalus
 ├── main.py                      # Entry point of the application
 ├── src
 │   ├── settings                 # Store for user settings
-|   ├── preferences.py           # Loads / Saves / Changes settngs
-|   ├── globals.py               # Classes for whole program to work
+|   ├── program
+|   |   ├── preferences.py       # Loads / Saves / Changes settngs
+|   |   ├── program.py           # Main class for Deadalus program
+|   |   ├── project.py           # Project class to store the data
+|   |   ├── splash_screen.py     # Splash screen on file load-up
+|   |   └── widget_log.py        # Console to display file log
+|   |             
 |   ├── arfdes
 |   |   ├── airfoil_designer.py  # Main window layout and setup
 |   |   ├── fit_2_reference.py   # Experimental function for reference matching
 |   |   ├── menu_bar.py          # Dropdown menu for file operations
-|   |   ├── plot_canvas.py       # Obsolete viewport
-|   |   ├── tools_airfoil.py     # Utility functions and helpers
+|   |   ├── tool_bar.py          # 
+|   |   ├── tools_airfoil.py     # Utility functions and helpers for airfoils
+|   |   ├── tools_refeerence.py  # Utility functions and helpers for reference
 |   |   ├── widget_tabele.py     # Tabele for object properties
 |   |   └── widget_tree.py       # Tree menu for objects store
 |   |

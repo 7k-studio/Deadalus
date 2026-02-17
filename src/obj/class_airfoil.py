@@ -29,6 +29,10 @@ import src.obj.tools_program as tools
 
 class LeadingEdge:
     def __init__(self):
+        self.infos = {
+            "type": "F",
+        }
+
         self.params = {
             "thickness": 0.05,
             "offset": 0,
@@ -55,6 +59,10 @@ class LeadingEdge:
 
 class TrailingEdge:
     def __init__(self):
+        self.infos = {
+            "type": "F",
+        }
+
         self.params = {
             "thickness": 0.05,
             "offset": 0,
@@ -81,6 +89,11 @@ class TrailingEdge:
 
 class PressureSide:
     def __init__(self):
+
+        self.infos = {
+            "type": "C",
+        }
+
         self.params = {
             "fwd_wedge": 0,
             "fwd_tan":   0.20,
@@ -105,6 +118,11 @@ class PressureSide:
 
 class SuctionSide:
     def __init__(self):
+
+        self.infos = {
+            "type": "C",
+        }
+
         self.params = {
             "fwd_wedge": 0,
             "fwd_tan":   0.20,
@@ -197,22 +215,22 @@ class Airfoil:
         # Creating handle for Pressure Side
         #===================================
         try:
-            p_ps_fwd_tan = tools.vec_translate(p_le_u, self.PS.params['fwd_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+            p_ps_fwd_tan = tools.vec_translate(p_le_u, self.PS.params['fwd_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_le_u
 
         try:
-            p_ps_rwd_tan = tools.vec_translate(p_te_u, -self.PS.params['rwd_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+            p_ps_rwd_tan = tools.vec_translate(p_te_u, -self.PS.params['rwd_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_te_u
 
         try:
-            p_ps_fwd_crv = tools.vec_translate(p_ps_fwd_tan, self.PS.params['fwd_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.PS.params["fwd_slope"]))
+            p_ps_fwd_crv = tools.vec_translate(p_ps_fwd_tan, self.PS.params['fwd_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.PS.params["fwd_slope"]))
         except ZeroDivisionError:
             p_ps_fwd_crv = p_ps_fwd_tan
 
         try:
-            p_ps_rwd_crv = tools.vec_translate(p_ps_rwd_tan, -self.PS.params['rwd_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.PS.params["rwd_slope"]))
+            p_ps_rwd_crv = tools.vec_translate(p_ps_rwd_tan, -self.PS.params['rwd_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.PS.params["rwd_slope"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_ps_rwd_tan
 
@@ -220,22 +238,22 @@ class Airfoil:
         # Creating handle for Suction Side
         #===================================
         try:
-            p_ss_fwd_tan = tools.vec_translate(p_le_d, self.SS.params['fwd_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
+            p_ss_fwd_tan = tools.vec_translate(p_le_d, self.SS.params['fwd_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_ss_fwd_tan = p_le_d
 
         try:
-            p_ss_rwd_tan = tools.vec_translate(p_te_d, -self.SS.params['rwd_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
+            p_ss_rwd_tan = tools.vec_translate(p_te_d, -self.SS.params['rwd_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_ss_fwd_tan = p_te_d
 
         try:
-            p_ss_fwd_crv = tools.vec_translate(p_ss_fwd_tan, self.SS.params['fwd_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.SS.params["fwd_slope"]))
+            p_ss_fwd_crv = tools.vec_translate(p_ss_fwd_tan, self.SS.params['fwd_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.SS.params["fwd_slope"]))
         except ZeroDivisionError:
             p_ss_fwd_tan = p_ss_fwd_tan
 
         try:
-            p_ss_rwd_crv = tools.vec_translate(p_ss_rwd_tan, -self.SS.params['rwd_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.SS.params["rwd_slope"]))
+            p_ss_rwd_crv = tools.vec_translate(p_ss_rwd_tan, -self.SS.params['rwd_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.SS.params["rwd_slope"]))
         except ZeroDivisionError:
             p_ss_rwd_crv = p_ss_rwd_tan
 
@@ -243,22 +261,22 @@ class Airfoil:
         # Creating handle for Leading Edge
         #===================================
         try:
-            p_le_ps_tan = tools.vec_translate(p_le_u, -self.LE.params['ps_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+            p_le_ps_tan = tools.vec_translate(p_le_u, -self.LE.params['ps_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_le_ps_tan = p_le_u
 
         try:
-            p_le_ss_tan = tools.vec_translate(p_le_d, -self.LE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["rwd_wedge"]))
+            p_le_ss_tan = tools.vec_translate(p_le_d, -self.LE.params['ss_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_le_ss_tan = p_le_d
 
         try:
-            p_le_ps_crv = tools.vec_translate(p_le_ps_tan, -self.LE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.LE.params["ps_slope"]))
+            p_le_ps_crv = tools.vec_translate(p_le_ps_tan, -self.LE.params['ps_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.LE.params["ps_slope"]))
         except ZeroDivisionError:
             p_le_ps_crv = p_le_ps_tan
 
         try:
-            p_le_ss_crv = tools.vec_translate(p_le_ss_tan, -self.LE.params['ss_curv']/self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["rwd_wedge"]+self.LE.params["ss_slope"]))
+            p_le_ss_crv = tools.vec_translate(p_le_ss_tan, -self.LE.params['ss_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.LE.params["ss_slope"]))
         except ZeroDivisionError:
             p_le_ss_tan = p_le_ss_tan
 
@@ -266,22 +284,22 @@ class Airfoil:
         # Creating handle for Trailing Edge
         #===================================
         try:
-            p_te_ps_tan = tools.vec_translate(p_te_u, self.TE.params['ps_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]))
+            p_te_ps_tan = tools.vec_translate(p_te_u, self.TE.params['ps_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_te_ps_tan = p_te_u
 
         try:
-            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["fwd_wedge"]))
+            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_te_ss_tan = p_te_d
 
         try:
-            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ps_slope"]))
+            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ps_slope"]))
         except ZeroDivisionError:
             p_te_ps_crv = p_te_ps_tan
 
         try:
-            p_te_ss_crv = tools.vec_translate(p_te_ss_tan, self.TE.params['ss_curv']/self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ss_slope"]))
+            p_te_ss_crv = tools.vec_translate(p_te_ss_tan, self.TE.params['ss_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.TE.params["ss_slope"]))
         except ZeroDivisionError:
             p_te_ss_tan = p_te_ss_tan
 
@@ -303,15 +321,24 @@ class Airfoil:
 
         return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
     
-    def summarize(self):
-        X_min = min(self.geom['le'][0])
-        X_max = max(self.geom['te'][0])
-        self.stats['chord'] = abs(X_max-X_min)
+    def calc_chord(self):
+
+        index_min = min(range(len(self.geom['le'][0])), key=self.geom['le'][0].__getitem__)
+        X_min = self.geom['le'][0][index_min]
+        Y_min = self.geom['le'][1][index_min]
+
+        index_max = max(range(len(self.geom['te'][0])), key=self.geom['te'][0].__getitem__)
+        X_max = self.geom['te'][0][index_max]
+        Y_max = self.geom['te'][1][index_max]
+
+        self.stats['chord'] = math.sqrt((X_max-X_min)**2 + (Y_max-Y_min)**2)
+        self.logger.debug(f"{X_max}-{X_min}={self.stats['chord']}")
 
     def update(self):
         self.logger.info("Recalculating airfoil geometry...")
         self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct()
-        self.summarize()
+        self.logger.info("Recalculating airfoil statistics...")
+        self.calc_chord()
 
 class SeligAirfoil:
     def __init__(self):

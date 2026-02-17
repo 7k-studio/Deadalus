@@ -1,0 +1,219 @@
+<!--
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of Deadalus.
+
+Deadalus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Deadalus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deadalus User Manual</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+      <img src="logo.png" alt="Program Logo" height="40"/>
+      <p style="font-size: xx-large; margin-top: 0px; margin-bottom: 0px;">Deadalus User Manual</p>
+      <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
+  </header>
+
+  <!-- Top Navigation Menu -->
+  <div class="section-menu">
+    <a href="../user_manual.html" class="button-link">Deadalus</a>
+    <a href="airfoil_designer.html" class="button-link">Airfoil Designer</a>
+    <button onclick="showSection('wing')">Wing Designer</button>
+    <a href="changelog.html" class="button-link">Changelog</a>
+  </div>
+
+  <!-- Main App Area -->
+  <div class="container">
+    <!-- Sidebar Menu -->
+    <nav class="sidebar">
+      <h3>Contents</h3>
+
+      <ul id="menu-wing" class="context-menu">
+        <li><a href="#WDoverview">Overview</a></li>
+        <li><a href="#WDMenuBar">Menu Bar</a></li>
+        <li><a href="#WDViewport">Viewport</a></li>
+        <li><a href="#WDStorage">Wing Storage</a></li>
+        <li><a href="#WDParamTab">Parameter Table</a></li>
+      </ul>
+
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- Wing Workbench Section -->
+      <div id="wing" class="page-section active">
+        <div id="WDoverview">
+          <h2>Wing Designer overview</h2>
+          <p>Assemble full wings from created / established in Airfoil Designer profiles.
+          Wing designer module allows useer to design, modify and export 3D wing geometries<br>
+          Wings are defined as a structures consisting of:
+            <ul>
+              <li><b>Components:</b> Primary object consits of wing (representation of e.g. Rear Wing in racecar )</li>
+              <li><b>Wings:</b> Secondary object consits of segments (representation of e.g. 1st Wing of Rear Wing )</li>
+              <li><b>Segments:</b> Constructional element of the wing. Give Wing a shape (representation of e.g. Ribs inside Wing )</li>
+            </ul>
+            It is belived that with such definition it would be easier to create such airfoil and ensure clean geometry to any CFD software as well as manufacturing.
+            To Help with creation of wings, designer consists of elements such as:
+            <ul>
+              <li>Menu Bar</li>
+              <li>Viewport</li>
+              <li>Geometry storage</li>
+              <li>Parameters tabele</li>
+            </ul>
+          </p>
+          <img src="WingDesigner/wing_workbench.jpg" alt="Wing Workbench" height="500"/>
+        </div>
+
+        <div id="WDMenuBar">
+          <h2>Menu Bar overview</h2>
+          <h3>File menu</h3>
+          use following link to check out <a href="#FileMenu">File menu details</a>
+          <h3>Edit menu</h3>
+          <p>Allows user to interact with Airfoil Designer. Contains basic functinality required to create, recreate, modify, reload airfoils</p>
+          <ul>
+              <li><b>Add Component:</b> Add a new component to your project.</li>
+              <li><b>Delete Component:</b> deletes selected component from a project.</li>
+              <li><b>Add Wing:</b> adds new wing under selected component</li>
+              <li><b>Delete Wing:</b> deletes selected wing from a compoent</li>
+              <li><b>Add Segment:</b> adds a new segment to selected wing</li>
+              <li><b>Delete Segment:</b> removes selected segment from wing</li>
+          </ul>
+
+          <h3>View menu</h3>
+          <p>Allows user to select preset view direction</p>
+            <ul>
+              <li><b>X+:</b> X axis points at the camera</li>
+              <li><b>Y+:</b> Y axis points at the camera</li>
+              <li><b>Z+:</b> Z axis points at the camera</li>
+              <li><b>X-:</b> X axis points away from the camera</li>
+              <li><b>Y-:</b> Y axis points away from the camera</li>
+              <li><b>Z-:</b> Z axis points away from the camera</li>
+            </ul>
+          
+          <h3>Module menu</h3>
+          Allows user to change module menu. Available modules are:
+          <a href="airfoil_designer.html" class="button-link">Airfoil Designer</a>
+
+          <h3>Program menu</h3>
+          use following link to check out <a href="#ProgramMenu">Program menu details</a>
+
+        </div>
+        
+        <div id="WDViewport">
+          <h2>Viewport overview</h2>
+          <p>Wing Designer is equiped with OpenGL 3D viewport. To navigate in viewport use mouse:</p>
+            <ul>
+              <li><b>Left Mouse Button LMB:</b> rotate viewport along center</li>
+              <li><b>Middle Mouse Button MMB:</b> translate viewport</li>
+              <li><b>Right Mouse Button</b> or <b>Mouse Wheel:</b> zoom in and out</li>
+            </ul>
+          <p>Viewport displays certain objects: </p>
+          <ul>
+              <li><b>Grid:</b> displays a net to visualize a dimensions and help to navigate</li>
+              <li><b>Control points:</b> visualize a uv grid which defines a surface</li>
+              <li><b>Construction:</b> show a connection between control points</li>
+              <li><b>Wireframe:</b> show a spline shape created from control points</li>
+              <li><b>Surface:</b> representation of wing skin geometry</li>
+            </ul>
+          <img src="WingDesigner/WD_Viewport.jpg" alt="Wing Designer Elements" height="500"/>
+        </div>
+        
+        <div id="WDStorage">
+          <h2>Wing Storage overview</h2>
+          <p>Wing storage widget display all the elements in current project. To perform some operations (e.g. delete a segment) it is neccessary to select one element in the widget. 
+          </p>
+          <ul>
+              <li><b>Name:</b> show an element name for representation</li>
+            </ul>
+          <img src="WingDesigner/WD_Storage.jpg" alt="Wing Designer Storage" height="500"/>
+        </div>
+        
+        <div id="ADParamTab">
+          <h2>Parameter Table overview</h2>
+
+          <p> Parameter table widget shows parameters of a selected in Wing Storage Widget element (component/wing/segment). Table is divided into 4 columns:
+            <ul>
+            <li><strong>Parameter:</strong> name of the parameter</li>
+            <li><strong>Value:</strong> modifiable value of the parameter. To change the value use arrows or input new value in the input box. If value is incorrect parameter will go back to last know value.</li>
+            <li><strong>Nominal:</strong> shows the parameter value before change</li>
+            <li><strong>Unit:</strong> shows a unit of the parameter</li>
+          </ul>
+          Use arrow up <button>⯅</button> to increase value and arrow down <button>⯆</button> to decrease value of parameter in the same row.
+          It is possible to change the increasement/decreasement value by holding keyboard keys while clicking on Left Mouse Button. Allowed modifiers are:
+          <ul>
+            <li><strong>LMB:</strong> 0.1</li>
+            <li><strong>LMB+Shift:</strong> 1.0</li>
+            <li><strong>LMB+Ctrl:</strong> 0.01</li>
+          </ul>
+          </p>
+          <img src="WingDesigner/WD_ParamTable.jpg" alt="Wing Designer Parameter Table" height="500"/><br>
+
+        </div>
+      </div>
+
+<script>
+  function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+    // Show selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.classList.add('active');
+    }
+
+    // Hide all context menus
+    document.querySelectorAll('.context-menu').forEach(el => el.style.display = 'none');
+
+    // Show relevant context menu
+    const menu = document.getElementById(`menu-${sectionId}`);
+    if (menu) menu.style.display = 'block';
+  }
+
+  function loadTestHtml() {
+    const changelogSection = document.getElementById('changelog');
+    const container = document.getElementById('markdown-container');
+
+    // Fetch the test.html content
+    fetch('changelog/test.html')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load test.html');
+        }
+        return response.text();
+      })
+      .then(htmlContent => {
+        // Replace the changelog container content with the fetched HTML
+        container.innerHTML = htmlContent;
+
+        // Apply the same styles as the user manual
+        changelogSection.classList.add('page-section', 'active');
+      })
+      .catch(error => {
+        container.innerHTML = `<p>Error loading test.html: ${error.message}</p>`;
+      });
+  }
+</script>
+</body>
+</html>

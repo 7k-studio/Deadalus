@@ -24,17 +24,17 @@ import math
 import os
 
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget
 from PyQt5.QtCore import Qt
 
 import numpy as np
 
-import src.obj.objects2D as objects2D
-import src.wngwb.tools_wing as tools_wing
+import src.wngdes.tools_wing as tools_wing
 import src.utils.dxf as dxf
 import random
 
 from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, 
+    QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget,
     QTableWidget, QTableWidgetItem, QPushButton, QSizePolicy
 )
 from PyQt5.QtGui import QIcon
@@ -43,27 +43,27 @@ from src.opengl.viewport3d import Viewport3D
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 
-from src.wngwb.menu_bar import MenuBar
-from src.wngwb.widget_tree import TreeMenu
-from src.wngwb.widget_tabele import Tabele
-from src.wngwb.widget_tree import TreeMenu  # Import TreeMenu
-from src.opengl.widget_console import LogViewer
+from src.wngdes.menu_bar import MenuBar
+from src.wngdes.widget_tree import TreeMenu
+from src.wngdes.widget_tabele import Tabele
+from src.wngdes.widget_tree import TreeMenu  # Import TreeMenu
+from src.program.widget_log import LogViewer
 
-#from globals import airfoil_list  # Import from globals.py
-import src.globals as globals  # Import from globals.py
 #from designer.airfoil_designer import AirfoilDesigner  # Import AirfoilDesigner
 #from wngwb import tools_wing  # Import add_component_to_tree
 from datetime import date
 
-Trans = tools_wing
+class WingDesigner(QMainWindow):
 
-class MainWindow(QMainWindow):
-
-    def __init__(self, parent=None, flags=Qt.WindowFlags()):
-        super(MainWindow, self).__init__(parent, flags)
+    def __init__(self, program=None, project=None, flags=Qt.WindowFlags()):
+        super(WingDesigner, self).__init__(program, flags)
+        self.name = "Wing Designer"
         self.logger = logging.getLogger(self.__class__.__name__)
         
-        self.setWindowTitle("DEADALUS: Wing Workbench")
+        self.DEADALUS = program
+        self.PROJECT = project
+        
+        self.setWindowTitle(f"{self.DEADALUS.name}: {self.name} - Untitled" if self.PROJECT.name == None else f"{self.DEADALUS.name}: {self.name} - {self.PROJECT.name}")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)

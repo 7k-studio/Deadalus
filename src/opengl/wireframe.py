@@ -25,12 +25,12 @@ from OpenGL.GLU import gluPerspective  # Add this import
 import math
 
 from src.obj.class_primitives import Wheels
-from src.globals import PROJECT
 
 logger = logging.getLogger(__name__)
 
 def draw_airfoil_wireframe(self, component_idx, wing_idx, segment_idx):
     """Draw an airfoil using coordinates from a file, extruded along the z-axis."""
+    from program.project import PROJECT
     glLineWidth(2)
 
     segment = PROJECT.project_components[component_idx].wings[wing_idx].segments[segment_idx]

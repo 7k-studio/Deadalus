@@ -159,7 +159,6 @@ def fit_2_reference(current_airfoil, reference_airfoil, bounds=None):
 
 class Fit2RefWindow(QDialog):
     def __init__(self, parent=None, current_airfoil=None, reference_airfoil=None):
-        import src.globals as globals
 
         super().__init__(parent)
         self.setWindowTitle("Fit 2 Reference")

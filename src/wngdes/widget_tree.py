@@ -20,15 +20,15 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 '''
 import logging
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
-import src.obj.objects2D as objects2D
-from src.wngwb.tools_wing import add_component_to_tree
+from src.wngdes.tools_wing import add_component_to_tree
 from datetime import date
-import src.globals as globals
 
 class TreeMenu(QTreeWidget):
-    def __init__(self, parent=None):
+    def __init__(self, program=None, project=None, parent=None):
         super(TreeMenu, self).__init__(parent)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.DEADALUS = program
+        self.PROJECT = project
         self.main_window = parent
         self.setHeaderLabel(f"{globals.PROJECT.project_name}")
         self.init_tree()
@@ -36,7 +36,7 @@ class TreeMenu(QTreeWidget):
     def init_tree(self):
         self.clear()
  
-        for component in globals.PROJECT.project_components:
+        for component in self.PROJECT.project_components:
             name = component.infos.get('name', 'Unknown')
             modification_date = component.infos.get('modification_date', 'Unknown')
             creation_date = component.infos.get('creation_date', 'Unknown')

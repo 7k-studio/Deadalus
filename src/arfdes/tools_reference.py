@@ -29,8 +29,7 @@ from tqdm import tqdm
 import json
 import src.obj
 from src.obj.class_airfoil import SeligAirfoil
-import src.globals as globals  # Import from globals.py
-logger = logging.getLogger(__name__)
+# from src.program import DEADALUS  # Import from globals.py
 
 logger = logging.getLogger(__name__)
 
@@ -77,8 +76,8 @@ def load_selig_reference(file):
     
     DW_points = np.array(DW_points).T
 
-    #logger.debug(UP_points)
-    #logger.debug(DW_points)
+    logger.debug(UP_points)
+    logger.debug(DW_points)
     
     airfoil = SeligAirfoil()
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
@@ -123,7 +122,7 @@ def load_json_reference(fileName):
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -137,7 +136,7 @@ def load_json_reference(fileName):
 
         logger.debug(airfoil)
 
-        globals.PROJECT.reference_airfoils.append(airfoil)
+        self.PROJECT.reference_airfoils.append(airfoil)
 
 def load_from_ddls_010(data):
     """load the airfoil data from a JSON format file."""
@@ -208,7 +207,7 @@ def load_from_ddls_030(data):
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:

@@ -18,27 +18,66 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
+# Library import
 import logging
 import sys
 import os
-
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QIcon
-from src.splash.splash_screen import SplashScreen
-import src.globals as globals
 import datetime
 
+# Module-level logger so exception hook can always access a logger
+logger = logging.getLogger(__name__)
+
+# PyQt import 
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QIcon
+from src.program.splash_screen import SplashScreen
+
+# In-Program import
+# from src.program import DEADALUS
+
+def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        # To allow clean exit
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    sys.exit()
+
 def main():
-    app = QApplication(sys.argv)
-    icon = QIcon("src/assets/logo.png")
-    app.setWindowIcon(icon)
+    from src.program.program import Program
+    DEADALUS = Program()
 
-    splash = SplashScreen(globals.DEADALUS)
-    splash.show()
+    #app = QApplication(sys.argv)
+    #icon = QIcon("src/assets/logo.png")
+    #app.setWindowIcon(icon)
+    #app.setStyleSheet(DEADALUS.buildStyleSheet())
+
+    log_file = 'toolout.log'
+
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    with open(log_file, "w") as file:
+        header(DEADALUS.version, file)
     
-    sys.exit(app.exec_())
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
 
-def header(file):
+    sys.excepthook = log_uncaught_exceptions
+
+    DEADALUS.APP = QApplication(sys.argv)
+    icon = QIcon("src/assets/logo.png")
+    DEADALUS.APP.setWindowIcon(icon)
+    DEADALUS.APP.setStyleSheet(DEADALUS.buildStyleSheet())
+    DEADALUS.SPLASHSCREEN = SplashScreen(DEADALUS)
+    DEADALUS.SPLASHSCREEN.show()
+
+    #splash = SplashScreen(DEADALUS)
+    #splash.show()
+    
+    # sys.exit(app.exec_())
+    sys.exit(DEADALUS.APP.exec_())
+
+def header(version, file):
     file.write("       _______        _________    ___________    _______        ___________    ___           ___     ___    __________  \n")
     file.write("      /  ___  \      /  ______/\  /  _____   /\  /  ___  \      /  _____   /\  /  /\         /  /\   /  /\  /  _______/\ \n")
     file.write("     /  /\__\  \    /  /\_____\/ /  /\___/  / / /  /\__\  \    /  /\___/  / / /  / /        /  / /  /  / / /  /\______\/ \n")
@@ -50,30 +89,23 @@ def header(file):
     file.write("\__________\/  \_________\/ \__\/   \__\/  \__________\/  \__\/   \__\/  \__________\/ \__________\/  \__________\/      \n")
     file.write("\n")
     file.write("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\|\n")
-    file.write(f"Program version: {globals.DEADALUS.program_version}\n")
+    file.write(f"Program version: {version}\n")
     file.write(f"Program opened on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
     
-def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        # To allow clean exit
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-    sys.exit()
 
 if __name__ == "__main__":
 
-    log_file = 'toolout.log'
+    # log_file = 'toolout.log'
 
-    if os.path.exists(log_file):
-        os.remove(log_file)
+    # if os.path.exists(log_file):
+    #     os.remove(log_file)
 
-    with open(log_file, "w") as file:
-        header(file)
+    # with open(log_file, "w") as file:
+    #     header(DEADALUS, file)
     
-    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
-    logger = logging.getLogger(__name__)
+    # logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
+    # logger = logging.getLogger(__name__)
 
-    sys.excepthook = log_uncaught_exceptions
+    # sys.excepthook = log_uncaught_exceptions
 
     main()

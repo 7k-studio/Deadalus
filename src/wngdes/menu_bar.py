@@ -19,10 +19,8 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
-from PyQt5.QtWidgets import QMenuBar, QAction, QFileDialog, QApplication
 import sys
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, QMenuBar, QAction, QFileDialog, QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 import numpy as np
 import math
@@ -33,6 +31,9 @@ from scipy import interpolate
 import random
 from tqdm import tqdm
 from PyQt5.QtWidgets import (
+    QMenuBar, QAction, QFileDialog, QApplication,
+    QMainWindow, QSplitter, QVBoxLayout, QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel,
+    QTreeWidget, QTreeWidgetItem, QTextEdit, QStackedWidget, QMessageBox,
     QTableWidget, QTableWidgetItem, QPushButton
 )
 
@@ -40,18 +41,20 @@ import src.obj.objects3D
 from OpenGL.GL import *  # Import OpenGL functions
 from OpenGL.GLU import *  # Import GLU functions (e.g., gluPerspective)
 from src.arfdes.airfoil_designer import AirfoilDesigner
-import src.globals as globals
 
-from src.wngwb import tools_wing  # Import add_component_to_tree
-from src.wngwb import widget_tree
+
+from src.wngdes import tools_wing  # Import add_component_to_tree
+from src.wngdes import widget_tree
 
 from datetime import date
 import src.obj
 
 class MenuBar(QMenuBar):
-    def __init__(self, parent=None, viewport=None):
+    def __init__(self, program=None, project=None, parent=None, viewport=None):
         super(MenuBar, self).__init__(parent)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.DEADALUS = program
+        self.PROJECT = project
         self.main_window = parent
         self.open_gl = viewport
         self.createMenu()
@@ -171,14 +174,14 @@ class MenuBar(QMenuBar):
         if msg == QMessageBox.Yes:
             self.logger.info("Creating new project...")
             # Reset the project components
-            globals.PROJECT.newProject()
+            self.PROJECT.new()
             self.main_window.tree_menu.init_tree()
 
     def openFile(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
-            globals.loadProject(fileName)
+            self.PROJECT.load(fileName)
             self.main_window.tree_menu.init_tree()
             self.logger.info(f"Opened file: {fileName}")
 
@@ -186,7 +189,7 @@ class MenuBar(QMenuBar):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
-            globals.saveProject(fileName)
+            self.PROJECT.save(fileName)
             self.logger.info(f"Saved file: {fileName}")
 
     def exportFile(self):
@@ -452,7 +455,7 @@ class MenuBar(QMenuBar):
     def preferencesWindow(self):        
         """Open the preferences dialog."""
         self.logger.info("Preferences")
-        from src.preferences import PreferencesWindow
+        from program.preferences import PreferencesWindow
         self.preferences_dialog = PreferencesWindow(self)
         self.preferences_dialog.show()
         msg = QMessageBox(self)

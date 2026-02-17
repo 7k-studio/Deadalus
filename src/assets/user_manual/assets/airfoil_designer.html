@@ -1,0 +1,223 @@
+<!--
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of Deadalus.
+
+Deadalus is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Deadalus is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Deadalus.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Deadalus User Manual</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+      <img src="logo.png" alt="Program Logo" height="40"/>
+      <p style="font-size: xx-large; margin-top: 0px; margin-bottom: 0px;">Deadalus User Manual</p>
+      <!-- <pre> <p style="margin: 0;">Welcome to the Deadalus User Manual</p> </pre> -->
+  </header>
+
+  <!-- Top Navigation Menu -->
+  <div class="section-menu">
+    <a href="../user_manual.html" class="button-link">Deadalus</a>
+    <button onclick="showSection('airfoil')">Airfoil Designer</button>
+    <a href="wing_designer.html" class="button-link">Wing Designer</a>
+    <a href="changelog.html" class="button-link">Changelog</a>
+  </div>
+
+  <!-- Main App Area -->
+  <div class="container">
+    <!-- Sidebar Menu -->
+    <nav class="sidebar">
+      <h3>Contents</h3>
+
+      <ul id="menu-airfoil" class="context-menu">
+        <li><a href="#ADoverview">Overview</a></li>
+        <li><a href="#ADMenuBar">Menu Bar</a></li>
+        <li><a href="#ADViewport">Viewport</a></li>
+        <li><a href="#ADArfTree">Airfoil Storage</a></li>
+        <li><a href="#ADParamTab">Parameter Table</a></li>
+      </ul>
+
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- Airfoil Designer Section -->
+      <div id="airfoil" class="page-section active">
+        <div id="ADoverview">
+          <h2>Airfoil Designer overview</h2>
+          <p>Airfoil designer module allows useer to design, modify and export airfoils using control points and geometry tools. <br>
+            Airfoils are defined as 4 splines, each for:
+            <ul>
+              <li>Pressure Side</li>
+              <li>Suction Side</li>
+              <li>Leading Edge</li>
+              <li>Trailing Edge</li>
+            </ul>
+            It is belived that with such definition it would be easier to create such airfoil and ensure clean geometry to any CFD software as well as manufacturing.
+            To Help with creation of airfoil, designer consists of elements such as:
+            <ul>
+              <li>Menu Bar</li>
+              <li>Viewport</li>
+              <li>Airfoil storage</li>
+              <li>Parameters tabele</li>
+            </ul>
+          </p>
+          <img src="AirfoilDesigner/airfoil_designer_elements.jpg" alt="Airfoil Designer Elements" height="500"/>
+        </div>
+
+        <div id="ADMenuBar">
+          <h2>Menu Bar overview</h2>
+
+          <h3>File menu</h3>
+          use following link to check out <a href="#FileMenu">File menu details</a>
+          <h3>Edit menu</h3>
+          <p>Allows user to interact with Airfoil Designer. Contains basic functinality required to create, recreate, modify, reload airfoils</p>
+            <ul>
+                <li><b>Create:</b> Add a new airfoil to your project.</li>
+                <li><b>Append:</b> Import an airfoil from a file.</li>
+                <li><b>Delete:</b> Remove the selected airfoil.</li>
+                <li><b>Save:</b> Save the selected airfoil to a file.</li>
+                <li><b>Export:</b> Export the airfoil as a DXF file.</li>
+                <li><b>Flip Airfoil:</b> Flip the selected airfoil horizontally.</li>
+                <li><b>Rename:</b> Change the name of the selected airfoil.</li>
+                <li><b>Edit Description:</b> Edit the airfoil's description.</li>
+                <li><b>Fit2Reference:</b> Fit the airfoil to a reference (beta feature).</li>
+            </ul>
+
+          <h3>View menu</h3>
+          <p>Allows user to add elements to be displayed</p>
+            <ul>
+                <li><b>Show Reference:</b> Chooses a reference airfoil and makes it visible in viewport (works for selig format airfoils (.txt) and for ddls-parametric (.arf))</li>
+            </ul>
+            <div class="note">
+              <div class="inside">
+                <h3>NOTE</h3>
+                To toggle a reference you must first select an airfoil from Airfoil Tree
+              </div>
+            </div>
+          
+          <h3>Module menu</h3>
+          Allows user to change module menu. Available modules are:
+          <a href="wing_designer.html" class="button-link">Wing Designer</a>
+
+          <h3>Program menu</h3>
+          use following link to check out <a href="#ProgramMenu">Program menu details</a>
+
+        </div>
+        
+        <div id="ADViewport">
+          <h2>Viewport overview</h2>
+          <p>Airfoil Designer is equiped with OpenGL 2D viewport. To navigate in viewport drag around holding Left Mouse Button (LMB), use mouse wheel to zoom in and out.</p>
+          <ul>
+              <li><b>Grid:</b> displays a net to visualize a dimensions and help to navigate</li>
+              <li><b>Ruler:</b> shows a dimensions that grid represents, at the same time show a project unit</li>
+              <li><b>Control points:</b> visualize a point which defines a spline, each color represents different spline CP</li>
+              <li><b>Construction:</b> show a connection between control points</li>
+              <li><b>Wireframe:</b> show a spline shape created from control points</li>
+            </ul>
+          <img src="AirfoilDesigner/AD_Viewport.jpg" alt="Airfoil Designer Elements" height="500"/>
+        </div>
+        
+        <div id="ADArfTree">
+          <h2>Airfoil Tree overview</h2>
+          <p>Airfoil tree widget display all the airfoils in current project. To perform some operations (e.g. delete an airfoil, fit2reference or flip) it is neccessary to select one airfoil in the widget. 
+          <br><strong>It is possible to have several airfoils under the same name</strong>
+          </p>
+          <ul>
+              <li><b>Name:</b> show a airfoil name for representation</li>
+              <li><b>Last modification:</b> shows a last modification date</li>
+              <li><b>Creation Date:</b> shows a date of airfoil creation</li>
+              <li><b>Description:</b> show a description atttached to airfoil</li>
+            </ul>
+          <img src="AirfoilDesigner/AD_Storage.png" alt="Airfoil Designer Elements" height="500"/>
+        </div>
+        
+        <div id="ADParamTab">
+          <h2>Parameter Table overview</h2>
+
+          <p> Parameter table widget shows parameters of a selected in Airfoil storage overview airfoil. Table is divided into 4 columns:
+            <ul>
+            <li><strong>Parameter:</strong> name of the parameter</li>
+            <li><strong>Value:</strong> modifiable value of the parameter. To change the value use arrows or input new value in the input box. If value is incorrect parameter will go back to last know value.</li>
+            <li><strong>Nominal:</strong> shows the parameter value before change</li>
+            <li><strong>Unit:</strong> shows a unit of the parameter</li>
+          </ul>
+          Use arrow up <button>⯅</button> to increase value and arrow down <button>⯆</button> to decrease value of parameter in the same row.
+          It is possible to change the increasement/decreasement value by holding keyboard keys while clicking on Left Mouse Button. Allowed modifiers are:
+          <ul>
+            <li><strong>LMB:</strong> 0.1</li>
+            <li><strong>LMB+Shift:</strong> 1.0</li>
+            <li><strong>LMB+Ctrl:</strong> 0.01</li>
+          </ul>
+          </p>
+          <img src="AirfoilDesigner/AD_ParamTable.png" alt="Airfoil Designer Elements" height="500"/><br>
+
+        </div>
+        
+      </div>
+
+<script>
+  function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+    // Show selected section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.classList.add('active');
+    }
+
+    // Hide all context menus
+    document.querySelectorAll('.context-menu').forEach(el => el.style.display = 'none');
+
+    // Show relevant context menu
+    const menu = document.getElementById(`menu-${sectionId}`);
+    if (menu) menu.style.display = 'block';
+  }
+
+  function loadTestHtml() {
+    const changelogSection = document.getElementById('changelog');
+    const container = document.getElementById('markdown-container');
+
+    // Fetch the test.html content
+    fetch('changelog/test.html')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to load test.html');
+        }
+        return response.text();
+      })
+      .then(htmlContent => {
+        // Replace the changelog container content with the fetched HTML
+        container.innerHTML = htmlContent;
+
+        // Apply the same styles as the user manual
+        changelogSection.classList.add('page-section', 'active');
+      })
+      .catch(error => {
+        container.innerHTML = `<p>Error loading test.html: ${error.message}</p>`;
+      });
+  }
+</script>
+</body>
+</html>

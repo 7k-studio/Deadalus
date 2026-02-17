@@ -37,19 +37,19 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 #Self imports
 import src.obj as obj
-from src.obj.objects2D import Airfoil
 from src.arfdes.tools_airfoils import Reference_load
 import src.arfdes.tools_reference as tools
-import src.globals as globals
 
 from src.opengl.viewport2d import ViewportOpenGL
 
 class TreeRererence(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
-    def __init__(self, parent=None):
+    def __init__(self, program=None, project=None, parent=None):
         super(TreeRererence, self).__init__(parent)
         self.setMinimumSize(200, 100)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.DEADALUS = program
+        self.PROJECT = project
         self.init_tree()
 
     def init_tree(self):
@@ -69,22 +69,18 @@ class TreeRererence(QTableWidget):
 
         options_buttons = QHBoxLayout()
         addButton = QPushButton("+")
-        addButton.setStyleSheet("background-color: lightgrey;")
         addButton.clicked.connect(self.add_reference)
         addButton.setFixedSize(20, 20)  # Set fixed size for the button
 
         delButton = QPushButton("-")
-        delButton.setStyleSheet("background-color: lightgrey;")
         delButton.clicked.connect(self.delete_reference)
         delButton.setFixedSize(20, 20)  # Set fixed size for the button
 
         shoButton = QPushButton("Show/Hide")
-        shoButton.setStyleSheet("background-color: lightgrey;")
         shoButton.clicked.connect(self.show_reference)
         shoButton.setFixedHeight(20)
 
         ediButton = QPushButton("Edit")
-        ediButton.setStyleSheet("background-color: lightgrey;")
         ediButton.clicked.connect(self.edit_reference)
         ediButton.setFixedHeight(20)
 
@@ -124,7 +120,7 @@ class TreeRererence(QTableWidget):
             self.logger.error("No connection between selected airfoil and project airfoil")
             return  # Invalid selection
 
-        airfoil_obj = globals.PROJECT.reference_airfoils[airfoil_index]
+        airfoil_obj = self.PROJECT.reference_airfoils[airfoil_index]
         
         if airfoil_obj.visible == False:
             airfoil_obj.visible = True
@@ -136,9 +132,9 @@ class TreeRererence(QTableWidget):
     def edit_reference():
         pass
     
-    def refresh_tree(self):
+    def update(self):
         self.tree.clear()  # Clear existing items
-        for airfoil in globals.PROJECT.reference_airfoils:
+        for airfoil in self.PROJECT.reference_airfoils:
             self.add_airfoil_to_tree(airfoil)
         self.logger.info("Reference Tree is refreshed")
 

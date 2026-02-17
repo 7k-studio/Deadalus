@@ -34,8 +34,8 @@ from OpenGL.GLU import *
 import src.opengl.bckgrd as background
 import src.opengl.construction as construction
 import src.opengl.solid as solid
-from src.globals import DEADALUS
-from src.globals import PROJECT
+# from src.program import DEADALUS
+from src.program.project import PROJECT
 
 
 class Viewport3D(QOpenGLWidget):

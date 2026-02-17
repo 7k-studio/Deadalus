@@ -25,17 +25,17 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 
-import src.globals as globals  # Import from globals.py
-
 
 class TableStatistics(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None, open_gl=None, airfoils_menu=None, project=None):
+    def __init__(self, program=None, project=None, parent=None, open_gl=None, airfoils_menu=None):
         super(TableStatistics, self).__init__(parent)
         self.setMinimumSize(200, 300)
+        self.DEADALUS = program
+        self.PROJECT = project
+        self.AIRFOILDESIGNER = parent
         self.open_gl = open_gl
-        self.project = project
         self.airfoils_menu = airfoils_menu
         # keep reference to the internal QTreeWidget (used to find top-level selection)
         self.tree_menu = None
@@ -88,9 +88,9 @@ class TableStatistics(QTableWidget):
             self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
             unit = airfoil_obj.unit.get(key, '')
             if unit == 'length':
-                unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
+                unit = self.DEADALUS.preferences['general']['units'].get('length', 'm')
             if unit == 'angle':
-                unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+                unit = self.DEADALUS.preferences['general']['units'].get('angle', 'rad')
             unit_value = QTableWidgetItem(str(unit))
             unit_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 3, unit_value)
@@ -125,7 +125,7 @@ class TableStatistics(QTableWidget):
             self.logger.debug("Top-level item index not found for selected item")
             return
 
-        selected_airfoil = globals.PROJECT.project_airfoils[index]
+        selected_airfoil = self.PROJECT.project_airfoils[index]
 
         # if component_attr:
         #     # Show component parameters

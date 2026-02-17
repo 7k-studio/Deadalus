@@ -21,20 +21,19 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import numpy as np
 import math
-import os
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
 from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
 from tqdm import tqdm
 import json
 import src.obj
-import src.globals as globals  # Import from globals.py
+# from src.program import DEADALUS  # Import from globals.py
 from src.obj.class_airfoil import Airfoil
 
 logger = logging.getLogger(__name__)
 
 
-def Reference_load(file):
+def SeligReference(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
     UP_points = []
@@ -89,6 +88,18 @@ def Reference_load(file):
     
     return airfoil
 
+def Reference_load(file):
+    """Load airfoil coordinates from a file and return upper and lower points."""
+    format = file.split('.')[1]
+    airfoil = None
+    
+    if format =="arf":
+        airfoil, _ = load_airfoil_from_json(file)
+    else:
+        airfoil = SeligReference(file)
+    
+    return airfoil
+
 def CreateBSpline(const_points, force_resolution=None):
 
     l=len(const_points[0])
@@ -99,8 +110,7 @@ def CreateBSpline(const_points, force_resolution=None):
 
     tck=[t,[const_points[0],const_points[1]],3]
     
-    
-    f = int(globals.DEADALUS.preferences['general']['performance'])
+    f = int(DEADALUS.preferences['general']['performance'])
     if force_resolution:
         f = force_resolution
 
@@ -205,7 +215,7 @@ def load_airfoil_from_json(fileName):
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -292,7 +302,7 @@ def load_from_ddls_030(data):
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -342,14 +352,14 @@ def load_from_ddls_030(data):
 
         return Airfoil, error_count
     
-def save_airfoil_to_json(airfoil_idx=None):
+def save_airfoil_to_json(airfoil_obj=None):
     """Save the airfoil data to a JSON format file."""
  
-    current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
+    current_airfoil = PROJECT.project_airfoils[airfoil_idx]
 
     data = {
-        "program name": globals.DEADALUS.program_name,
-        "program version": globals.DEADALUS.program_version,
+        "program name": DEADALUS.program_name,
+        "program version": DEADALUS.program_version,
         "airfoil": {
             "infos": {
                 **current_airfoil.infos,

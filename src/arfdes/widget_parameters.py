@@ -27,18 +27,19 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, pyqtSignal
 
-import src.globals as globals  # Import from globals.py
-
 
 class TableParameters(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
+    parametersChanged = pyqtSignal(object)
 
-    def __init__(self, parent=None, open_gl=None, airfoils_menu=None, project=None):
+    def __init__(self, program=None, project=None, parent=None, open_gl=None, airfoils_menu=None, stat_table=None, ):
         super(TableParameters, self).__init__(parent)
         self.setMinimumSize(200, 300)
+        self.DEADALUS = program
+        self.PROJECT = project
         self.open_gl = open_gl
-        self.project = project
         self.airfoils_menu = airfoils_menu
+        self.stat_table = stat_table
         # keep reference to the internal QTreeWidget (used to find top-level selection)
         self.tree_menu = None
         if airfoils_menu is not None:
@@ -60,7 +61,10 @@ class TableParameters(QTableWidget):
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setStretchLastSection(True)
         #self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.setColumnWidth(1, 100)  # Set minimum width for column 2
+        self.setColumnWidth(0, 70) # Set width of the first column
+        self.setColumnWidth(1, 100)  # Set width of the second column
+        self.setColumnWidth(2, 70)  # Set width of the third column
+        self.setColumnWidth(3, 50)  # Set width of the forth column
 
     def set_reference_points(self, up_ref_points, dwn_ref_points):
         """Set reference points for plotting."""
@@ -188,7 +192,7 @@ class TableParameters(QTableWidget):
             self.logger.debug("Top-level item index not found for selected item")
             return
 
-        selected_airfoil = globals.PROJECT.project_airfoils[index]
+        selected_airfoil = self.PROJECT.project_airfoils[index]
 
         if component_attr:
             # Show component parameters
@@ -245,7 +249,7 @@ class TableParameters(QTableWidget):
         if airfoil_index == -1:
             return  # Invalid selection
 
-        current_airfoil = self.project.project_airfoils[airfoil_index]
+        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
 
         # Decide target object (parent airfoil or one of its components)
         if component_attr:
@@ -283,7 +287,10 @@ class TableParameters(QTableWidget):
 
         # Update tree label to indicate modification and force viewport repaint
         current_airfoil.update()
+
         top_item.setText(0, f"{current_airfoil.infos['name']}*")
+        # Notify listeners that parameters changed
+        self.parametersChanged.emit(current_airfoil)
         try:
             # ensure viewport reflects changes
             self.open_gl.set_airfoil_to_display(current_airfoil)

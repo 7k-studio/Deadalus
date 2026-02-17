@@ -21,19 +21,18 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 import math
 import sys
-import src.obj.objects2D as objects2D
 import json
 import os
 import numpy as np
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
 from scipy.optimize import minimize, root_scalar
 from scipy import interpolate
-from PyQt5.QtWidgets import QTreeWidgetItem
 
 #import tools.DXFmodule
 import random
 from tqdm import tqdm
 from PyQt5.QtWidgets import (
+    QTreeWidgetItem,
     QApplication, QVBoxLayout, QTableWidget, QTableWidgetItem, QMainWindow, QWidget, QHBoxLayout, QPushButton, QLabel, QLineEdit
 )
 from PyQt5.QtCore import Qt
@@ -42,7 +41,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-import src.globals as globals
+from src.program.project import PROJECT
 
 import datetime
 
@@ -294,7 +293,7 @@ def rotate_airfoil(angle, tmp_le, tmp_ps, tmp_ss, tmp_te, incidence):
 
 def add_component_to_tree(tree_menu, component_obj):
     """Add an airfoil to the list and tree menu."""
-    globals.PROJECT.project_components.append(component_obj)
+    PROJECT.project_components.append(component_obj)
     name = component_obj.infos.get('name', 'Unknown')
     modification_date = component_obj.infos.get('modification_date', 'Unknown')
     creation_date = component_obj.infos.get('creation_date', 'Unknown')
@@ -307,5 +306,5 @@ def add_wing_to_tree(item, name, wing_obj, component_obj):
 
 def add_segment_to_tree(tree_menu, name, segment_obj, component_index, wing_index):
     """Add an airfoil to the list and tree menu."""
-    globals.PROJECT.project_components[component_index].wings[wing_index].segments.append(segment_obj)
+    PROJECT.project_components[component_index].wings[wing_index].segments.append(segment_obj)
 

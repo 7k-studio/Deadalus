@@ -1,0 +1,146 @@
+'''
+
+Copyright (C) 2025 Jakub Kamyk
+
+This file is part of DEADALUS.
+
+DEADALUS is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+DEADALUS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+
+'''
+
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QApplication, QMessageBox, QFileDialog
+    )
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QIcon
+
+from src.arfdes.airfoil_designer import AirfoilDesigner  # Import the AirfoilDesigner class from the correct module
+from src.wngdes.wing_designer import WingDesigner
+import src.program.project as project
+
+import logging
+
+
+class SplashScreen(QWidget):
+    def __init__(self, program=None):
+        super().__init__()
+        self.DEADALUS = program
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.setWindowTitle("Splash Screen")
+        self.setFixedSize(500, 500)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
+        #self.setAttribute(Qt.WA_TranslucentBackground, True)
+        #self.setAttribute(Qt.WA_DeleteOnClose, True)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # Add splash image
+        splash_label = QLabel(self)
+        pixmap = QPixmap("src/assets/logo.png")
+        if pixmap.isNull():
+            self.logger.error(" 'logo.png' not found or invalid path.")
+        splash_label.setPixmap(pixmap)
+        splash_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(splash_label)
+
+        program_label = QLabel('Deadalus Airfoil & Wing designer')
+        program_label.setStyleSheet("font-size: 12px; font-weight: regular;")
+        layout.addWidget(program_label, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        version_label = QLabel('v{}'.format(self.DEADALUS.version))
+        version_label.setStyleSheet("font-size: 12px; font-weight: regular;")
+        layout.addWidget(version_label, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
+        copyright_label.setStyleSheet("font-size: 9px; font-weight: regular;")
+        layout.addWidget(copyright_label, alignment=Qt.AlignCenter | Qt.AlignTop)
+        
+        # Add buttons
+        program_button_layout = QHBoxLayout()
+        button1 = QPushButton(icon = QIcon(f"{self.DEADALUS.color_scheme['pathToIcons']}/NewFile.svg"), text="New Project")
+        button1.setStyleSheet(f"QPushButton {{border-radius: 10px;}}")
+        button1.clicked.connect(self.new_project)
+        button1.setFixedSize(220, 30)  # Set fixed size for the button
+
+        button2 = QPushButton(icon = QIcon(f"{self.DEADALUS.color_scheme['pathToIcons']}/OpenFile.svg"), text="Open Project")
+        button2.setStyleSheet(f"QPushButton  {{ border-radius: 10px; }}")
+        button2.clicked.connect(self.open_project)
+        button2.setFixedSize(220, 30)  # Set fixed size for the button
+
+        info_button_layout = QHBoxLayout()
+        button3 = QPushButton(icon = QIcon(f"{self.DEADALUS.color_scheme['pathToIcons']}/Manual.svg"), text="User Manual")
+        button3.setStyleSheet(f"QPushButton {{ border-radius: 10px;}} ")
+        button3.clicked.connect(self.open_manual)
+        button3.setFixedSize(220, 30)  # Set fixed size for the button
+
+        button4 = QPushButton(icon = QIcon(f"{self.DEADALUS.color_scheme['pathToIcons']}/Web.svg"), text="Reales Notes")
+        button4.setStyleSheet(f"QPushButton {{ border-radius: 10px;}} ")
+        button4.clicked.connect(self.open_notes)
+        button4.setFixedSize(220, 30)  # Set fixed size for the button
+
+        program_button_layout.addWidget(button1)
+        program_button_layout.addWidget(button2)
+        info_button_layout.addWidget(button3)
+        info_button_layout.addWidget(button4)
+        layout.addLayout(program_button_layout)
+        layout.addLayout(info_button_layout)
+
+        # Center the buttons
+        program_button_layout.setAlignment(Qt.AlignCenter)
+        info_button_layout.setAlignment(Qt.AlignCenter)
+
+        # Add close button
+        close_button = QPushButton(self)
+        icon = QIcon(f"{self.DEADALUS.color_scheme['pathToIcons']}/ExitCross.svg")
+
+        close_button.setIcon(icon)
+        close_button.setFixedSize(30, 30)
+        close_button.setStyleSheet("border: none;")
+        close_button.clicked.connect(self.close)
+
+        # Add close button to the top-right corner
+        close_layout = QHBoxLayout()
+        close_layout.addWidget(close_button)
+        close_layout.setAlignment(Qt.AlignRight)
+        layout.insertLayout(0, close_layout)  # Insert at the top of the main layout
+
+        self.logger.info("SplashScreen initialized")
+
+    def new_project(self):
+        """Create new DEADALUS project and open the AirfoilDesigner window."""
+        self.logger.info("Creating new project")
+        self.PROJECT = project.Project(self.DEADALUS)
+        self.airfoil_designer_window = AirfoilDesigner(self.DEADALUS, self.PROJECT)  # Pass airfoil_list
+        self.airfoil_designer_window.show()
+        self.close()
+
+    def open_project(self):
+        """Load DEADALUS project and open the AirfoilDesigner window."""
+        self.logger.info("Opening existing project")
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DEADALUS Database Files (*.ddls);; All Files (*)", options=options)
+        if fileName:
+            self.PROJECT = project.Project(self.DEADALUS)
+            self.PROJECT.loadProject(fileName)
+            self.airfoil_designer_window = AirfoilDesigner(self.DEADALUS, self.PROJECT)  # Pass airfoil_list
+            self.airfoil_designer_window.show()
+            self.close()
+
+    def open_manual(self):
+        self.logger.info("Opening user manual")
+        manual = self.DEADALUS.showUserManual()
+
+    def open_notes(self):
+        manual = self.DEADALUS.showRealiseNotes()

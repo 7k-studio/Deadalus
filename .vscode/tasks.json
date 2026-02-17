@@ -1,0 +1,32 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "pytest: run",
+      "type": "shell",
+      "command": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "pytest",
+        "${input:pytestArgs}"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "options": {
+        "env": {
+          "QT_QPA_PLATFORM": "offscreen"
+        }
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "pytestArgs",
+      "type": "promptString",
+      "description": "pytest args (example: -q  or tests/test_menu_bar.py::test_new_airfoil -q)",
+      "default": "-q"
+    }
+  ]
+}

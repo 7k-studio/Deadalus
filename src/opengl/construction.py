@@ -27,7 +27,6 @@ import numpy as np
 from numpy import array, linalg
 
 from src.obj.class_primitives import Wheels
-from src.globals import PROJECT
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +123,8 @@ def draw_dashed_line_v2(p1, p2, dash_length=0.02, gap_length=0.02):
 
 def draw_wireframe(self, component_idx, wing_idx, segment_idx):
     """Draw an airfoil using coordinates from a file, extruded along the z-axis."""
+    from program.project import PROJECT
+    
     glLineWidth(2)
 
     segment = PROJECT.project_components[component_idx].wings[wing_idx].segments[segment_idx]

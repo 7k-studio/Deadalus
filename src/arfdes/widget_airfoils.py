@@ -38,12 +38,12 @@ from PyQt5.QtGui import QIcon
 
 #Self imports
 import src.obj as obj
-import src.wngwb.tools_wing
+import src.wngdes.tools_wing
 
 from src.obj.class_airfoil import Airfoil
 from src.arfdes.tools_airfoils import Reference_load
 import src.arfdes.tools_reference as tools
-import src.globals as globals
+
 
 from src.opengl.viewport2d import ViewportOpenGL
 
@@ -52,10 +52,12 @@ logger = logging.getLogger(__name__)
 class TreeAirfoil(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
 
-    def __init__(self, parent=None, open_gl=None):
+    def __init__(self, program=None, project=None, parent=None, open_gl=None):
         super(TreeAirfoil, self).__init__(parent)
         self.setMinimumSize(200, 200)
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.DEADALUS = program
+        self.PROJECT = project
         self.open_gl = open_gl
         self.init_tree()
 
@@ -64,10 +66,14 @@ class TreeAirfoil(QTableWidget):
         self.arf_widget = QVBoxLayout()
 
         self.tree = QTreeWidget()
-        self.tree.setColumnCount(3)  # Adjust the number of columns
-        self.tree.setHeaderLabels(["Name", "Last modification", "Creation Date"])
+        self.tree.setColumnCount(4)  # Adjust the number of columns
+        self.tree.setHeaderLabels(["Name", "Type", "Last modification", "Creation Date"])
         self.tree.setMinimumHeight(100)  # Set minimum height for the tree menu
-        self.setColumnWidth(0, 150)
+        self.tree.setColumnWidth(0, 120) # Set width of the first column
+        self.tree.setColumnWidth(1, 35)  # Set width of the second column
+        self.tree.setColumnWidth(2, 100)  # Set width of the third column
+        self.tree.setColumnWidth(3, 100)  # Set width of the forth column
+
         self.arf_widget.addWidget(self.tree)
         self.setLayout(self.arf_widget)
 
@@ -106,7 +112,7 @@ class TreeAirfoil(QTableWidget):
         index = self.tree.indexOfTopLevelItem(top_item)
         if index != -1:
             try:
-                selected_airfoil = globals.PROJECT.project_airfoils[index]
+                selected_airfoil = self.PROJECT.project_airfoils[index]
                 selected_airfoil.update()
                 if self.open_gl:
                     # Always set the full airfoil; if viewport supports component-highlight, call it
@@ -132,39 +138,43 @@ class TreeAirfoil(QTableWidget):
         modification_date = airfoil_obj.infos.get('modification_date', 'Unknown')
         creation_date = airfoil_obj.infos.get('creation_date', 'Unknown')
         description = airfoil_obj.infos.get('description', 'No description')
-        tree_item = QTreeWidgetItem([name, str(modification_date), str(creation_date)])
+        tree_item = QTreeWidgetItem([name, None, str(modification_date), str(creation_date)])
         self.tree.addTopLevelItem(tree_item)
 
         if airfoil_obj.LE:
             name = 'Leading Edge'
-            le_item = QTreeWidgetItem([str(name)])
+            type = airfoil_obj.LE.infos.get('type', 'U')
+            le_item = QTreeWidgetItem([str(name), str(type)])
             tree_item.addChild(le_item)
         if airfoil_obj.TE:
             name = 'Trailing Edge'
-            te_item = QTreeWidgetItem([str(name)])
+            type = airfoil_obj.TE.infos.get('type', 'U')
+            te_item = QTreeWidgetItem([str(name), str(type)])
             tree_item.addChild(te_item)
         if airfoil_obj.PS:
             name = 'Pressure Side'
-            ps_item = QTreeWidgetItem([str(name)])
+            type = airfoil_obj.PS.infos.get('type', 'U')
+            ps_item = QTreeWidgetItem([str(name), str(type)])
             tree_item.addChild(ps_item)
         if airfoil_obj.SS:
             name = 'Suction Side'
-            ss_item = QTreeWidgetItem([str(name)])
+            type = airfoil_obj.SS.infos.get('type', 'U')
+            ss_item = QTreeWidgetItem([str(name), str(type)])
             tree_item.addChild(ss_item)
 
 
         logger.info(f"Airfoil '{name}' added to the tree")
         
-
-    def refresh_tree(self):
+    def update(self):
         """Update the tree menu based on the current self.project.project_airfoils."""
         self.tree.clear()  # Clear existing items
 
         # Set up tree columns
-        self.tree.setColumnCount(3)  # Adjust the number of columns
-        self.tree.setHeaderLabels(["Name", "Last modification", "Creation Date"])  # Set column headers
+        self.tree.setColumnCount(4)  # Adjust the number of columns
+        self.tree.setHeaderLabels(["Name", "Type", "Last modification", "Creation Date"])  # Set column headers
 
-        for airfoil in globals.PROJECT.project_airfoils:
+        for airfoil in self.PROJECT.project_airfoils:
+            self.logger.debug(airfoil)
             # Assuming airfoil_list contains objects with 'infos' dictionary
             name = airfoil.infos.get('name', 'Unknown')
             modification_date = airfoil.infos.get('modification_date', 'Unknown')
@@ -201,15 +211,15 @@ class TreeAirfoil(QTableWidget):
         airfoil_obj.infos['creation_date'] = time
         airfoil_obj.infos['modification_date'] = time
         airfoil_obj.infos['description'] = dscr
-        globals.PROJECT.project_airfoils.append(airfoil_obj)
-        globals.PROJECT.nominal_airfoils.append(airfoil_obj)
+        self.PROJECT.project_airfoils.append(airfoil_obj)
+        self.PROJECT.nominal_airfoils.append(airfoil_obj)
         self.add_airfoil_to_tree(airfoil_obj, name=name)
     
     def append(self, fileName):
         """ Opens an airfoil from saved file and appends it into project """
         try:
             airfoil_obj, _ = tools.load_airfoil_from_json(fileName)
-            globals.PROJECT.project_airfoils.append(airfoil_obj)
+            self.PROJECT.project_airfoils.append(airfoil_obj)
             if airfoil_obj:
                 self.logger.debug(f"An airfoil was loaded: {airfoil_obj.info['name']}")
                 self.add_airfoil_to_tree(airfoil_obj, airfoil_obj.infos['name'])
@@ -223,21 +233,25 @@ class TreeAirfoil(QTableWidget):
             self.logger.error("No airfoil selected to be deleted!")
             return
 
-        # Find the index of the selected item
-        index = self.tree.indexOfTopLevelItem(selected_item)
+        # If a child item is selected, get its parent (the airfoil)
+        top_item = selected_item.parent() if selected_item.parent() else selected_item
+
+        # Find the index of the top-level item
+        index = self.tree.indexOfTopLevelItem(top_item)
+        self.logger.debug(index)
         if index != -1:
             # Remove the item from the tree menu
             self.tree.takeTopLevelItem(index)
             # Remove the corresponding airfoil from the airfoils_list
-            self.logger.debug(f"Available airfoils count: {len(globals.PROJECT.project_airfoils)}")
-            self.logger.debug(f"Does airoils match nominals: {len(globals.PROJECT.project_airfoils) == len(globals.PROJECT.nominal_airfoils)}")
-            name = globals.PROJECT.project_airfoils[index].infos['name']
-            del globals.PROJECT.project_airfoils[index]
-            del globals.PROJECT.nominal_airfoils[index]
-            self.logger.debug(f"Deleted airfoil at index {index} with it's nominal copy.")
+            self.logger.debug(f"Available airfoils count: {len(self.PROJECT.project_airfoils)}")
+            self.logger.debug(f"Does airoils match nominals: {len(self.PROJECT.project_airfoils) == len(self.PROJECT.nominal_airfoils)}")
+            name = self.PROJECT.project_airfoils[index].infos['name']
+            del self.PROJECT.project_airfoils[index]
+            del self.PROJECT.nominal_airfoils[index]
+            self.logger.debug(f"Deleted airfoil: {name} at index {index} with it's nominal copy.")
             return True, name
         
         else:
             self.logger.debug("Invalid selection.")
-            return False
+            return False, None
 

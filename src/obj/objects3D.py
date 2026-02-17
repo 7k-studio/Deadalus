@@ -24,8 +24,7 @@ import numpy as np
 from geomdl import BSpline, utilities
 
 from src.utils.tools_program import CreateBSpline_3D
-import src.globals as globals
-import src.obj.objects2D as objects2D
+# from src.project import PROJECT
 
 from geomdl import NURBS
 from geomdl import tessellate
@@ -193,19 +192,19 @@ class Segment:
 
     def transform(self, grandparent_index, parent_index, item_index):
 
-        cmp_X = globals.PROJECT.project_components[grandparent_index].params['origin_X']
-        cmp_Y = globals.PROJECT.project_components[grandparent_index].params['origin_Y']
-        cmp_Z = globals.PROJECT.project_components[grandparent_index].params['origin_Z']
+        cmp_X = PROJECT.project_components[grandparent_index].params['origin_X']
+        cmp_Y = PROJECT.project_components[grandparent_index].params['origin_Y']
+        cmp_Z = PROJECT.project_components[grandparent_index].params['origin_Z']
 
-        wng_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_X']
-        wng_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Y']
-        wng_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Z']
+        wng_X = PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_X']
+        wng_Y = PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Y']
+        wng_Z = PROJECT.project_components[grandparent_index].wings[parent_index].params['origin_Z']
 
-        seg_X = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_X']
-        seg_Y = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Y']
-        seg_Z = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Z']
-        scale = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['scale']
-        incidence = globals.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['incidence']
+        seg_X = PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_X']
+        seg_Y = PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Y']
+        seg_Z = PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['origin_Z']
+        scale = PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['scale']
+        incidence = PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].params['incidence']
 
         print("Transforming SEGMENT geometry...")
         print(".")

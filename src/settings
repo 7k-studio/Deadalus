@@ -4,11 +4,13 @@
    "length": "m",
    "angle": "rad"
   },
-  "performance": 10,
+  "performance": 45,
+  "color_scheme": "Deadalus-Light",
   "beta_features": true
  },
  "airfoil_designer": {
   "viewport": {
+   "color_scheme": "Greenprint",
    "grid": {
     "show": true
    },
