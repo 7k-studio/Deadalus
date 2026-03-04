@@ -50,6 +50,12 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+.vscode/
+
+# Development files
+CAD_test_files/
+Logo.ai
+SplashScreen.psd
 
 # Translations
 *.mo
