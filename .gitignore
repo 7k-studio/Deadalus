@@ -201,3 +201,11 @@ cython_debug/
 
 # MAC OS stuff
 .DS_Store
+
+# Custom ignores
+settings
+toolout.log
+CAD_test_files/
+Logo.ai
+SplashScreen.psd
+'export to exe command.txt'
