@@ -118,15 +118,15 @@ class Segment:
 
         print(f"> Scaling SEGMENT geometry by {scale}...")
 
-        tmp_le = scale * np.array(self.geom['le'])
-        tmp_ps = scale * np.array(self.geom['ps'])
-        tmp_ss = scale * np.array(self.geom['ss'])
-        tmp_te = scale * np.array(self.geom['te'])
+        tmp_le = np.array([[scale], [scale], [1]]) * np.array(self.geom['le'])
+        tmp_ps = np.array([[scale], [scale], [1]]) * np.array(self.geom['ps'])
+        tmp_ss = np.array([[scale], [scale], [1]]) * np.array(self.geom['ss'])
+        tmp_te = np.array([[scale], [scale], [1]]) * np.array(self.geom['te'])
 
-        tmp_c_le = scale * np.array(self.control_points['le'])
-        tmp_c_ps = scale * np.array(self.control_points['ps'])
-        tmp_c_ss = scale * np.array(self.control_points['ss'])
-        tmp_c_te = scale * np.array(self.control_points['te'])
+        tmp_c_le = np.array([[scale], [scale], [1]]) * np.array(self.control_points['le'])
+        tmp_c_ps = np.array([[scale], [scale], [1]]) * np.array(self.control_points['ps'])
+        tmp_c_ss = np.array([[scale], [scale], [1]]) * np.array(self.control_points['ss'])
+        tmp_c_te = np.array([[scale], [scale], [1]]) * np.array(self.control_points['te'])
 
         return tmp_le, tmp_ps, tmp_ss, tmp_te, tmp_c_le, tmp_c_ps, tmp_c_ss, tmp_c_te
 

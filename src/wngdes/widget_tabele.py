@@ -91,7 +91,8 @@ class Tabele(QTableWidget):
                 delta = 0.1
             self.adjust_value(row, direction * delta)
 
-    def update_value_from_input(self, row, value_input):
+    def update_value_from_input_odd(self, row, value_input):
+        '''An odd function I dont know what it was supposed to do'''
         # Update parameter from the input field
         param_name = self.item(row, 0).text()
 
@@ -149,7 +150,7 @@ class Tabele(QTableWidget):
         
         self.logger.info(f"Changed airfoil for segment {row} to {selected_airfoil.infos['name']}")
 
-    def update_airfoil_value(self, row, value_input):
+    def update_value_from_input(self, row, value_input):
         # Update parameter from the input field
         param_name = self.item(row, 0).text()
         try:
