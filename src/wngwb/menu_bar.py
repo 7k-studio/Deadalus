@@ -194,7 +194,7 @@ class MenuBar(QMenuBar):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Export File", "", "STEP AP203 (*.step;*.stp);", options=options)
         if fileName:
-            import src.utils.step as step
+            import src.utils.step.step as step
             #step.export_only_control_points(fileName)
             base_name = os.path.basename(fileName)
             step.export_3d_segment_wing(fileName, base_name)

@@ -4,7 +4,7 @@
    "length": "m",
    "angle": "rad"
   },
-  "performance": 46,
+  "performance": 10,
   "beta_features": false
  },
  "airfoil_designer": {

@@ -2,7 +2,7 @@
 import re, json, math
 from collections import defaultdict, OrderedDict
 
-path = "test6_from_solid.step"
+path = "D:/Programy/7kStudio/Formula Student FW.step"
 with open(path, "r") as f:
     txt = f.read()
 

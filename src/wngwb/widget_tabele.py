@@ -199,7 +199,7 @@ class Tabele(QTableWidget):
                 airfoil_dropdown.setCurrentText(current_name)
             elif airfoil_names:
                 airfoil_dropdown.setCurrentIndex(0)
-            airfoil_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            airfoil_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_value_from_input(r, new_value))
             self.setCellWidget(row, 1, airfoil_dropdown)
             nominal_value = QTableWidgetItem(current_name)
             nominal_value.setTextAlignment(Qt.AlignCenter)
@@ -219,7 +219,7 @@ class Tabele(QTableWidget):
                 anchor_dropdown.setCurrentText(current_name)
             elif anchor_names:
                 anchor_dropdown.setCurrentIndex(0)
-            anchor_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            anchor_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_value_from_input(r, new_value))
             self.setCellWidget(row, 1, anchor_dropdown)
             nominal_value = QTableWidgetItem(current_name)
             nominal_value.setTextAlignment(Qt.AlignCenter)
