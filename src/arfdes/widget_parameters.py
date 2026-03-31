@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -137,30 +137,33 @@ class TableParameters(QTableWidget):
         # Pass reference points to update_plot
         self.save_current_airfoil_state()  # Save changes to the airfoil list
 
-    def populate_table(self, airfoil_obj):
+    def update(self, airfoil_obj=None):
         """Populate the table with data from an airfoil object."""
+        
         self.setRowCount(0)  # Clear existing rows
-        param_units = airfoil_obj.unit.items()
+        self.logger.debug("THE PARAMETERS SHOULD CLEAR NOW")
+        if airfoil_obj:
+            param_units = airfoil_obj.unit.items()
 
-        self.logger.debug('Populating table')
+            self.logger.debug('Populating table')
 
-        for key, value in airfoil_obj.params.items():
-            row = self.rowCount()
-            self.insertRow(row)
-            self.setItem(row, 0, QTableWidgetItem(key))
-            self.add_editable_row(row, value)
-            value = format(value, '.4f')
-            nominal_value = QTableWidgetItem(str(value))
-            nominal_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
-            unit = airfoil_obj.unit.get(key, '')
-            if unit == 'length':
-                unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
-            if unit == 'angle':
-                unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
-            unit_value = QTableWidgetItem(str(unit))
-            unit_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 3, unit_value)
+            for key, value in airfoil_obj.params.items():
+                row = self.rowCount()
+                self.insertRow(row)
+                self.setItem(row, 0, QTableWidgetItem(key))
+                self.add_editable_row(row, value)
+                value = format(value, '.4f')
+                nominal_value = QTableWidgetItem(str(value))
+                nominal_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
+                unit = airfoil_obj.unit.get(key, '')
+                if unit == 'length':
+                    unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
+                if unit == 'angle':
+                    unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+                unit_value = QTableWidgetItem(str(unit))
+                unit_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 3, unit_value)
 
     def display_selected_airfoil(self, item, column=None):
         """Display the selected airfoil's data in the table.
@@ -192,13 +195,13 @@ class TableParameters(QTableWidget):
             self.logger.debug("Top-level item index not found for selected item")
             return
 
-        selected_airfoil = self.PROJECT.project_airfoils[index]
+        selected_airfoil = self.PROJECT.airfoils[index]
 
         if component_attr:
             # Show component parameters
             selected_component = getattr(selected_airfoil, component_attr, None)
             if selected_component:
-                self.populate_table(selected_component)
+                self.update(selected_component)
                 # store component state for edits (child has 'params' and 'unit')
                 self.airfoil = {key: value for key, value in vars(selected_component).items()}
                 # Tell viewport about parent airfoil and (optionally) component
@@ -216,8 +219,8 @@ class TableParameters(QTableWidget):
                 self.logger.warning(f"Component '{component_attr}' not found on selected airfoil")
         else:
             # Top-level airfoil selected -> show overall params
-            self.populate_table(selected_airfoil)
-            self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
+            self.update(selected_airfoil)
+            self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "info"}
             if self.open_gl:
                 try:
                     self.open_gl.set_airfoil_to_display(selected_airfoil)
@@ -249,7 +252,7 @@ class TableParameters(QTableWidget):
         if airfoil_index == -1:
             return  # Invalid selection
 
-        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
+        current_airfoil = self.PROJECT.airfoils[airfoil_index]
 
         # Decide target object (parent airfoil or one of its components)
         if component_attr:
@@ -288,7 +291,7 @@ class TableParameters(QTableWidget):
         # Update tree label to indicate modification and force viewport repaint
         current_airfoil.update()
 
-        top_item.setText(0, f"{current_airfoil.infos['name']}*")
+        top_item.setText(0, f"{current_airfoil.name}*")
         # Notify listeners that parameters changed
         self.parametersChanged.emit(current_airfoil)
         try:

@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -19,33 +19,51 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QLineEdit, QApplication
-from PyQt5.QtCore import Qt
+
 from PyQt5 import QtWidgets
 
+from PyQt5.QtWidgets import (
+    QMainWindow, QWidget,
+    QVBoxLayout,  QHBoxLayout,
+    QTableWidget, QTableWidgetItem, 
+    QPushButton, QLineEdit, QHeaderView, QApplication,
+    
+)
+from PyQt5.QtCore import Qt, pyqtSignal
 
 class Tabele(QTableWidget):
+    referenceStatus = pyqtSignal(bool, str)
+    parametersChanged = pyqtSignal(object)
+
     def __init__(self, program=None, project=None, parent=None, tree_menu=None, open_gl=None):
         super(Tabele, self).__init__(parent)
+        self.setMinimumSize(200, 300)
+
         self.logger = logging.getLogger(self.__class__.__name__)
+
         self.DEADALUS = program
         self.PROJECT = project
-        self.main_window = parent
+        self.WINGDESIGNER = parent
         self.open_gl = open_gl
         self.tree_menu = tree_menu
-        self.init_tabele()
-    
+
+        self.init_tabele()   
+
     def init_tabele(self, params=None):
         # Initial Parameters
         self.params = {}
+
         # Parameter Table
         self.setRowCount(len(self.params))
-        self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal"])
+        self.setColumnCount(4)
+        self.setHorizontalHeaderLabels(["Parameter", "Value", "Nominal", "Unit"])
         self.verticalHeader().setVisible(False)
         self.horizontalHeader().setStretchLastSection(True)
         #self.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.setColumnWidth(1, 100)  # Set minimum width for column 2
+        self.setColumnWidth(0, 70) # Set width of the first column
+        self.setColumnWidth(1, 100)  # Set width of the second column
+        self.setColumnWidth(2, 70)  # Set width of the third column
+        self.setColumnWidth(3, 50)  # Set width of the forth column
 
     def add_editable_row(self, row, value):
         """Add an editable row with up/down buttons and input field."""
@@ -60,7 +78,7 @@ class Tabele(QTableWidget):
             pass
         value_input = QLineEdit(str(value))
         value_input.setAlignment(Qt.AlignCenter)
-        value_input.setMinimumWidth(60)
+
         value_input.editingFinished.connect(lambda: self.update_value_from_input(row, value_input))
 
         # Up button
@@ -78,8 +96,6 @@ class Tabele(QTableWidget):
         layout.addWidget(value_input)
         layout.addWidget(up_button)
         self.setCellWidget(row, 1, container)
-
-        self.save_current_element_state()
 
     def _adjust_value_with_modifiers(self, row, direction):
             modifiers = QApplication.keyboardModifiers()
@@ -119,7 +135,7 @@ class Tabele(QTableWidget):
                 parent_index = grandparent_item.indexOfChild(parent_item)
                 grandparent_index = self.tree_menu.indexOfTopLevelItem(grandparent_item)
 
-                element_item = self.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
+                element_item = self.PROJECT.components[grandparent_index].wings[parent_index].segments[item_index]
 
                 element_item.airfoil = selected_airfoil
                 self.save_current_element_state()
@@ -129,13 +145,13 @@ class Tabele(QTableWidget):
                 item_index = parent_item.indexOfChild(selected_item)
                 parent_index = self.tree_menu.indexOfTopLevelItem(parent_item)
 
-                element_item = self.PROJECT.project_components[parent_index].wings[item_index]
+                element_item = self.PROJECT.components[parent_index].wings[item_index]
 
             if not parent_item and not grandparent_item:
 
                 item_index = self.tree_menu.indexOfTopLevelItem(selected_item)
 
-                element_item = self.PROJECT.project_components[item_index]
+                element_item = self.PROJECT.components[item_index]
         
         try:
             new_value = float(value_input.text())
@@ -149,7 +165,7 @@ class Tabele(QTableWidget):
         # Optionally, update the UI or trigger a redraw
         
         self.logger.info(f"Changed airfoil for segment {row} to {selected_airfoil.infos['name']}")
-
+            
     def update_value_from_input(self, row, value_input):
         # Update parameter from the input field
         param_name = self.item(row, 0).text()
@@ -192,7 +208,7 @@ class Tabele(QTableWidget):
             self.insertRow(row)
             self.setItem(row, 0, QTableWidgetItem('airfoil'))
             airfoil_dropdown = QtWidgets.QComboBox(self)
-            airfoil_names = [airfoil.infos['name'] for airfoil in self.PROJECT.project_airfoils]
+            airfoil_names = [airfoil.name for airfoil in self.PROJECT.airfoils]
             airfoil_dropdown.addItems(airfoil_names)
             current_name = getattr(element_obj.airfoil, 'infos', {}).get('name', '')
             if current_name in airfoil_names:
@@ -258,7 +274,7 @@ class Tabele(QTableWidget):
 
                     self.logger.debug(f'Segment at index: {grandparent_index}:{parent_index}:{item_index}')
 
-                    element_item = self.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
+                    element_item = self.PROJECT.components[grandparent_index].wings[parent_index].segments[item_index]
                     #print(type(element_item))
 
                     self.populate_table(element_item)
@@ -272,7 +288,7 @@ class Tabele(QTableWidget):
 
                     self.logger.debug(f'Wing at index: {parent_index} >>> {item_index}')
 
-                    element_item = self.PROJECT.project_components[parent_index].wings[item_index]
+                    element_item = self.PROJECT.components[parent_index].wings[item_index]
                     self.populate_table(element_item)
                     self.params = {key: value for key, value in vars(element_item).items() if key != "infos"}
 
@@ -282,7 +298,7 @@ class Tabele(QTableWidget):
 
                     self.logger.debug(f'Component at index: {item_index}')
 
-                    element_item = self.PROJECT.project_components[item_index]
+                    element_item = self.PROJECT.components[item_index]
                     self.populate_table(element_item)
                     self.params = {key: value for key, value in vars(element_item).items() if key != "infos"}
                 
@@ -312,8 +328,8 @@ class Tabele(QTableWidget):
 
                     self.logger.info(f'Segment at index: {grandparent_index}:{parent_index}:{item_index} saved')
                     
-                    element_item = self.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index]
-                    #globals.PROJECT.project_components[grandparent_index].wings[parent_index].build_connection()
+                    element_item = self.PROJECT.components[grandparent_index].wings[parent_index].segments[item_index]
+                    #globals.PROJECT.components[grandparent_index].wings[parent_index].build_connection()
 
                 # ----- WING UPDATE -----
 
@@ -324,8 +340,8 @@ class Tabele(QTableWidget):
 
                     self.logger.info(f'Wing at index: {parent_index} >>> {item_index} saved')
 
-                    element_item = self.PROJECT.project_components[parent_index].wings[item_index]
-                    #globals.PROJECT.project_components[parent_index].wings[item_index].build_connection()
+                    element_item = self.PROJECT.components[parent_index].wings[item_index]
+                    #globals.PROJECT.components[parent_index].wings[item_index].build_connection()
                 
                 # ----- COMPONENT UPDATE -----
 
@@ -335,7 +351,7 @@ class Tabele(QTableWidget):
 
                     self.logger.info(f'WNGWB > Save_state > Component at index: {item_index} saved')
 
-                    element_item = self.PROJECT.project_components[item_index]
+                    element_item = self.PROJECT.components[item_index]
                     #for item in element_item.wings:
                     #    item.build_connection()
 
@@ -383,35 +399,35 @@ class Tabele(QTableWidget):
 
                 if parent_item and grandparent_item:
                     try:
-                        self.PROJECT.project_components[grandparent_index].wings[parent_index].segments[item_index].update(grandparent_index, parent_index, item_index)
-                        self.PROJECT.project_components[grandparent_index].wings[parent_index].update(grandparent_index, parent_index, item_index)
+                        self.PROJECT.components[grandparent_index].wings[parent_index].segments[item_index].update(grandparent_index, parent_index, item_index)
+                        self.PROJECT.components[grandparent_index].wings[parent_index].update(grandparent_index, parent_index, item_index)
                     except:
                         self.logger.warning('No segment to transform')
 
                 if parent_item and not grandparent_item:
-                    for i in range(len(self.PROJECT.project_components[parent_index].wings[item_index].segments)):
+                    for i in range(len(self.PROJECT.components[parent_index].wings[item_index].segments)):
                         try:
-                            self.PROJECT.project_components[parent_index].wings[item_index].segments[i].update(parent_index, item_index, i)
+                            self.PROJECT.components[parent_index].wings[item_index].segments[i].update(parent_index, item_index, i)
                         except:
                             self.logger.warning('No segment to transform')
                         try:
-                            self.PROJECT.project_components[parent_index].wings[item_index].update(parent_index, item_index, i)
+                            self.PROJECT.components[parent_index].wings[item_index].update(parent_index, item_index, i)
                         except:
                             self.logger.warning('No wing to transform')
 
                 if not parent_item and not grandparent_item:
-                    for w in range(len(self.PROJECT.project_components[item_index].wings)):
-                        for i in range(len(self.PROJECT.project_components[item_index].wings[w].segments)):
+                    for w in range(len(self.PROJECT.components[item_index].wings)):
+                        for i in range(len(self.PROJECT.components[item_index].wings[w].segments)):
                             try:
-                                self.PROJECT.project_components[item_index].wings[w].segments[i].update(item_index, w, i)
+                                self.PROJECT.components[item_index].wings[w].segments[i].update(item_index, w, i)
                             except:
                                 self.logger.warning('No segment to transform')
                             try:
-                                self.PROJECT.project_components[item_index].wings[w].update(item_index, w, i)
+                                self.PROJECT.components[item_index].wings[w].update(item_index, w, i)
                             except:
                                 self.logger.warning('No wing to transform')
                             try:
-                                self.PROJECT.project_components[item_index].update(item_index, w, i)
+                                self.PROJECT.components[item_index].update(item_index, w, i)
                             except:
                                 self.logger.warning('No component to transform')
 

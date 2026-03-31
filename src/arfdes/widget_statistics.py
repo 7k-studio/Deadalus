@@ -65,35 +65,36 @@ class TableStatistics(QTableWidget):
         self.Up_ref_points = up_ref_points
         self.Dwn_ref_points = dwn_ref_points
 
-    def populate_table(self, airfoil_obj):
+    def update(self, airfoil_obj=None):
         """Populate the table with data from an airfoil object."""
         self.setRowCount(0)  # Clear existing rows
-        param_units = airfoil_obj.unit.items()
+        if airfoil_obj:
+            param_units = airfoil_obj.unit.items()
 
-        self.logger.debug('Populating table')
+            self.logger.debug('Populating table')
 
-        for key, value in airfoil_obj.stats.items():
-            row = self.rowCount()
-            self.insertRow(row)
-            self.setItem(row, 0, QTableWidgetItem(key))
+            for key, value in airfoil_obj.stats.items():
+                row = self.rowCount()
+                self.insertRow(row)
+                self.setItem(row, 0, QTableWidgetItem(key))
 
-            value = format(value, '.4f')
+                value = format(value, '.4f')
 
-            airfoil_value = QTableWidgetItem(str(value))
-            airfoil_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 1, airfoil_value)  # Optional: Add nominal value column
+                airfoil_value = QTableWidgetItem(str(value))
+                airfoil_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 1, airfoil_value)  # Optional: Add nominal value column
 
-            nominal_value = QTableWidgetItem(str(value))
-            nominal_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
-            unit = airfoil_obj.unit.get(key, '')
-            if unit == 'length':
-                unit = self.DEADALUS.preferences['general']['units'].get('length', 'm')
-            if unit == 'angle':
-                unit = self.DEADALUS.preferences['general']['units'].get('angle', 'rad')
-            unit_value = QTableWidgetItem(str(unit))
-            unit_value.setTextAlignment(Qt.AlignCenter)
-            self.setItem(row, 3, unit_value)
+                nominal_value = QTableWidgetItem(str(value))
+                nominal_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
+                unit = airfoil_obj.unit.get(key, '')
+                if unit == 'length':
+                    unit = self.DEADALUS.preferences['general']['units'].get('length', 'm')
+                if unit == 'angle':
+                    unit = self.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+                unit_value = QTableWidgetItem(str(unit))
+                unit_value.setTextAlignment(Qt.AlignCenter)
+                self.setItem(row, 3, unit_value)
 
     def display_selected_airfoil(self, item, column=None):
         """Display the selected airfoil's data in the table.
@@ -125,7 +126,7 @@ class TableStatistics(QTableWidget):
             self.logger.debug("Top-level item index not found for selected item")
             return
 
-        selected_airfoil = self.PROJECT.project_airfoils[index]
+        selected_airfoil = self.PROJECT.airfoils[index]
 
         # if component_attr:
         #     # Show component parameters
@@ -149,8 +150,8 @@ class TableStatistics(QTableWidget):
         #         self.logger.warning(f"Component '{component_attr}' not found on selected airfoil")
         # else:
         #     # Top-level airfoil selected -> show overall params
-        self.populate_table(selected_airfoil)
-        self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "infos"}
+        self.update(selected_airfoil)
+        self.airfoil = {key: value for key, value in vars(selected_airfoil).items() if key != "info"}
         if self.open_gl:
             try:
                 self.open_gl.set_airfoil_to_display(selected_airfoil)

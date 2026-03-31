@@ -6,7 +6,7 @@
   },
   "performance": 45,
   "color_scheme": "Deadalus-Light",
-  "beta_features": true
+  "beta_features": false
  },
  "airfoil_designer": {
   "viewport": {

@@ -83,10 +83,10 @@ def load_selig_reference(file):
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
-    airfoil.infos['name'] = airfoil_name
-    logger.info(f"Finished loading {airfoil.infos['name']} in selig format")
+    airfoil.info['name'] = airfoil_name
+    logger.info(f"Finished loading {airfoil.info['name']} in selig format")
     
-    globals.PROJECT.reference_airfoils.append(airfoil)
+    return airfoil
 
 def interpolate_reference(reference, spline_points):
     """Interpolate reference points to match the number of spline points"""
@@ -237,7 +237,7 @@ def load_from_ddls_030(data):
                 "ss_fwd_accel": airfoil_params["ss_fwd_accel"],
                 "ss_rwd_accel": airfoil_params["ss_rwd_accel"]
             }
-            Airfoil.infos = {
+            Airfoil.info = {
                 "name":              airfoil_infos["name"],
                 "creation_date":     airfoil_infos["creation_date"],
                 "modification_date": airfoil_infos["modification_date"],
@@ -248,10 +248,10 @@ def load_from_ddls_030(data):
             return None
         
         if is_version_different == True:
-            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
+            logger.info(f"Airfoil '{Airfoil.info['name']}' loaded but should be checked!")
             error_count += 1
         else:
-            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+            logger.info(f"Airfoil '{Airfoil.info['name']}' loaded successfully!")
 
         Airfoil.update()
 
@@ -260,7 +260,7 @@ def load_from_ddls_030(data):
 def flip_airfoil_horizontally(airfoil):
     """Flip the airfoil horizontally."""
     flipped_airfoil = src.obj.objects2D.Airfoil()
-    flipped_airfoil.infos = airfoil.infos.copy()
+    flipped_airfoil.info = airfoil.info.copy()
     flipped_airfoil.params = airfoil.params.copy()
 
     flipped_airfoil.params['chord'] = airfoil.params['chord']

@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 # PyQt import 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QIcon
-from src.program.splash_screen import SplashScreen
+from src.widgets.splash_screen import SplashScreen
+from src.arfdes.airfoil_designer import AirfoilDesigner
+from src.wngdes.wing_designer import WingDesigner
 
 # In-Program import
 # from src.program import DEADALUS
@@ -69,6 +71,8 @@ def main():
     DEADALUS.APP.setWindowIcon(icon)
     DEADALUS.APP.setStyleSheet(DEADALUS.buildStyleSheet())
     DEADALUS.SPLASHSCREEN = SplashScreen(DEADALUS)
+    DEADALUS.AIRFOILDESIGNER = AirfoilDesigner(DEADALUS, project=None)
+    DEADALUS.WINGDESIGNER = WingDesigner(DEADALUS, project=None)
     DEADALUS.SPLASHSCREEN.show()
 
     #splash = SplashScreen(DEADALUS)

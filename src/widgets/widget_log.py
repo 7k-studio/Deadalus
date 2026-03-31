@@ -48,13 +48,14 @@ class LogViewer(QTextEdit):
             with open(self.log_file, 'r') as file:
                 lines = file.readlines()
 
-                # Skip the first 11 lines
-                new_content = ''.join(lines[11:])
+                # Skip the first 11 lines and filter out DEBUG messages
+                filtered_lines = [line for line in lines[11:] if "DEBUG" not in line]
+                new_content = ''.join(filtered_lines)
 
                 # Update only if the content has changed
                 if self.toPlainText() != new_content:
                     self.setPlainText("")  # Clear the console
-                    for line in lines[11:]:
+                    for line in filtered_lines:
                         self.append_colored_line(line.strip())
         except Exception as e:
             self.setPlainText(f"Error reading log file: {e}")

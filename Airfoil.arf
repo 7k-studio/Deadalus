@@ -2,13 +2,13 @@
  "program name": "Deadalus",
  "program version": "0.4.0-beta",
  "airfoil": {
-  "name": "test",
-  "path": "D:/Programy/7kStudio/Deadalus/test.arf",
+  "name": "Airfoil",
+  "path": "D:/Programy/7kStudio/Deadalus/Airfoil.arf",
   "format": "ddls-parametric",
   "info": {
    "creation_date": "2026-03-24",
    "modification_date": "2026-03-24",
-   "description": "Airfoil created from scratch"
+   "description": "New projects: Initialized because of no other airfoil was available"
   },
   "params": {
    "origin_X": 0,

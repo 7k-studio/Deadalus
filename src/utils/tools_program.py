@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -22,9 +22,6 @@ import uuid
 import math
 import numpy as np
 from scipy.interpolate import splprep, splev, interpolate, BSpline, interp1d
-
-def new_id():
-    return str(uuid.uuid4())
 
 def normalize(vector):
     length = sum(x ** 2 for x in vector) ** 0.5
@@ -79,15 +76,10 @@ def CreateBSpline(const_points):
     t=np.append(t,[1,1,1])
 
     tck=[t,[const_points[0],const_points[1]],3]
-    if DEADALUS.preferences['general']['performance'] == 'fast':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*1,25)),endpoint=True)
-    if DEADALUS.preferences['general']['performance'] == 'normal':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*2,50)),endpoint=True)
-    if DEADALUS.preferences['general']['performance'] == 'good':
-        # Use a faster method for performance
-        u3=np.linspace(0,1,(max(l*3,75)),endpoint=True)
+
+    
+    # Use a faster method for performance
+    u3=np.linspace(0,1,(max(l*3,75)),endpoint=True)
 
     spline = splev(u3, tck)
 
@@ -111,7 +103,7 @@ def CreateBSpline_3D(const_points, degree, resolution=None):
     
     # Sampling resolution
     if resolution == None:
-        f = int(DEADALUS.preferences['general']['performance'])
+        f = int(globals.DEADALUS.preferences['general']['performance'])
     else:
         f = resolution
 
@@ -128,6 +120,7 @@ def safe_date(val):
     return val
 
 def vec_translate(points, magnitude, angle):
+    print(points)
     angle_radians = deg2rad(angle)
     dx = magnitude * math.cos(angle_radians)
     dy = magnitude * math.sin(angle_radians)
@@ -135,4 +128,7 @@ def vec_translate(points, magnitude, angle):
     translated_points = [points[0] + dx, points[1] + dy]
 
     return translated_points
+
+def new_id():
+    return str(uuid.uuid4())
     

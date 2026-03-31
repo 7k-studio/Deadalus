@@ -121,13 +121,12 @@ def draw_dashed_line_v2(p1, p2, dash_length=0.02, gap_length=0.02):
         glVertex3fv(end)
         glEnd()
 
-def draw_wireframe(self, component_idx, wing_idx, segment_idx):
+def draw_wireframe(PROJECT, component_idx, wing_idx, segment_idx):
     """Draw an airfoil using coordinates from a file, extruded along the z-axis."""
-    from program.project import PROJECT
     
     glLineWidth(2)
 
-    segment = PROJECT.project_components[component_idx].wings[wing_idx].segments[segment_idx]
+    segment = PROJECT.components[component_idx].wings[wing_idx].segments[segment_idx]
     le = segment.geom['le']
     te = segment.geom['te']
     ps = segment.geom['ps']

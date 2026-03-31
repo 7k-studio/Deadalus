@@ -27,30 +27,6 @@ import math
 
 logger = logging.getLogger(__name__)
 
-def CurvatureComb(element, density):
-    ct = element.construction_tool()
-    for t in np.linspace(0, ct.max_t, density):
-        
-        point, derivative = ct.derivative(t, 1)
-        acceleration = ct.derivative(t, 2)
-
-        curvature = np.linalg.norm(acceleration) / (np.linalg.norm(derivative) ** 3)
-        adjusted_tangent_length = 0.1 / (1 + curvature)
-        tangent = derivative.normalize(adjusted_tangent_length)
-        if point[1] > 0:
-            ppdclr = [-tangent[1], tangent[0], 0]
-        else:
-            ppdclr = [tangent[1], -tangent[0], 0]
-
-        #msp.add_line(point, point + tangent, dxfattribs={"color": 1})
-        #msp.add_line(point, point + ppdclr, dxfattribs={"color": 1})
-        #try:
-            #msp.add_line(old_point, point + ppdclr, dxfattribs={"color": 1})
-        #except:
-        #    NameError
-
-        old_point = point + ppdclr
-
 def calculate_length(points):
     length = 0
     for i in range(1, len(points)):
@@ -67,40 +43,38 @@ def find_point_at_length(points, target_length):
         length += segment_length
     return Vec3(points[-1])
 
-def export_airfoil_to_dxf(airfoil_obj, file_name=None):
+def export_airfoil_to_dxf(airfoil, file_name=None, ):
 
     Z = 0
     
     doc = ezdxf.new()
     msp = doc.modelspace()
 
-    airfoil = PROJECT.project_airfoils[airfoil_idx]
-    logger.info(f"Exporting airfoil {airfoil_idx} to DXF...")
-    
     #for idx, airfoil in enumerate(export_airfoil):
 
     if airfoil is not None and hasattr(airfoil, 'constr') and airfoil.constr['le'] is not None and len(airfoil.constr['le']) > 0:
+        logger.info(f"Exporting airfoil {airfoil.name} to DXF...")
 
         # Sprawdzenie, czy wszystkie tablice mają wystarczającą ilość danych
         if len(airfoil.constr['le'][0]) > 0 and len(airfoil.constr['le'][1]) > 0:
             exp_le = airfoil.constr['le']
         else:
-            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient LE array.")
+            logger.error(f"Airfoil {airfoil.name} has an empty or insufficient LE array.")
 
         if len(airfoil.constr['ps'][0]) > 0 and len(airfoil.constr['ps'][1]) > 0:
             exp_ps = airfoil.constr['ps']
         else:
-            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient PS array.")
+            logger.error(f"Airfoil {airfoil.name} has an empty or insufficient PS array.")
 
         if len(airfoil.constr['ss'][0]) > 0 and len(airfoil.constr['ss'][1]) > 0:
             exp_ss = airfoil.constr['ss']
         else:
-            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient SS array.")
+            logger.error(f"Airfoil {airfoil.name} has an empty or insufficient SS array.")
 
         if len(airfoil.constr['te'][0]) > 0 and len(airfoil.constr['te'][1]) > 0:
             exp_te = airfoil.constr['te']
         else:
-            logger.error(f"Airfoil {airfoil_idx} has an empty or insufficient TE array.")
+            logger.error(f"Airfoil {airfoil.name} has an empty or insufficient TE array.")
 
     ps_Z_row = np.full((1, exp_ps.shape[1]), Z)
     ps = np.vstack((exp_ps, ps_Z_row)).T

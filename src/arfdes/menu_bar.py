@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -42,6 +42,7 @@ import src.arfdes.fit_2_reference as fit_2_reference  # Import the fitting modul
 import src.arfdes.widget_airfoils as widget_airfoils
 from src.arfdes.widget_description import TextDescription
 import src.arfdes.tools_airfoils as tools
+import src.arfdes.tools_reference as tools_ref
 
 class MenuBar(QMenuBar):
     referenceStatus = pyqtSignal(bool, str)
@@ -55,6 +56,9 @@ class MenuBar(QMenuBar):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.createMenu()
 
+    def set_project(self, project):
+        self.PROJECT = project
+
     def createMenu(self):
         """File menu creation"""
         fileMenu = self.addMenu('File')
@@ -66,11 +70,11 @@ class MenuBar(QMenuBar):
         editDescAction = QAction('Edit project description', self)
         exitAction = QAction('Exit', self)
 
-        newAction.triggered.connect(lambda: (self.PROJECT.new(), self.ARFDES.refresh_widgets()))
-        openAction.triggered.connect(lambda: (self.PROJECT.open(), self.ARFDES.refresh_widgets()))
-        saveAction.triggered.connect(self.PROJECT.save)
-        saveAsAction.triggered.connect(self.PROJECT.save_as)
-        editDescAction.triggered.connect(self.PROJECT.edit_description)
+        newAction.triggered.connect(self.new_project)
+        openAction.triggered.connect(self.open_project)
+        saveAction.triggered.connect(self.save_project)
+        saveAsAction.triggered.connect(self.save_as_project)
+        editDescAction.triggered.connect(self.edit_description_project)
         exitAction.triggered.connect(self.DEADALUS.quit)
 
         fileMenu.addAction(newAction)
@@ -85,7 +89,7 @@ class MenuBar(QMenuBar):
         """Airfoil menu creation"""
         airfoilMenu = self.addMenu('Airfoil')
 
-        newAirfoilAction = QAction('Create', self)
+        newAirfoilAction = QAction('New', self)
         appendAirfoilAction = QAction('Append', self)
         deleteAirfoilAction = QAction('Delete', self)
         saveAirfoilAction = QAction('Save', self)
@@ -95,14 +99,14 @@ class MenuBar(QMenuBar):
         editDescriptionAction = QAction('Edit Description', self)
         fit2refAction = QAction('Fit2Reference', self)
 
-        newAirfoilAction.triggered.connect(self.newAirfoil)
-        appendAirfoilAction.triggered.connect(self.appendAirfoil)
-        deleteAirfoilAction.triggered.connect(self.deleteAirfoil)  
-        saveAirfoilAction.triggered.connect(self.saveAirfoil)
-        exportAirfoilAction.triggered.connect(self.exportAirfoil)
-        flipAirfoilAction.triggered.connect(self.flipAirfoil)
-        renameAirfoilAction.triggered.connect(self.renameAirfoil)
-        editDescriptionAction.triggered.connect(self.editDescriptionAirfoil)
+        newAirfoilAction.triggered.connect(self.ARFDES.newAirfoil)
+        appendAirfoilAction.triggered.connect(self.ARFDES.appendAirfoil)
+        deleteAirfoilAction.triggered.connect(self.ARFDES.deleteAirfoil)  
+        saveAirfoilAction.triggered.connect(self.ARFDES.saveAirfoil)
+        exportAirfoilAction.triggered.connect(self.ARFDES.exportAirfoil)
+        flipAirfoilAction.triggered.connect(self.ARFDES.flipAirfoil)
+        renameAirfoilAction.triggered.connect(self.ARFDES.renameAirfoil)
+        editDescriptionAction.triggered.connect(self.ARFDES.editDescriptionAirfoil)
         fit2refAction.triggered.connect(self.fit2ref)
         
         airfoilMenu.addAction(newAirfoilAction)
@@ -118,23 +122,26 @@ class MenuBar(QMenuBar):
             airfoilMenu.addAction(fit2refAction)
         
         """Reference menu creation"""
-        referenceMenu = self.addMenu('Reference')
+        self.referenceMenu = self.addMenu('Reference')
 
         addReferenceAction = QAction('Add', self)
         deleteReferenceAction = QAction('Delete', self)
         showReferenceAction = QAction('Show', self)
         editReferenceAction = QAction('Edit', self)
+        flipReferenceAction = QAction('Flip', self)
 
         addReferenceAction.triggered.connect(self.addReference)
         deleteReferenceAction.triggered.connect(self.deleteReference)  
         showReferenceAction.triggered.connect(self.showReference)
         editReferenceAction.triggered.connect(self.editReference)
+        flipReferenceAction.triggered.connect(self.flipReference)
         
-        referenceMenu.addAction(addReferenceAction)
-        referenceMenu.addAction(deleteReferenceAction)
-        referenceMenu.addAction(showReferenceAction)
-        referenceMenu.addAction(editReferenceAction)
-        referenceMenu.addAction(flipAirfoilAction)
+        self.referenceMenu.addAction(addReferenceAction)
+        self.referenceMenu.addAction(deleteReferenceAction)
+        self.referenceMenu.addAction(showReferenceAction)
+        if self.DEADALUS.preferences['general']['beta_features']:
+            self.referenceMenu.addAction(editReferenceAction)
+            self.referenceMenu.addAction(flipReferenceAction)
 
         """View menu creation"""
         viewMenu = self.addMenu('View')
@@ -152,8 +159,9 @@ class MenuBar(QMenuBar):
         self.showCamberlineAction.triggered.connect(self.showCamberline)
 
         viewMenu.addAction(fitViewAction)
-        viewMenu.addAction(self.showCurvCombAction)
-        viewMenu.addAction(self.showCamberlineAction)
+        if self.DEADALUS.preferences['general']['beta_features']:
+            viewMenu.addAction(self.showCurvCombAction)
+            viewMenu.addAction(self.showCamberlineAction)
 
         """Window menu creation"""
         windowMenu = self.addMenu('Window')
@@ -218,158 +226,12 @@ class MenuBar(QMenuBar):
         programMenu.addAction(preferencesAction)
     
     """Airfoil menu actions"""
-    def newAirfoil(self):
-        self.logger.info("Creating new airfoil")
-        if self.ARFDES:  # Ensure main_window is set     
-            self.ARFDES.TREE_AIRFOIL.add('Airfoil', self.time, 'Airfoil created from scratch')
-
-    def appendAirfoil(self):
-        """load the airfoil data from a JSON format file."""
-        self.logger.info("Appending airfoil...")
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
-
-        if fileName:
-            try:
-                airfoil_obj, _ = tools_airfoils.load_airfoil_from_json(fileName)
-                globals.PROJECT.project_airfoils.append(airfoil_obj)
-                if airfoil_obj:
-                    self.logger.debug(airfoil_obj)
-                    self.ARFDES.TREE_AIRFOIL.add_airfoil_to_tree(airfoil_obj.infos['name'], airfoil_obj)
-                    self.logger.info("Appending an airfoil was sucessful!")
-            except TypeError:
-                self.logger.error("Failed to append airfoil")
-
-    def deleteAirfoil(self):
-        self.logger.info("Deleting selected airfoil...")
-        if self.ARFDES.TREE_AIRFOIL:  # Ensure main_window is set
-            status, name = self.ARFDES.TREE_AIRFOIL.delete()
-            if status == True and name:
-                self.logger.info(f"Successfully deleted airfoil: {name}")
-            else:
-                self.logger.error("Failed to delete!")
-            
-    def saveAirfoil(self):
-        """Save the airfoil data to a JSON format file."""
-        self.logger.info("Saving selected airfoil...")
-        selected_item = self.ARFDES.TREE_AIRFOIL.currentItem()
-        if not selected_item:
-            return  # No airfoil selected
- 
-        # Find the corresponding airfoil object
-        airfoil_index = self.ARFDES.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            return  # Invalid selection
-
-        json_object = tools_airfoils.save_airfoil_to_json(airfoil_index)
-
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "DEADALUS Airfoil Format (*.arf);;All Files (*)", options=options)
-        if fileName:
-            with open(f"{fileName}", "w") as outfile:
-                outfile.write(json_object)
-                self.logger.info(f"Saved file: {fileName}")
- 
-    def exportAirfoil(self):
-        """Export the airfoil data to a DXF format file."""
-        self.logger.info("Exporting selected airfoil...")
-        selected_item = self.ARFDES.TREE_AIRFOIL.currentItem()
-        if not selected_item:
-            return  # No airfoil selected
- 
-        # Find the corresponding airfoil object
-        airfoil_index = self.ARFDES.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            return  # Invalid selection
-        
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Export File to DXF format", "", "DXF Format (*.dxf);;All Files (*)", options=options)
-        if fileName:
-            dxf.export_airfoil_to_dxf(airfoil_index, fileName)
-            self.logger.info(f"Exported file: {fileName}")
-
-    def renameAirfoil(self):
-        """Rename currently selected airfoil."""
-        self.logger.info("Renaming selected airfoil...")
-        self.le = QLabel(self)
-        selected_item = self.ARFDES.TREE_AIRFOIL.currentItem()
-        if not selected_item:
-            self.logger.warning("First select an airfoil")
-            return  # No airfoil selected
-
-        # Find the corresponding airfoil object
-        airfoil_index = self.ARFDES.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            self.logger.error("No connection between selected airfoil and project airfoil")
-            return  # Invalid selection
-
-        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
-
-        text, ok = QInputDialog.getText(self, 'Change Airfoils Name', 'Enter airfoil\'s new name:')
-        if ok:
-            self.le.setText(str(text))
-        if text:
-            #setattr(current_airfoil, 'name', text)
-            # Update the airfoil object with the new name
-            current_airfoil.infos['name'] = text
-            current_airfoil.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
-            
-        # Optionally, update the tree menu display
-        selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-        self.logger.info("Airfoil renamed")
-    
-    def flipAirfoil(self):
-        """Flip the currently selected airfoil."""
-        self.logger.info("Flipping selected airfoil...")
-        selected_item = self.ARFDES.TREE_AIRFOIL.currentItem()
-        if not selected_item:
-            return  # No airfoil selected
-
-        # Find the corresponding airfoil object
-        airfoil_index = self.ARFDES.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            return  # Invalid selection
-
-        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
-
-        flipped_airfoil = tools_airfoils.flip_airfoil_horizontally(current_airfoil)
-
-        if flipped_airfoil:
-            self.PROJECT.project_airfoils[airfoil_index] = flipped_airfoil
-            self.logger.info(f"Airfoil {flipped_airfoil.infos['name']} flipped...")
-            self.ARFDES.open_gl.update()
-            self.ARFDES.table.display_selected_airfoil(selected_item)
-
-    def editDescriptionAirfoil(self):
-        """Edit the description of an airfoil."""
-        self.logger.info("Editing selected airfoil description...")
-        selected_item = self.ARFDES.TREE_AIRFOIL.currentItem()
-        if not selected_item:
-            self.logger.warning("First select an airfoil")
-            return  # No airfoil selected
-
-        # Find the corresponding airfoil object
-        airfoil_index = self.ARFDES.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
-        if airfoil_index == -1:
-            self.logger.error("No connection between selected airfoil and project airfoil")
-            return  # Invalid selection
-
-        current_airfoil = self.PROJECT.project_airfoils[airfoil_index]
-
-        dialog = TextDescription(self.ARFDES, current_airfoil)
-        if dialog.exec_() == QDialog.Accepted:
-            # Optionally, update the tree menu display
-            selected_item.setText(0, f"{current_airfoil.infos['name']}*")
-            self.logger.info("Airfoil description updated.")
-
-        # Optionally, update the tree menu display
-        selected_item.setText(0, f"{current_airfoil.infos['name']}*")
 
     def fit2ref(self):
         """Fit the currently selected airfoil in airfoils_menu to the reference_airfoil by optimizing its parameters."""
         self.logger.info("Opening Fit2Ref window...")
         # Get selected item and corresponding airfoil object
-        selected_items = self.ARFDES.TREE_AIRFOIL.selectedItems()
+        selected_items = self.ARFDES.TREE_AIRFOIL.tree.selectedItems()
         if not selected_items:
             self.logger.warning("No airfoil selected in the tree menu.")
             return None
@@ -378,7 +240,7 @@ class MenuBar(QMenuBar):
         # Find airfoil object by name
         current_airfoil = None
         for af in globals.PROJECT.project_airfoils:
-            if af.infos.get('name', '') == airfoil_name:
+            if af.info.get('name', '') == airfoil_name:
                 current_airfoil = af
                 break
         if current_airfoil is None:
@@ -441,28 +303,54 @@ class MenuBar(QMenuBar):
         action.setChecked(dock_widget.isVisible())
 
     def open_wing_module(self):
+        if not self.PROJECT:
+            return
         
-        for airfoil in self.PROJECT.project_airfoils:
+        for airfoil in self.PROJECT.airfoils:
             airfoil.update()
 
-        from src.wngdes.wing_designer import WingDesigner  # Late import to avoid circular dependency
-        self.airfoil_designer_window = WingDesigner(program=self.DEADALUS, project=self.PROJECT)  # Pass airfoil_list
-        self.airfoil_designer_window.show()
+        self.DEADALUS.WINGDESIGNER.set_project(self.PROJECT)
+        self.DEADALUS.WINGDESIGNER.show()
+    
+    def new_project(self):
+        if self.PROJECT:
+            self.PROJECT.new()
+            self.ARFDES.refresh()
+
+    def open_project(self):
+        if self.PROJECT:
+            self.PROJECT.open()
+            self.ARFDES.refresh()
+
+    def save_project(self):
+        if self.PROJECT:
+            self.PROJECT.save()
+
+    def save_as_project(self):
+        if self.PROJECT:
+            self.PROJECT.save_as()
+
+    def edit_description_project(self):
+        if self.PROJECT:
+            self.PROJECT.edit_description()
     
     def addReference(self):
-        pass
-    
+        self.ARFDES.TREE_REFERENCE.add_reference()
+
     def deleteReference(self):
-        pass
+        self.ARFDES.TREE_REFERENCE.show_delete_dialog()
 
     def showReference(self):
-        pass
+        self.ARFDES.TREE_REFERENCE.show_show_dialog()
 
     def editReference(self):
-        pass
+        self.ARFDES.TREE_REFERENCE.show_edit_dialog()
+
+    def flipReference(self):
+        self.ARFDES.TREE_REFERENCE.show_flip_dialog()
 
     def fitView(self):
-        pass
+        self.ARFDES.OPEN_GL.fit_to_airfoil()
 
     def showCurvComb(self):
         pass

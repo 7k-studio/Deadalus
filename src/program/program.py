@@ -54,6 +54,7 @@ class Program:
 
         # Program components
         self.APP = None
+        self.PROJECT = None
         self.SPLASHSCREEN = None
         self.AIRFOILDESIGNER = None
         self.WINGDESIGNER = None
@@ -172,7 +173,7 @@ class Program:
         }
         
         self.readPreferences()  # Load preferences from file
-
+    
     def readPreferences(self):
         """Read preferences from a JSON file."""
         try:
@@ -303,7 +304,7 @@ class Program:
     def showPreferences(self):
         """Open the preferences dialog."""
         self.logger.info("Open preferences window")
-        from program.preferences import PreferencesWindow
+        from src.program.preferences import PreferencesWindow
         
         msg = QMessageBox(None)
         msg.setWindowTitle("WARNING!")

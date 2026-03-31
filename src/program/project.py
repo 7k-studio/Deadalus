@@ -70,12 +70,12 @@ class Project:
         self.description = "Project description"
         self.path = None  # Path to the project directory
         
-        self.project_airfoils = []
+        self.airfoils = []
         self.nominal_airfoils = []
         self.reference_airfoils = []
 
-        self.project_components = []
-        self.components_nominal = []
+        self.components = []
+        self.nominal_components = []
 
     def new(self):
         """Create a new project."""
@@ -96,7 +96,7 @@ class Project:
         if self.name != None and self.path != None:
 
             self.modification_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            txt = prep_json_data(self, self.DEADALUS.name, self.DEADALUS.version)
+            txt = self._prep_json_data(self, self.DEADALUS.name, self.DEADALUS.version)
             self.logger.debug(txt)
 
             self.logger.info(f"Saved file: {self.path}")
@@ -105,14 +105,16 @@ class Project:
 
     def save_as(self):
         options = QFileDialog.Options()
-        filePath, _ = QFileDialog.getSaveFileName(None, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
-        
+        default_name = f"{self.name}.ddls" if self.name else f"Untitled.ddls"
+        filePath, _ = QFileDialog.getSaveFileName(None, "Save File", default_name, "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        print('filepath', filePath)
+        print('_', _)
         if filePath:
-            self.name = os.path.splitext(os.path.basename(filePath)[0])
+            self.name = os.path.basename(filePath).split('.')[0]
             self.path = filePath
 
             self.modification_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            txt = prep_json_data(self, self.DEADALUS.name, self.DEADALUS.version)
+            txt = self._prep_json_data()
             self.logger.debug(txt)
 
         self.logger.info(f"Saved file as: {self.name} to location: {self.path}")
@@ -137,10 +139,10 @@ class Project:
             data = convert_list_to_ndarray(data)
 
             if "Program" in data:
-                if data["Program"].get("program version", self.DEADALUS.program_version):
-                    file_version = data["Program"].get("program version", self.DEADALUS.program_version)
+                if data["Program"].get("program version", self.DEADALUS.version):
+                    file_version = data["Program"].get("program version", self.DEADALUS.version)
                     file_version = file_version.split("-")[0].split(".")
-                    program_version = self.DEADALUS.program_version
+                    program_version = self.DEADALUS.version
                     program_version = program_version.split("-")[0].split(".")
                     if program_version[1] != file_version[1] or program_version[0] != file_version[0]:
                         self.logger.warning("Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
@@ -148,28 +150,27 @@ class Project:
 
             # Restore PROJECT info
             if "Project" in data:
+                self.logger.debug("Loading data")
                 proj = data["Project"]
-                self.project_name = proj.get("project name", self.project_name)
-                self.project_date = proj.get("creation date", self.project_date)
-                self.project_description = proj.get("project description", self.project_description)
-                self.project_path = proj.get("project path", self.project_path)
+                self.name = proj.get("project name", self.name)
+                self.creation_date = proj.get("creation date", self.creation_date)
+                self.description = proj.get("project description", self.description)
+                self.path = proj.get("project path", self.path)
                 self.project_components.clear()
                 self.project_airfoils.clear()
 
                 # Load airfoils from in-memory JSON (not from files)
+                self.logger.debug("Loading airfoil entires...")
                 airfoil_entries = proj.get("project airfoils", [])
-                for idx, airfoil_entry in enumerate(airfoil_entries):
-                    # airfoil_entry: {"id": ..., "data": {...}}
-                    airfoil_data = airfoil_entry.get("data", {})
-                    airfoil_json = airfoil_data.get("airfoil", {})
-
-                    airfoil_obj = Airfoil()
-                    airfoil_obj.id = airfoil_entry.get("id", 'Unknown')
-                    airfoil_obj.infos = airfoil_json.get("infos", {})
-                    airfoil_obj.params = airfoil_json.get("params", {})
-                    self.project_airfoils.append(airfoil_obj)
+                for airfoil_entry in airfoil_entries:
+                    airfoil_data = airfoil_entry["data"]
+                    arf_obj = load_airfoil_from_json(airfoil_data)
+                    self._ensure_unique_name(arf_obj)  # Ensure unique name in case of conflicts
+                    self.project_airfoils.append(arf_obj)
+                    self.logger.debug(f"Found airfoil: {arf_obj.name}")
 
                 # Load components using templates
+                self.logger.debug("Loading components entires...")
                 for comp_data in proj.get("project components", []):
                     component = Component()
                     # Merge infos and params with defaults
@@ -187,14 +188,9 @@ class Project:
                             segment.anchor = seg_data.get("anchor", Segment().anchor)
                             segment.params = {**Segment().params, **seg_data.get("params", {})}
 
-                            # Set airfoil_index based on airfoil ID string
+                            # Set airfoil based on airfoil name
                             airfoil_ref = seg_data.get("airfoil", "")
-                            if airfoil_ref.startswith("airfoil_"):
-                                try:
-                                    airfoil_index = int(airfoil_ref.split("_")[1])
-                                    segment.airfoil = self.project_airfoils[airfoil_index]
-                                except Exception:
-                                    segment.airfoil = self.project_airfoils[0]
+                            segment.airfoil = next((a for a in self.project_airfoils if a.name == airfoil_ref), self.project_airfoils[0] if self.project_airfoils else None)
                             wing.segments.append(segment)
                         component.wings.append(wing)
                     self.project_components.append(component)
@@ -253,9 +249,9 @@ class Project:
             self.logger.debug("Update finished!")
 
             if warning_count == 0:
-                report.insert(0, (f"Project archive '{base_name}' successfully loaded")) 
+                report.insert(0, (f"Project archive '{self.name}' successfully loaded")) 
             else: 
-                report.insert(0, (f"Project archive '{base_name}' loaded with ({warning_count}) warnings, check might be necessary!"))
+                report.insert(0, (f"Project archive '{self.name}' loaded with ({warning_count}) warnings, check might be necessary!"))
                 
             self.logger.info("\n".join(report))
 
@@ -302,116 +298,121 @@ class Project:
         
         dialog.exec_()
 
-PROJECT = Project()  # Create a global instance of Project
+    def _ensure_unique_name(self, airfoil):
+        """Ensure the airfoil has a unique name by appending a number if necessary."""
+        base_name = airfoil.name
+        counter = 1
+        existing_names = [a.name for a in self.airfoils if a is not airfoil]
+        while airfoil.name in existing_names:
+            airfoil.name = f"{base_name}.{str(counter).zfill(3)}"
+            counter += 1
+                    
+    def _prep_json_data(self):
+        from src.arfdes.tools_airfoils import save_airfoil_to_json
+        from src.utils.tools_program import convert_ndarray_to_list
 
-def prep_json_data(project, Program_name, Program_version):
-    from src.arfdes.tools_airfoils import save_airfoil_to_json
-    from src.utils.tools_program import convert_ndarray_to_list
+        designed_components = []
 
-    designed_components = []
+        # Collect all airfoils in one list with names
+        airfoil_entries = []
+        for arf_obj in self.airfoils:
 
-    # Collect all airfoils in one list with IDs
-    airfoil_entries = []
-    for idx, arf_obj in enumerate(project.project_airfoils):
+            airfoil_data = save_airfoil_to_json(arf_obj, self, self.DEADALUS)  # serialized JSON string
+            airfoil_json = json.loads(airfoil_data)   # parse to dict
+            
+            airfoil_entries.append({
+                "airfoil": airfoil_json
+            })
 
-        airfoil_data = save_airfoil_to_json(arf_obj)  # serialized JSON string
-        airfoil_json = json.loads(airfoil_data)   # parse to dict
-        
-        arf_obj.id = f"airfoil_{idx}"
-        airfoil_entries.append({
-            "id": f"airfoil_{idx}",
-            "data": airfoil_json
-        })
+        # Build components → wings → segments
+        for component in self.project_components:
+            designed_wings = []
+            for wing in component.wings:
+                designed_segments = []
+                for segment in wing.segments:
+                    infos = {
+                        "name": segment.infos.get('name', 'Unknown'),
+                        "creation_date": segment.infos.get('creation_date', 'Unknown'),
+                        "modification_date": segment.infos.get('modification_date', 'Unknown'),
+                    }
+                    params = {
+                        "origin_X": segment.params.get('origin_X', 0),
+                        "origin_Y": segment.params.get('origin_Y', 0),
+                        "origin_Z": segment.params.get('origin_Z', 0),
+                        "incidence": segment.params.get('incidence', 0),
+                        "scale": segment.params.get('scale', 1.0),
+                        "tan_accel": segment.params.get('tan_accel', 0.1),
+                    }
 
-    # Build components → wings → segments
-    for component in project.project_components:
-        designed_wings = []
-        for wing in component.wings:
-            designed_segments = []
-            for segment in wing.segments:
+                    segments = {
+                        "infos": infos,
+                        "airfoil": segment.airfoil.name,  # link by name
+                        "anchor": segment.anchor,
+                        "params": params,
+                    }
+                    designed_segments.append(segments)
+
                 infos = {
-                    "name": segment.infos.get('name', 'Unknown'),
-                    "creation_date": segment.infos.get('creation_date', 'Unknown'),
-                    "modification_date": segment.infos.get('modification_date', 'Unknown'),
+                    "name": wing.infos.get('name', 'Unknown'),
+                    "creation_date": wing.infos.get('creation_date', 'Unknown'),
+                    "modification_date": wing.infos.get('modification_date', 'Unknown'),
                 }
                 params = {
-                    "origin_X": segment.params.get('origin_X', 0),
-                    "origin_Y": segment.params.get('origin_Y', 0),
-                    "origin_Z": segment.params.get('origin_Z', 0),
-                    "incidence": segment.params.get('incidence', 0),
-                    "scale": segment.params.get('scale', 1.0),
-                    "tan_accel": segment.params.get('tan_accel', 0.1),
+                    "origin_X": wing.params.get('origin_X', 0),
+                    "origin_Y": wing.params.get('origin_Y', 0),
+                    "origin_Z": wing.params.get('origin_Z', 0),
                 }
 
-                segments = {
+                wings = {
                     "infos": infos,
-                    "airfoil": segment.airfoil.id,  # link by ID
-                    "anchor": segment.anchor,
                     "params": params,
+                    "segments": designed_segments,
                 }
-                designed_segments.append(segments)
+                designed_wings.append(wings)
 
             infos = {
-                "name": wing.infos.get('name', 'Unknown'),
-                "creation_date": wing.infos.get('creation_date', 'Unknown'),
-                "modification_date": wing.infos.get('modification_date', 'Unknown'),
+                "name": component.infos.get('name', 'Unknown'),
+                "creation_date": component.infos.get('creation_date', 'Unknown'),
+                "modification_date": component.infos.get('modification_date', 'Unknown'),
             }
             params = {
-                "origin_X": wing.params.get('origin_X', 0),
-                "origin_Y": wing.params.get('origin_Y', 0),
-                "origin_Z": wing.params.get('origin_Z', 0),
+                "origin_X": component.params.get('origin_X', 0),
+                "origin_Y": component.params.get('origin_Y', 0),
+                "origin_Z": component.params.get('origin_Z', 0),
             }
 
-            wings = {
+            components = {
                 "infos": infos,
                 "params": params,
-                "segments": designed_segments,
+                "wings": designed_wings
             }
-            designed_wings.append(wings)
+            designed_components.append(components)
 
-        infos = {
-            "name": component.infos.get('name', 'Unknown'),
-            "creation_date": component.infos.get('creation_date', 'Unknown'),
-            "modification_date": component.infos.get('modification_date', 'Unknown'),
-        }
-        params = {
-            "origin_X": component.params.get('origin_X', 0),
-            "origin_Y": component.params.get('origin_Y', 0),
-            "origin_Z": component.params.get('origin_Z', 0),
+        Deadalus = {
+            "program name": self.DEADALUS.name,
+            "program version": self.DEADALUS.version,
         }
 
-        components = {
-            "infos": infos,
-            "params": params,
-            "wings": designed_wings
+        Project = {
+            "name": self.name,
+            "creation date": self.creation_date,
+            "modification date": self.modification_date,
+            "description": self.description,
+            "path": self.path,
+            "components": designed_components,
+            "airfoils": airfoil_entries
         }
-        designed_components.append(components)
 
-    Deadalus = {
-        "program name": DEADALUS.program_name,
-        "program version": DEADALUS.program_version,
-    }
+        data = {
+            "Program": Deadalus,
+            "Project": Project
+        }
 
-    Project = {
-        "project name": project.name,
-        "creation date": project.creation_date,
-        "modification date": project.modification_date,
-        "project description": project.project_description,
-        "project path": project.path,
-        "project components": designed_components,
-        "project airfoils": airfoil_entries
-    }
+        # Convert numpy arrays to lists before saving
+        data = convert_ndarray_to_list(data)
 
-    data = {
-        "Program": Deadalus,
-        "Project": Project
-    }
+        # Save into one .ddls file
+        with open(self.path, "w") as f:
+            json.dump(data, f, indent=2)
 
-    # Convert numpy arrays to lists before saving
-    data = convert_ndarray_to_list(data)
-
-    # Save into one .ddls file
-    with open(project.path, "w") as f:
-        json.dump(data, f, indent=2)
-
-    return 'Project archive successfully saved'
+        return 'Project archive successfully saved'

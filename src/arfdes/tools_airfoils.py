@@ -32,7 +32,6 @@ from src.obj.class_airfoil import Airfoil
 
 logger = logging.getLogger(__name__)
 
-
 def SeligReference(file):
     """Load airfoil coordinates from a file and return upper and lower points."""
     AirfoilCoord = []
@@ -83,8 +82,8 @@ def SeligReference(file):
     #airfoil.full_curve = np.vstack([UP_points, DW_points])
     airfoil.top_curve = UP_points
     airfoil.dwn_curve = DW_points
-    airfoil.infos['name'] = airfoil_name
-    logger.info(f"Finished loading {airfoil.infos['name']} in selig format")
+    airfoil.info['name'] = airfoil_name
+    logger.info(f"Finished loading {airfoil.info['name']} in selig format")
     
     return airfoil
 
@@ -190,10 +189,11 @@ def find_t_for_x(desired_x, tck):
         raise ValueError(f"Could not find t for X = {desired_x}")
     return result.root
 
-def load_airfoil_from_json(fileName):
+def load_airfoil_from_json(fileName, program_version):
     """load the airfoil data from a JSON format file."""
-    error_count = 0
+
     airfoil = None
+    is_version_different = False
 
     if fileName:
         try:
@@ -215,179 +215,276 @@ def load_airfoil_from_json(fileName):
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = DEADALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
                 logger.warning("Current program version is different from the saved airfoil version. Import may not be compatible.")
-                if airfoil_version[1] == 1:
-                    logger.info("Trying to load using 0.1.X version")
-                    airfoil, error_count = load_from_ddls_010(data)
+                is_version_different = True
+                if airfoil_version[1] == 3:
+                    logger.info("Trying to load using 0.3.X version")
+                    airfoil = load_from_ddls_030(data, fileName)
             else:
-                logger.info("Trying to load using 0.3.X version")
-                airfoil, error_count = load_from_ddls_030(data)
+                logger.info("Trying to load using 0.4.X version")
+                airfoil = load_from_ddls_040(data, fileName)
 
         if airfoil:
-            logger.info('Airfoil was successfully loaded!')
+            if is_version_different == True:
+                logger.warning(f"Airfoil '{Airfoil.name}' loaded but should be checked!")
+            else:
+                logger.info('Airfoil was successfully loaded!')
         else:
             logger.warning('No airfoil found!')
 
-        return airfoil, error_count
-
-def load_from_ddls_010(data):
-    """load the airfoil data from a JSON format file."""
-    error_count = 0
-    import src.obj.objects2D as objects2D
-    Airfoil = objects2D.Airfoil()
-
-    if data:
-
-        try:
-            # Set parameters in Airfoil.params dictionary
-            Airfoil.params = {
-                "chord": objects2D["chord"],
-                "origin_X": objects2D["origin_X"],
-                "origin_Y": objects2D["origin_Y"],
-                "le_thickness": objects2D["le_thickness"],
-                "le_depth": objects2D["le_depth"],
-                "le_offset": objects2D["le_offset"],
-                "le_angle": objects2D["le_angle"],
-                "te_thickness": objects2D["te_thickness"],
-                "te_depth": objects2D["te_depth"],
-                "te_offset": objects2D["te_offset"],
-                "te_angle": objects2D["te_angle"],
-                "ps_fwd_angle": objects2D["ps_fwd_angle"],
-                "ps_rwd_angle": objects2D["ps_rwd_angle"],
-                "ps_fwd_accel": objects2D["ps_fwd_accel"],
-                "ps_rwd_accel": objects2D["ps_rwd_accel"],
-                "ss_fwd_angle": objects2D["ss_fwd_angle"],
-                "ss_rwd_angle": objects2D["ss_rwd_angle"],
-                "ss_fwd_accel": objects2D["ss_fwd_accel"],
-                "ss_rwd_accel": objects2D["ss_rwd_accel"]
-            }
-            Airfoil.infos = {
-                "name": objects2D["infos"]["name"],
-                "creation_date": objects2D["infos"]["creation_date"],
-                "modification_date": objects2D["infos"]["modification_date"],
-                "description": objects2D["infos"]["description"]
-            }
-        except KeyError as e:
-            logger.error(f"ERROR: Missing key in ARF data - {e}")
-            return None
-
-        Airfoil.update()
-
-        logger.debug(Airfoil)
-        logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
-
-        return Airfoil, error_count
+        return airfoil
     
-def load_from_ddls_030(data):
+def load_from_ddls_030(data, fileName):
     """load the airfoil data from a JSON format file."""
-    is_version_different =  False
-    error_count = 0
-    import src.obj.objects2D as objects2D
-    Airfoil = objects2D.Airfoil()
+    
+    from  src.obj.class_airfoil import Airfoil
+
+    airfoil = Airfoil()
 
     if data:
         try:
             airfoil_version = data["program version"]
             airfoil_data = data["airfoil"]
             airfoil_params = airfoil_data["params"]
-            airfoil_infos   = airfoil_data["infos"]
+            airfoil_info   = airfoil_data["info"]
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
             logger.warning("File may not load properly or is not compatible with DEADALUS")
             return None
-        
-        if airfoil_version:
-            airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = DEADALUS.program_version
-            program_version = program_version.split("-")[0].split(".")
-
-            if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
-                logger.warning("Current program version is different from the saved airfoil version. Import may not be compatible.")
-                is_version_different = True
 
         try:
+            airfoil.name = airfoil_info['name']
+            airfoil.path = fileName
+
+            airfoil.info = {
+                "creation_date":     airfoil_info["creation_date"],
+                "modification_date": airfoil_info["modification_date"],
+                "description":       airfoil_info["description"]
+            }
+
             # Set parameters in Airfoil.params dictionary
-            Airfoil.params = {
-                "chord":        airfoil_params["chord"],
+            airfoil.params = {
                 "origin_X":     airfoil_params["origin_X"],
                 "origin_Y":     airfoil_params["origin_Y"],
-                "le_thickness": airfoil_params["le_thickness"],
-                "le_depth":     airfoil_params["le_depth"],
-                "le_offset":    airfoil_params["le_offset"],
-                "le_angle":     airfoil_params["le_angle"],
-                "te_thickness": airfoil_params["te_thickness"],
-                "te_depth":     airfoil_params["te_depth"],
-                "te_offset":    airfoil_params["te_offset"],
-                "te_angle":     airfoil_params["te_angle"],
-                "ps_fwd_angle": airfoil_params["ps_fwd_angle"],
-                "ps_rwd_angle": airfoil_params["ps_rwd_angle"],
-                "ps_fwd_accel": airfoil_params["ps_fwd_accel"],
-                "ps_rwd_accel": airfoil_params["ps_rwd_accel"],
-                "ss_fwd_angle": airfoil_params["ss_fwd_angle"],
-                "ss_rwd_angle": airfoil_params["ss_rwd_angle"],
-                "ss_fwd_accel": airfoil_params["ss_fwd_accel"],
-                "ss_rwd_accel": airfoil_params["ss_rwd_accel"]
+                "stretch":      float(airfoil_params["chord"]-airfoil_params["le_offset"]-airfoil_params["te_offset"]),
+                "incline":      0
             }
-            Airfoil.infos = {
-                "name":              airfoil_infos["name"],
-                "creation_date":     airfoil_infos["creation_date"],
-                "modification_date": airfoil_infos["modification_date"],
-                "description":       airfoil_infos["description"]
+
+            airfoil.LE.params = {
+                "thickness":    airfoil_params["le_thickness"],
+                "angle":        airfoil_params["le_angle"],
+                "ps_tan":       airfoil_params["le_offset"]/2,
+                "ps_slope":     -30,
+                "ps_curv":      airfoil_params["le_offset"]/2,
+                "ss_tan":       airfoil_params["le_offset"]/2,
+                "ss_slope":     30,
+                "ss_curv":      airfoil_params["le_offset"]/2,
             }
+
+            airfoil.TE.params = {
+                "thickness":    airfoil_params["te_thickness"],
+                "angle":        airfoil_params["te_angle"],
+                "ps_tan":       airfoil_params["te_offset"]/2,
+                "ps_slope":     -30,
+                "ps_curv":      airfoil_params["te_offset"]/2,
+                "ss_tan":       airfoil_params["te_offset"]/2,
+                "ss_slope":     30,
+                "ss_curv":      airfoil_params["te_offset"]/2,
+            }
+
+            airfoil.PS.params = {
+                "fwd_wedge":    airfoil_params["ps_fwd_angle"],
+                "fwd_tan":      airfoil_params["ps_fwd_accel"],
+                "fwd_slope":    0,
+                "fwd_curv":     0.10,
+                "rwd_wedge":    airfoil_params["ps_rwd_angle"],
+                "rwd_tan":      airfoil_params["ps_rwd_accel"],
+                "rwd_slope":    0,
+                "rwd_curv":     0.10,
+            }
+
+            airfoil.SS.params = {
+                "fwd_wedge":    airfoil_params["ss_fwd_angle"],
+                "fwd_tan":      airfoil_params["ss_fwd_accel"],
+                "fwd_slope":    0,
+                "fwd_curv":     0.10,
+                "rwd_wedge":    airfoil_params["ss_rwd_angle"],
+                "rwd_tan":      airfoil_params["ss_rwd_accel"],
+                "rwd_slope":    0,
+                "rwd_curv":     0.10,
+            }
+            
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
             return None
         
-        if is_version_different == True:
-            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded but should be checked!")
-            error_count += 1
         else:
-            logger.info(f"Airfoil '{Airfoil.infos['name']}' loaded successfully!")
+            logger.info(f"Airfoil '{airfoil.info['name']}' loaded successfully!")
 
-        Airfoil.update()
+        airfoil.update()
 
-        return Airfoil, error_count
+        return airfoil
+
+def load_from_ddls_040(data, fileName):
+    """load the airfoil data from a JSON format file."""
+    from  src.obj.class_airfoil import Airfoil
+
+    airfoil = Airfoil()
+    logger.debug("Using v0.4.X importer!")
+    if data:
+        logger.debug('Data specified')
+        try:
+            airfoil_data = data["airfoil"]
+            airfoil_params = airfoil_data["params"]
+            airfoil_le = airfoil_data["params"]["LE"]
+            airfoil_te = airfoil_data["params"]["TE"]
+            airfoil_ps = airfoil_data["params"]["PS"]
+            airfoil_ss = airfoil_data["params"]["SS"]
+            airfoil_info   = airfoil_data["info"]
+            
+        except KeyError as e:
+            logger.error(f"Missing key in ARF data - {e}")
+            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            return None
+
+        try:
+            airfoil.name = airfoil_data['name']
+            airfoil.path = fileName
+
+            airfoil.info = {
+                "creation_date":     airfoil_info["creation_date"],
+                "modification_date": airfoil_info["modification_date"],
+                "description":       airfoil_info["description"]
+            }
+
+            # Set parameters in Airfoil.params dictionary
+            airfoil.params = {
+                "origin_X":     airfoil_params["origin_X"],
+                "origin_Y":     airfoil_params["origin_Y"],
+                "stretch":      airfoil_params["stretch"],
+                "incline":      airfoil_params["incline"]
+            }
+
+            airfoil.LE.params = {
+                "thickness":    airfoil_le["thickness"],
+                "angle":        airfoil_le["angle"],
+                "ps_tan":       airfoil_le["ps_tan"],
+                "ps_slope":     airfoil_le["ps_slope"],
+                "ps_curv":      airfoil_le["ps_curv"],
+                "ss_tan":       airfoil_le["ss_tan"],
+                "ss_slope":     airfoil_le["ss_slope"],
+                "ss_curv":      airfoil_le["ss_curv"],
+            }
+
+            airfoil.TE.params = {
+                "thickness":    airfoil_te["thickness"],
+                "angle":        airfoil_te["angle"],
+                "ps_tan":       airfoil_te["ps_tan"],
+                "ps_slope":     airfoil_te["ps_slope"],
+                "ps_curv":      airfoil_te["ps_curv"],
+                "ss_tan":       airfoil_te["ss_tan"],
+                "ss_slope":     airfoil_te["ss_slope"],
+                "ss_curv":      airfoil_te["ss_curv"],
+            }
+
+            airfoil.PS.params = {
+                "fwd_wedge":    airfoil_ps["fwd_wedge"],
+                "fwd_tan":      airfoil_ps["fwd_tan"],
+                "fwd_slope":    airfoil_ps["fwd_slope"],
+                "fwd_curv":     airfoil_ps["fwd_curv"],
+                "rwd_wedge":    airfoil_ps["rwd_wedge"],
+                "rwd_tan":      airfoil_ps["rwd_tan"],
+                "rwd_slope":    airfoil_ps["rwd_slope"],
+                "rwd_curv":     airfoil_ps["rwd_curv"],
+            }
+
+            airfoil.SS.params = {
+                "fwd_wedge":    airfoil_ss["fwd_wedge"],
+                "fwd_tan":      airfoil_ss["fwd_tan"],
+                "fwd_slope":    airfoil_ss["fwd_slope"],
+                "fwd_curv":     airfoil_ss["fwd_curv"],
+                "rwd_wedge":    airfoil_ss["rwd_wedge"],
+                "rwd_tan":      airfoil_ss["rwd_tan"],
+                "rwd_slope":    airfoil_ss["rwd_slope"],
+                "rwd_curv":     airfoil_ss["rwd_curv"],
+            }
+            
+        except KeyError as e:
+            logger.error(f"Missing key in ARF data - {e}")
+            return None
+        
+        else:
+            logger.info(f"Airfoil '{airfoil.name}' loaded successfully!")
+
+        airfoil.update()
+
+        return airfoil
     
-def save_airfoil_to_json(airfoil_obj=None):
+def save_airfoil_to_json(current_airfoil=None, project=None, program=None):
     """Save the airfoil data to a JSON format file."""
  
-    current_airfoil = PROJECT.project_airfoils[airfoil_idx]
+    # current_airfoil = project.project_airfoils[airfoil_idx]
 
     data = {
-        "program name": DEADALUS.program_name,
-        "program version": DEADALUS.program_version,
+        "program name": program.name,
+        "program version": program.version,
         "airfoil": {
-            "infos": {
-                **current_airfoil.infos,
-                "name": str(current_airfoil.infos.get("name", "")),
-                "creation_date": str(current_airfoil.infos.get("creation_date", "")),
-                "modification_date": str(current_airfoil.infos.get("modification_date", "")),
-                "description": str(current_airfoil.infos.get("description", ""))
+            "name": str(current_airfoil.name),
+            "path": str(current_airfoil.path),
+            "format": str(current_airfoil.format),
+            "info": {
+                "creation_date": str(current_airfoil.info.get("creation_date", "")),
+                "modification_date": str(current_airfoil.info.get("modification_date", "")),
+                "description": str(current_airfoil.info.get("description", ""))
             },
             "params": {
-                "chord": current_airfoil.params["chord"],
                 "origin_X": current_airfoil.params["origin_X"],
                 "origin_Y": current_airfoil.params["origin_Y"],
-                "le_thickness": current_airfoil.params["le_thickness"],
-                "le_depth": current_airfoil.params["le_depth"],
-                "le_offset": current_airfoil.params["le_offset"],
-                "le_angle": current_airfoil.params["le_angle"],
-                "te_thickness": current_airfoil.params["te_thickness"],
-                "te_depth": current_airfoil.params["te_depth"],
-                "te_offset": current_airfoil.params["te_offset"],
-                "te_angle": current_airfoil.params["te_angle"],
-                "ps_fwd_angle": current_airfoil.params["ps_fwd_angle"],
-                "ps_rwd_angle": current_airfoil.params["ps_rwd_angle"],
-                "ps_fwd_accel": current_airfoil.params["ps_fwd_accel"],
-                "ps_rwd_accel": current_airfoil.params["ps_rwd_accel"],
-                "ss_fwd_angle": current_airfoil.params["ss_fwd_angle"],
-                "ss_rwd_angle": current_airfoil.params["ss_rwd_angle"],
-                "ss_fwd_accel": current_airfoil.params["ss_fwd_accel"],
-                "ss_rwd_accel": current_airfoil.params["ss_rwd_accel"]
+                "stretch":  current_airfoil.params["stretch"],
+                "incline":  current_airfoil.params["incline"],
+                "LE": {
+                    "thickness": current_airfoil.LE.params["thickness"],
+                    "angle": current_airfoil.LE.params["angle"],
+                    "ps_tan": current_airfoil.LE.params["ps_tan"],
+                    "ps_slope": current_airfoil.LE.params["ps_slope"],
+                    "ps_curv":current_airfoil.LE.params["ps_curv"],
+                    "ss_tan": current_airfoil.LE.params["ss_tan"],
+                    "ss_slope": current_airfoil.LE.params["ss_slope"],
+                    "ss_curv": current_airfoil.LE.params["ss_curv"]
+                },
+                "TE": {
+                    "thickness": current_airfoil.TE.params["thickness"],
+                    "angle": current_airfoil.TE.params["angle"],
+                    "ps_tan": current_airfoil.TE.params["ps_tan"],
+                    "ps_slope": current_airfoil.TE.params["ps_slope"],
+                    "ps_curv":current_airfoil.TE.params["ps_curv"],
+                    "ss_tan": current_airfoil.TE.params["ss_tan"],
+                    "ss_slope": current_airfoil.TE.params["ss_slope"],
+                    "ss_curv": current_airfoil.TE.params["ss_curv"]
+                },
+                "PS": {
+                    "fwd_wedge": current_airfoil.PS.params["fwd_wedge"],
+                    "fwd_tan":   current_airfoil.PS.params["fwd_tan"],
+                    "fwd_slope": current_airfoil.PS.params["fwd_slope"],
+                    "fwd_curv":  current_airfoil.PS.params["fwd_curv"],
+                    "rwd_wedge": current_airfoil.PS.params["rwd_wedge"],
+                    "rwd_tan":   current_airfoil.PS.params["rwd_tan"],
+                    "rwd_slope": current_airfoil.PS.params["rwd_slope"],
+                    "rwd_curv":  current_airfoil.PS.params["rwd_curv"]
+                },
+                "SS": {
+                    "fwd_wedge": current_airfoil.SS.params["fwd_wedge"],
+                    "fwd_tan":   current_airfoil.SS.params["fwd_tan"],
+                    "fwd_slope": current_airfoil.SS.params["fwd_slope"],
+                    "fwd_curv":  current_airfoil.SS.params["fwd_curv"],
+                    "rwd_wedge": current_airfoil.SS.params["rwd_wedge"],
+                    "rwd_tan":   current_airfoil.SS.params["rwd_tan"],
+                    "rwd_slope": current_airfoil.SS.params["rwd_slope"],
+                    "rwd_curv":  current_airfoil.SS.params["rwd_curv"]
+                }
             }
         }
     }
@@ -398,28 +495,59 @@ def save_airfoil_to_json(airfoil_obj=None):
 
 def flip_airfoil_horizontally(airfoil):
     """Flip the airfoil horizontally."""
-    flipped_airfoil = src.obj.objects2D.Airfoil()
-    flipped_airfoil.infos = airfoil.infos.copy()
+    flipped_airfoil = src.obj.class_airfoil.Airfoil()
+
+    flipped_airfoil.name = airfoil.name
+    flipped_airfoil.path = airfoil.path
+    flipped_airfoil.info = airfoil.info.copy()
     flipped_airfoil.params = airfoil.params.copy()
 
-    flipped_airfoil.params['chord'] = airfoil.params['chord']
-    flipped_airfoil.params['origin_X'] = airfoil.params['origin_X']
-    flipped_airfoil.params['origin_Y'] = airfoil.params['origin_Y']
-    flipped_airfoil.params['le_thickness'] = airfoil.params['le_thickness']
-    flipped_airfoil.params['le_depth'] = airfoil.params['le_depth']
-    flipped_airfoil.params['le_offset'] = -airfoil.params['le_offset']
-    flipped_airfoil.params['le_angle'] = -airfoil.params['le_angle']
-    flipped_airfoil.params['te_thickness'] = airfoil.params['te_thickness']
-    flipped_airfoil.params['te_depth'] = airfoil.params['te_depth']
-    flipped_airfoil.params['te_offset'] = -airfoil.params['te_offset']
-    flipped_airfoil.params['te_angle'] = -airfoil.params['te_angle']
-    flipped_airfoil.params['ps_fwd_angle'] = -airfoil.params['ss_fwd_angle']
-    flipped_airfoil.params['ps_rwd_angle'] = -airfoil.params['ss_rwd_angle']
-    flipped_airfoil.params['ps_fwd_accel'] = airfoil.params['ss_fwd_accel']
-    flipped_airfoil.params['ps_rwd_accel'] = airfoil.params['ss_rwd_accel']
-    flipped_airfoil.params['ss_fwd_angle'] = -airfoil.params['ps_fwd_angle']
-    flipped_airfoil.params['ss_rwd_angle'] = -airfoil.params['ps_rwd_angle']
-    flipped_airfoil.params['ss_fwd_accel'] = airfoil.params['ps_fwd_accel']
-    flipped_airfoil.params['ss_rwd_accel'] = airfoil.params['ps_rwd_accel']
+    flipped_airfoil.LE.type = airfoil.LE.type
+    flipped_airfoil.TE.type = airfoil.TE.type
+    flipped_airfoil.PS.type = airfoil.PS.type
+    flipped_airfoil.SS.type = airfoil.SS.type
 
+    flipped_airfoil.params["origin_X"] = airfoil.params['origin_X']
+    flipped_airfoil.params["origin_Y"] = airfoil.params['origin_Y']
+    flipped_airfoil.params["stretch"]  = airfoil.params['stretch']
+    flipped_airfoil.params["incline"]  = -airfoil.params["incline"]
+
+    flipped_airfoil.LE.params["thickness"] = airfoil.LE.params['thickness']
+    flipped_airfoil.LE.params["angle"]     = -airfoil.LE.params['angle']
+    flipped_airfoil.LE.params["ps_tan"]    = airfoil.LE.params["ps_tan"]  
+    flipped_airfoil.LE.params["ps_slope"]  = airfoil.LE.params["ps_slope"]
+    flipped_airfoil.LE.params["ps_curv"]   = airfoil.LE.params["ps_curv"] 
+    flipped_airfoil.LE.params["ss_tan"]    = airfoil.LE.params["ss_tan"]  
+    flipped_airfoil.LE.params["ss_slope"]  = airfoil.LE.params["ss_slope"]
+    flipped_airfoil.LE.params["ss_curv"]   = airfoil.LE.params["ss_curv"] 
+
+    flipped_airfoil.TE.params["thickness"] = airfoil.TE.params['thickness']
+    flipped_airfoil.TE.params["angle"]     = -airfoil.TE.params['angle']
+    flipped_airfoil.TE.params["ps_tan"]    = airfoil.TE.params["ps_tan"]  
+    flipped_airfoil.TE.params["ps_slope"]  = airfoil.TE.params["ps_slope"]
+    flipped_airfoil.TE.params["ps_curv"]   = airfoil.TE.params["ps_curv"] 
+    flipped_airfoil.TE.params["ss_tan"]    = airfoil.TE.params["ss_tan"]  
+    flipped_airfoil.TE.params["ss_slope"]  = airfoil.TE.params["ss_slope"]
+    flipped_airfoil.TE.params["ss_curv"]   = airfoil.TE.params["ss_curv"] 
+
+    flipped_airfoil.PS.params["fwd_wedge"] = airfoil.PS.params["fwd_wedge"]
+    flipped_airfoil.PS.params["fwd_tan"]   = airfoil.PS.params["fwd_tan"]  
+    flipped_airfoil.PS.params["fwd_slope"] = airfoil.PS.params["fwd_slope"]
+    flipped_airfoil.PS.params["fwd_curv"]  = airfoil.PS.params["fwd_curv"] 
+    flipped_airfoil.PS.params["rwd_wedge"] = airfoil.PS.params["rwd_wedge"]
+    flipped_airfoil.PS.params["rwd_tan"]   = airfoil.PS.params["rwd_tan"]  
+    flipped_airfoil.PS.params["rwd_slope"] = airfoil.PS.params["rwd_slope"]
+    flipped_airfoil.PS.params["rwd_curv"]  = airfoil.PS.params["rwd_curv"] 
+    
+    flipped_airfoil.SS.params["fwd_wedge"] = airfoil.SS.params["fwd_wedge"]
+    flipped_airfoil.SS.params["fwd_tan"]   = airfoil.SS.params["fwd_tan"]  
+    flipped_airfoil.SS.params["fwd_slope"] = airfoil.SS.params["fwd_slope"]
+    flipped_airfoil.SS.params["fwd_curv"]  = airfoil.SS.params["fwd_curv"] 
+    flipped_airfoil.SS.params["rwd_wedge"] = airfoil.SS.params["rwd_wedge"]
+    flipped_airfoil.SS.params["rwd_tan"]   = airfoil.SS.params["rwd_tan"]  
+    flipped_airfoil.SS.params["rwd_slope"] = airfoil.SS.params["rwd_slope"]
+    flipped_airfoil.SS.params["rwd_curv"]  = airfoil.SS.params["rwd_curv"] 
+
+    flipped_airfoil.update()
+    
     return flipped_airfoil

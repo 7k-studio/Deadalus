@@ -18,21 +18,22 @@ You should have received a copy of the GNU General Public License
 along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
-
+import logging
 import math
 import numpy as np
 from geomdl import BSpline, utilities
 
 from src.utils.tools_program import CreateBSpline_3D
-import src.globals as globals
 import src.obj.objects2D as objects2D
 
 from geomdl import NURBS
 from geomdl import tessellate
 from geomdl import knotvector
 
-class Segment:
+class Spar:
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.name = 'Spar'
         self.infos = {'name': 'segment',
                       'creation_date': '',
                       'modification_date': ''}

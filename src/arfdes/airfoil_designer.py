@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -20,6 +20,7 @@ along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 #System imports
+import os
 import sys
 from datetime import date
 import logging
@@ -31,26 +32,35 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, 
     QMenuBar, QAction, QFileDialog, QTreeWidget, 
     QTreeWidgetItem, QTextEdit, QStackedWidget, QHeaderView,
-    QTableWidget, QTableWidgetItem, QPushButton, QDockWidget
-)
+    QTableWidget, QTableWidgetItem, QPushButton, QDockWidget,
+    QWidget,
+    QHBoxLayout, QVBoxLayout,
+    QMenuBar, QAction, QFileDialog, 
+    QLineEdit, QTextEdit,
+    QTreeWidget, QTreeWidgetItem, 
+    QApplication, QLabel, QInputDialog, QDialog, QDialogButtonBox,
+    QStackedWidget, QMessageBox, QTableWidget, QTableWidgetItem, QPushButton, QHeaderView,
+    )
+
 from PyQt5.QtGui import QIcon
 
 #Self imports
 import src.obj as obj
 import src.wngdes.tools_wing
-import src.utils.dxf
+import src.utils.dxf as dxf
 
 from src.arfdes.menu_bar import MenuBar
 from .tool_bar import ToolBar
 from src.obj.class_airfoil import Airfoil
 from src.arfdes.tools_airfoils import Reference_load
+import src.arfdes.tools_airfoils as tools_airfoils
 
 from src.arfdes.widget_airfoils import TreeAirfoil
 from src.arfdes.widget_reference import TreeRererence
 from src.arfdes.widget_parameters import TableParameters
 from src.arfdes.widget_statistics import TableStatistics
 from src.arfdes.widget_description import TextDescription
-from src.program.widget_log import LogViewer
+from src.widgets.widget_log import LogViewer
 import src.arfdes.tools_airfoils as tools
 
 from src.opengl.viewport2d import ViewportOpenGL
@@ -68,7 +78,10 @@ class AirfoilDesigner(QMainWindow):
         self.DEADALUS = program
         self.PROJECT = project
 
-        self.setWindowTitle(f"{self.DEADALUS.name}: {self.name} - Untitled" if self.PROJECT.name == None else f"{self.DEADALUS.name}: {self.name} - {self.PROJECT.name}")
+        self._build_ui()
+    
+    def _build_ui(self):
+
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)
@@ -107,7 +120,7 @@ class AirfoilDesigner(QMainWindow):
 
         # Widgets for INPUT container
         # Left side tree airfoil
-        self.TREE_AIRFOIL = TreeAirfoil(program=self.DEADALUS, project=self.PROJECT, open_gl=self.OPEN_GL)
+        self.TREE_AIRFOIL = TreeAirfoil(program=self.DEADALUS, project=self.PROJECT, parent=self)
         self.dock_airfoil = QDockWidget("Airfoil Tree", self)
         self.dock_airfoil.setWidget(self.TREE_AIRFOIL)
         self.dock_airfoil.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -143,7 +156,7 @@ class AirfoilDesigner(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock_statistics)
 
         # Refresh statistics table whenever parameters are changed in the parameters table
-        self.TABLE_PARAMETERS.parametersChanged.connect(self.TABLE_STATISTICS.populate_table)
+        self.TABLE_PARAMETERS.parametersChanged.connect(self.TABLE_STATISTICS.update)
 
         # Log Viewer Widget
         self.LOG_VIEWER = LogViewer(log_file="toolout.log", parent=self, program=self.DEADALUS)
@@ -201,18 +214,51 @@ class AirfoilDesigner(QMainWindow):
         self.TREE_AIRFOIL.itemClicked.connect(self.TABLE_STATISTICS.display_selected_airfoil)
         self.TREE_AIRFOIL.itemClicked.connect(self.TEXT_DESCRIPTION.display_selected_airfoil)
 
-        if not self.PROJECT.project_airfoils:
+        if self.PROJECT and not self.PROJECT.airfoils:
             # Initialize with a default airfoil
             self.TREE_AIRFOIL.add("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
         self.logger.info("Initialization completed")
+    
+    def _update_header(self):
+        self.setWindowTitle(f"{self.DEADALUS.name}: {self.name} - Untitled" if self.PROJECT.name is None else f"{self.DEADALUS.name}: {self.name} - {self.PROJECT.name}")
+
+    def _populate_ui(self):
+        self._update_header()
+
+        # assign into both styleses if code expects either attribute
+        self.OPEN_GL.PROJECT = self.OPEN_GL.project = self.PROJECT
+        self.TOOL_BAR.PROJECT = self.TOOL_BAR.project = self.PROJECT
+        self.TREE_AIRFOIL.PROJECT = self.TREE_AIRFOIL.project = self.PROJECT
+        self.TREE_REFERENCE.PROJECT = self.TREE_REFERENCE.project = self.PROJECT
+        self.TABLE_PARAMETERS.PROJECT = self.TABLE_PARAMETERS.project = self.PROJECT
+        self.TEXT_DESCRIPTION.PROJECT = self.TEXT_DESCRIPTION.project = self.PROJECT
+        self.TABLE_STATISTICS.PROJECT = self.TABLE_STATISTICS.project = self.PROJECT
+        self.MENU_BAR.PROJECT = self.MENU_BAR.project = self.PROJECT
+
+        if not self.PROJECT.airfoils:
+            # Initialize with a default airfoil
+            self.TREE_AIRFOIL.add("Airfoil", self.time, "New projects: Initialized because of no other airfoil was available")
+
+    def set_project(self, project):
+        self.PROJECT = project
+        self._populate_ui()
+        self.refresh()
+
+    def refresh(self):
+        self.TREE_AIRFOIL.update()
+        self.TREE_REFERENCE.update()
+        self.TABLE_PARAMETERS.update()
+        self.TABLE_STATISTICS.update()
+        self.TEXT_DESCRIPTION.clear()
+        self.OPEN_GL.clear()
 
     def handleReferenceToggle(self, state, filename):
-        selected_item = self.tree_airfoil.currentItem()
+        selected_item = self.TREE_AIRFOIL.currentItem()
         if not selected_item:
             return  # No airfoil selected
 
         # Find the corresponding airfoil object
-        airfoil_index = self.tree_airfoil.indexOfTopLevelItem(selected_item)
+        airfoil_index = self.TREE_AIRFOIL.indexOfTopLevelItem(selected_item)
         if airfoil_index == -1:
             return  # Invalid selection
 
@@ -220,7 +266,7 @@ class AirfoilDesigner(QMainWindow):
             reference_airfoil = Reference_load(filename)
             if reference_airfoil != None:
                 self.logger.info(f"Reference enabled with file: '{filename}'")
-                self.open_gl.set_reference_to_display(reference_airfoil)
+                self.OPEN_GL.set_reference_to_display(reference_airfoil)
             else:
                 self.logger.error('Failed to load refrence!')
 
@@ -229,7 +275,7 @@ class AirfoilDesigner(QMainWindow):
         else:
             self.logger.info("Reference disabled")
             #self.table.set_reference_points(None, None)  # Clear reference points in the table
-            self.open_gl.set_reference_to_display(None)
+            self.OPEN_GL.set_reference_to_display(None)
     
     def toggle_airfoil(self):
         """Toggle the airfoil widget."""
@@ -288,10 +334,129 @@ class AirfoilDesigner(QMainWindow):
         elif dock_widget == self.dock_logger:
             self.MENU_BAR.update_action_state(self.MENU_BAR.loggerWidgetAction, self.dock_logger)
     
-    def refresh_widgets(self):
-        self.TREE_AIRFOIL.update()
-        self.TREE_REFERENCE.update()
-        self.OPEN_GL.clear()
+    def newAirfoil(self):
+        self.logger.info("Creating new airfoil")
+        self.TREE_AIRFOIL.add('Airfoil', self.time, 'Airfoil created from scratch')
+
+    def appendAirfoil(self):
+        """load the airfoil data from a JSON format file."""
+        self.logger.info("Appending airfoil...")
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
+
+        if fileName:
+            # try:
+            airfoil_obj = tools_airfoils.load_airfoil_from_json(fileName, self.DEADALUS.version)                
+            self.PROJECT._ensure_unique_name(airfoil_obj)  # Ensure unique name             
+            self.PROJECT.project_airfoils.append(airfoil_obj)
+            if airfoil_obj:
+                self.logger.debug(airfoil_obj)
+                self.TREE_AIRFOIL.add_airfoil_to_tree(airfoil_obj, airfoil_obj.name)
+                self.logger.info("Appending an airfoil was sucessful!")
+            # except TypeError:
+            #     self.logger.error("Failed to append airfoil")
+
+    def deleteAirfoil(self):
+        self.logger.info("Deleting selected airfoil...")
+        if self.TREE_AIRFOIL:  # Ensure main_window is set
+            status, name = self.TREE_AIRFOIL.delete()
+            if status == True and name:
+                self.logger.info(f"Successfully deleted airfoil: {name}")
+                self.refresh()
+            else:
+                self.logger.error("Failed to delete!")
+            
+    def saveAirfoil(self):
+        """Save the airfoil data to a JSON format file."""
+        self.logger.info("Saving selected airfoil...")
+        airfoil = self.TREE_AIRFOIL.selected_airfoil
+        if not airfoil:
+            self.logger.error("No valid airfoil selected!")
+
+        options = QFileDialog.Options()
+        default_name = f"{airfoil.name}.arf" if airfoil.name else f"Untitled.arf"
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save File", default_name, "DEADALUS Airfoil Format (*.arf);;All Files (*)", options=options)
+        if filePath:
+            airfoil.name = os.path.basename(filePath).split('.')[0]
+            airfoil.path = filePath
+            
+            json_object = tools_airfoils.save_airfoil_to_json(airfoil, self.PROJECT, self.DEADALUS)
+        
+            with open(f"{filePath}", "w") as outfile:
+                outfile.write(json_object)
+                self.logger.info(f"Saved file: {filePath}")
+
+            self.PROJECT._ensure_unique_name(airfoil)  # Ensure unique name
+            self.refresh()
+ 
+    def exportAirfoil(self):
+        """Export the airfoil data to a DXF format file."""
+        self.logger.info("Exporting selected airfoil...")
+
+        airfoil = self.TREE_AIRFOIL.selected_airfoil
+        if not airfoil:
+            self.logger.error("No valid airfoil selected!")
+        
+        options = QFileDialog.Options()
+        default_name = f"{airfoil.name}.dxf" if airfoil.name else "Untitled.dxf"
+        fileName, _ = QFileDialog.getSaveFileName(self, "Export File to DXF format", default_name, "DXF Format (*.dxf);;All Files (*)", options=options)
+        if fileName:
+            dxf.export_airfoil_to_dxf(airfoil, fileName)
+            self.logger.info(f"Exported file: {fileName}")
+    
+    def renameAirfoil(self):
+        """Rename currently selected airfoil."""
+        self.logger.info("Renaming selected airfoil...")
+        self.le = QLabel(self)
+        
+        try:
+            selected_airfoil = self.TREE_AIRFOIL.selected_airfoil
+
+            text, ok = QInputDialog.getText(self, 'Change Airfoils Name', 'Enter airfoil\'s new name:', text=selected_airfoil.info["name"])
+            if ok:
+                self.le.setText(str(text))
+            if text:
+                selected_airfoil.info['name'] = text
+                selected_airfoil.name = text  # Sync name
+                self.PROJECT._ensure_unique_name(selected_airfoil)  # Ensure unique name
+                selected_airfoil.info['name'] = selected_airfoil.name  # Sync back
+                selected_airfoil.info['modification_date'] = date.today().strftime("%Y-%m-%d")
+                
+            # Optionally, update the tree menu display
+            self.refresh()
+            self.logger.info("Airfoil renamed")
+        
+        except AttributeError:
+            self.logger.error("No valid airfoil selected!")
+    
+    def flipAirfoil(self):
+        """Flip the currently selected airfoil."""
+
+        airfoil_idx = self.TREE_AIRFOIL.selected_airfoil_index
+
+        current_airfoil = self.PROJECT.project_airfoils[airfoil_idx]
+
+        flipped_airfoil = tools_airfoils.flip_airfoil_horizontally(current_airfoil)
+
+        if flipped_airfoil:
+            self.PROJECT.project_airfoils[airfoil_idx] = flipped_airfoil
+            self.logger.info(f"Airfoil '{flipped_airfoil.name}' flipped...")
+            self.OPEN_GL.set_airfoil_to_display(self.PROJECT.project_airfoils[airfoil_idx])
+            self.OPEN_GL.update()
+            self.TABLE_PARAMETERS.update()
+            self.TABLE_STATISTICS.update()
+        else:
+            self.logger.error("Something went wrong, airfoil not flipped!")
+
+    def editDescriptionAirfoil(self):
+        """Edit the description of an airfoil from the presentation widget."""
+        self.logger.info("Editing selected airfoil description...")
+
+        # Ensure the description widget has the selected airfoil loaded
+        self.TEXT_DESCRIPTION.display_selected_airfoil()
+
+        # Open the same edit dialog used by the description panel
+        self.TEXT_DESCRIPTION.edit_dialog()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

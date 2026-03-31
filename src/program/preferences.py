@@ -1,6 +1,6 @@
 '''
 
-Copyright (C) 2025 Jakub Kamyk
+Copyright (C) 2026 Jakub Kamyk
 
 This file is part of DEADALUS.
 
@@ -321,6 +321,8 @@ class PreferencesWindow(QDialog):
         with open(f"src/settings", "w") as outfile:
             outfile.write(json_object)
             self.logger.info(f"Saved file: settings")
+        
+        self.DEADALUS.APP.setStyleSheet(self.DEADALUS.buildStyleSheet())
 
 # For testing the dialog independently
 if __name__ == "__main__":

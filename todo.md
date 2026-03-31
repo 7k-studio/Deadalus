@@ -1,43 +1,60 @@
 # ToDo
 
-### Airfoil Tree
+for realease of ***v0.4.0-beta*** version
+
+---
+
+### Airfoil
 An airfoil tree was adjusted to match new convention
 **ToDo:**
 - [x] Add 'type' column Airfoil tree
-    - [ ] control type of LE and TE: free (F), circle (C), elipse(E)
-- [x] There is a bug on tree refreshe when ***Type*** is missing
+    - [ ] ~~control type of LE and TE: free (F), circle (C), elipse(E)~~ **postponed to version v4.1**
+- [x] Fixed the bug on tree refresh when ***Type*** is missing
+- [x] To make the widget store the selected object info data
+ 
+### Reference
+A reference can now be handled using both bar menu and specified widget. Both allow to add, delete, show and hide a reference airfoil
 
-### Reference Tree
-A reference widget with buttons was created.
-- [x] **Add** button works properly for selig format airfoils
-- [x] **Show/Hide** button works properly for selig format airfoils
 **ToDo:**
+- [x] **Add** button works properly for selig format airfoils
+- [x] **Delete** button works properly for selig format airfoils
+- [x] **Show/Hide** button works properly for selig format airfoils
 - [ ] To be able to load ddls files as reference
-- [ ] To allow to delete reference
-- [ ] Secondary:
-    - [ ] To allow to modify the reference
+- [ ] Secondary: **postponed to version v4.1**
+    - [ ] ~~To allow to modify the reference~~
+    - [ ] ~~To allow to flip the reference~~
 
 ### Parameter Table
-Updates and populates the tabel properly with the selected airfoil data
+A table was adjusted to new airfoil format. It now updates and populates the tabele properly with the selected airfoil data.
 **ToDo:**
+- [x] To clear out the rows after airfoil was deleted
 - [ ] To repair nominal to stay put untill project open or refresh
-
-### Description TextArea
-Exists but does not work as intendet
+ 
+### Airfoil Description Editing
+Description Widget in Airfoil Designer shows the description of an airfoil in the widget or in the dialog. Clicking Edit button allows to edit the text. To edit an airfoil user must first select an airfoil in the airfoil tree. If an airfoil is deleted the default message is being displayed.
 **ToDo:**
-- [ ] To populate the text area with description of selected airfoil
+- [x] To populate the text area with description of selected airfoil
+- [x] To save/reject the changes on user's request
+- [x] Bullet proof the widget for possible unwanted events
+- [x] To clear out after deleding an airfoil
 
 ### Statistics Table
-Populates the table with selected airfoil's statistics
+New widget added to display statistics of the selected airfoil.
 **ToDo:**
 - [ ] To investigate the statistics of interest
 - [ ] To enlarge the available statistics storage
 
 ### Tool Bar
-Exists but does not work as intendet
+New element added to GUI to quickly navigate the functions of the program. For now the airfoil functions are displayed for quick access it also supports shortcuts:
+> Shift+N - add new airfoil
+> Shift+A - append selected airfoil
+> Shift+X - delete selected airfoil
+> Shift+F - flip selected airfoil
+> Shift+S - save selected airfoil
+
 **ToDo:**
-- [ ] To assign functions to each button
-- [ ] To enlarge the Toolbar with other Essentail Tools
+- [x] To assign functions to each button
+- [x] To enlarge the Toolbar with other Essentail Tools
 
 ### Menu Bar
 Has a lot to investiagte
@@ -57,47 +74,38 @@ Has a lot to investiagte
 
 **ToDo:**
 - Airfoil -- *Check if functions are working with new airfoil definition:*
-    - [ ] Create ← works! + to add to tool bar
+    - [x] Create ← works, added to toolbar
     - [ ] Append
-    - [ ] Delete ← works! + to add to tool bar
+    - [ ] Delete ← works, added to tool bar
     - [ ] Flip
     - [ ] Save
     - [ ] Export
-    - [ ] Rename
-    - [ ] Edit description ← requires rework
-    - [ ] Fit2Reference
+    - [x] Rename ← works!
+    - [x] Edit description ← works!
+    - [ ] ~~Fit2Reference~~ **postponed to version v4.1**
 - Reference
-    - [ ] Add
-    - [ ] Delete
-    - [ ] Show
-    - [ ] Edit
-    - [ ] Flip
+    - [x] Add
+    - [x] Delete
+    - [x] Show
+    - [ ] ~~Edit~~ **postponed to version v4.1**
+    - [ ] ~~Flip~~ **postponed to version v4.1**
 - View
     - [ ] Fit view
-    - [ ] Show Curvature comb
-    - [ ] Show camberline
+    - [ ] ~~Show Curvature comb~~ **postponed to version v4.1**
+    - [ ] ~~Show camberline~~ **postponed to version v4.1**
 - Window
-    - [ ] Airfoil Tree
-    - [ ] Reference Tree
-    - [ ] Parameter Table
-    - [ ] Logger Console
-    - [ ] Description TextArea
-    - [ ] Statistics Table
+    - [x] Airfoil Tree
+    - [x] Reference Tree
+    - [x] Parameter Table
+    - [x] Logger Console
+    - [x] Description TextArea
+    - [x] Statistics Table
 - Module
     - [ ] Wing Module
 
 ## Rework:
 **View menu**
 - [ ] set view back to airfoil
-- [ ] curvature comb?
-- [ ] strzalka ugięcia
-
-**Description Widget**
-**Reference Widget**
-**Statistics Table**
-Looks like it refreshes only after click on airfoil tree
-
-Chords statistic: calc from Pitagoras
 
 ---
 

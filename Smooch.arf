@@ -2,33 +2,31 @@
  "program name": "Deadalus",
  "program version": "0.4.0-beta",
  "airfoil": {
-  "name": "test",
-  "path": "D:/Programy/7kStudio/Deadalus/test.arf",
+  "name": "Smooch",
+  "path": "D:/Programy/7kStudio/Deadalus/Smooch.arf",
   "format": "ddls-parametric",
   "info": {
    "creation_date": "2026-03-24",
    "modification_date": "2026-03-24",
-   "description": "Airfoil created from scratch"
+   "description": "New projects: Initialized because of no other airfoil was available"
   },
   "params": {
-   "origin_X": 0,
-   "origin_Y": 0,
-   "stretch": 1,
-   "incline": 0,
+   "origin_X": 0.0,
+   "origin_Y": 0.0,
+   "stretch": 3.0,
+   "incline": 22.0,
    "LE": {
-    "thickness": 0.1,
-    "offset": 0,
-    "angle": 0.0,
-    "ps_tan": 0.05,
-    "ps_slope": 20,
+    "thickness": 0.5,
+    "angle": 36.0,
+    "ps_tan": 0.07,
+    "ps_slope": 20.0,
     "ps_curv": 0.05,
-    "ss_tan": 0.05,
-    "ss_slope": -20,
+    "ss_tan": 0.04,
+    "ss_slope": -20.0,
     "ss_curv": 0.05
    },
    "TE": {
     "thickness": 0.01,
-    "offset": 0,
     "angle": 0.0,
     "ps_tan": 0.004,
     "ps_slope": -30,

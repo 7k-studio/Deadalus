@@ -106,12 +106,12 @@ class ViewportOpenGL(QGLWidget):
                 self.draw_dashed_line(self.airfoil, 0.01, self.zoom)
         for reference in self.PROJECT.reference_airfoils:
             if reference.visible:
-                if reference.infos['format'] == 'selig':
+                if reference.info['format'] == 'selig':
                     self.draw_airfoil_selig_format(reference)
-                    self.logger.debug("Drawing selig format airfoil")
-                if reference.infos['format'] == 'ddls-parametric':
+                    # self.logger.debug("Drawing selig format airfoil")
+                if reference.info['format'] == 'ddls-parametric':
                     self.draw_airfoil(reference, color='grey')
-                    self.logger.debug("Drawing .ddls-parametric reference model")
+                    # self.logger.debug("Drawing .ddls-parametric reference model")
             #self.fit_to_airfoil(self.airfoil)
         
         # Switch to 2D GUI space (orthographic projection) using widget size
@@ -453,9 +453,11 @@ class ViewportOpenGL(QGLWidget):
             color = self.airfoil_settings['wireframe']['color']
 
         for key in ['le', 'te', 'ps', 'ss']:
-            vec_length = len(Current_Airfoil.geom[key][0])
+            segment = getattr(Current_Airfoil, key.upper())
+
+            vec_length = len(segment.spline.geom[0])
             if vec_length > 0:
-                points = [(Current_Airfoil.geom[key][0][i], Current_Airfoil.geom[key][1][i]) for i in range(vec_length)]
+                points = [(segment.spline.geom[0][i], segment.spline.geom[1][i]) for i in range(vec_length)]
                 if line_style == "solid":
                     self._draw_solid_line(points, color[key])
                 if line_style == "dashed":
@@ -529,25 +531,34 @@ class ViewportOpenGL(QGLWidget):
                 glVertex3fv(dot)
                 glEnd()
     
-    def fit_to_airfoil(self, airfoil):
-        xs = airfoil.geom['ps'][0] + airfoil.geom['ss'][0]
-        ys = airfoil.geom['ps'][1] + airfoil.geom['ss'][1]
-        if not xs or not ys:
-            return
-        width = max(xs) - min(xs)
-        height = max(ys) - min(ys)
-        self.zoom = -max(width, height) * 0.6
-        self.translation = [-(min(xs)+max(xs))/2, -(min(ys)+max(ys))/2, 0]
+    def fit_to_airfoil(self):
+        if self.airfoil:
+            top = max(self.airfoil.geom['ps'][1])
+            down = min(self.airfoil.geom['ss'][1])
+            left = min(self.airfoil.geom['le'][0])
+            right = max(self.airfoil.geom['te'][0])
 
-    def draw_cp_net(self, airfoil, zoom):
+            print( '| top | down | left | right |')
+            print(f"| {top} | {down} | {left} | {right} |")
+
+            width = right - left
+            height = top - down
+            self.zoom = max(width, height) * 0.6
+            self.translation = [-(left + right) / 2, -(top + down) / 2, 0]
+            self.resizeGL(self.width(), self.height())
+        self.update()
+
+    def draw_cp_net(self, Current_Airfoil, zoom):
         
         color = self.airfoil_settings['control_points']['color']
         glPointSize(6.0)
 
-        for key in airfoil.constr:
+        for key in ['le', 'te', 'ps', 'ss']:
+            segment = getattr(Current_Airfoil, key.upper())
+
             glColor3f(color[key][0], color[key][1], color[key][2])
             glBegin(GL_POINTS)
-            points = np.array(airfoil.constr[key]).T
+            points = np.array(segment.spline.control_points).T
             #print(f"{key}: ", points)
             for point in points:
                 glVertex3f(point[0], point[1], 0.0)

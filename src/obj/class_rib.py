@@ -24,17 +24,16 @@ import numpy as np
 from geomdl import BSpline, utilities
 
 from src.utils.tools_program import CreateBSpline_3D
-import src.globals as globals
 import src.obj.objects2D as objects2D
 
 from geomdl import NURBS
 from geomdl import tessellate
 from geomdl import knotvector
 
-class Segment:
+class Rib:
     def __init__(self):
-        self.infos = {'name': 'segment',
-                      'creation_date': '',
+        self.name = 'Rib'
+        self.infos = {'creation_date': '',
                       'modification_date': ''}
         
         self.airfoil = objects2D.Airfoil()

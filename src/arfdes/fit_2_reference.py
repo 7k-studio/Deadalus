@@ -151,7 +151,7 @@ def fit_2_reference(current_airfoil, reference_airfoil, bounds=None):
     if result.success:
         for i, k in enumerate(param_names):
             current_airfoil.params[k] = result.x[i]
-        logger.info(f"Airfoil '{current_airfoil.infos.get('name', '')}' parameters fitted to reference.")
+        logger.info(f"Airfoil '{current_airfoil.info.get('name', '')}' parameters fitted to reference.")
     else:
         logger.error("Optimization failed:", result.message)
 

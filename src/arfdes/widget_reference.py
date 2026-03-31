@@ -30,7 +30,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QLineEdit, QFormLayout, QLabel, 
     QMenuBar, QAction, QFileDialog, QTreeWidget, 
     QTreeWidgetItem, QTextEdit, QStackedWidget, QHeaderView,
-    QTableWidget, QTableWidgetItem, QPushButton
+    QTableWidget, QTableWidgetItem, QPushButton, QDialog
     )
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
@@ -41,6 +41,93 @@ from src.arfdes.tools_airfoils import Reference_load
 import src.arfdes.tools_reference as tools
 
 from src.opengl.viewport2d import ViewportOpenGL
+
+class ReferenceDialog(QDialog):
+    def __init__(self, references, mode='show', parent=None):
+        super().__init__(parent)
+        self.references = references
+        self.mode = mode
+        self.selected_references = []
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle(f"Reference {self.mode.title()}")
+        layout = QVBoxLayout()
+
+        self.tree = QTreeWidget()
+        self.tree.setColumnCount(3)
+        self.tree.setHeaderLabels(["Name", "Format", "Visible"])
+        self.tree.setSelectionMode(QTreeWidget.MultiSelection if self.mode in ['delete', 'show'] else QTreeWidget.SingleSelection)
+
+        for ref in self.references:
+            name = ref.info.get('name', 'Unknown')
+            format_ = ref.info.get('format', 'Unknown')
+            visible = "Yes" if ref.visible else "No"
+            item = QTreeWidgetItem([name, format_, visible])
+            self.tree.addTopLevelItem(item)
+
+        layout.addWidget(self.tree)
+
+        button_layout = QHBoxLayout()
+        if self.mode == 'delete':
+            accept_btn = QPushButton("Delete")
+            accept_btn.clicked.connect(self.accept)
+            cancel_btn = QPushButton("Cancel")
+            cancel_btn.clicked.connect(self.reject)
+            button_layout.addWidget(accept_btn)
+            button_layout.addWidget(cancel_btn)
+        elif self.mode == 'show':
+            show_btn = QPushButton("Show")
+            show_btn.clicked.connect(self.show_selected)
+            hide_btn = QPushButton("Hide")
+            hide_btn.clicked.connect(self.hide_selected)
+            cancel_btn = QPushButton("Cancel")
+            cancel_btn.clicked.connect(self.reject)
+            button_layout.addWidget(show_btn)
+            button_layout.addWidget(hide_btn)
+            button_layout.addWidget(cancel_btn)
+        else:  # edit, flip
+            action_btn = QPushButton(self.mode.title())
+            action_btn.clicked.connect(self.perform_action)
+            close_btn = QPushButton("Close")
+            close_btn.clicked.connect(self.accept)
+            button_layout.addWidget(action_btn)
+            button_layout.addWidget(close_btn)
+
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
+
+    def accept(self):
+        if self.mode == 'delete':
+            selected_items = self.tree.selectedItems()
+            for item in selected_items:
+                index = self.tree.indexOfTopLevelItem(item)
+                self.selected_references.append(self.references[index])
+        super().accept()
+
+    def show_selected(self):
+        selected_items = self.tree.selectedItems()
+        for item in selected_items:
+            index = self.tree.indexOfTopLevelItem(item)
+            self.references[index].visible = True
+        self.update_tree()
+
+    def hide_selected(self):
+        selected_items = self.tree.selectedItems()
+        for item in selected_items:
+            index = self.tree.indexOfTopLevelItem(item)
+            self.references[index].visible = False
+        self.update_tree()
+
+    def perform_action(self):
+        # Placeholder for edit/flip
+        print(f"{self.mode} action performed")
+
+    def update_tree(self):
+        for i, ref in enumerate(self.references):
+            item = self.tree.topLevelItem(i)
+            visible = "Yes" if ref.visible else "No"
+            item.setText(2, visible)
 
 class TreeRererence(QTableWidget):
     referenceStatus = pyqtSignal(bool, str)
@@ -87,26 +174,73 @@ class TreeRererence(QTableWidget):
         options_buttons.addWidget(addButton)
         options_buttons.addWidget(delButton)
         options_buttons.addWidget(shoButton)
-        options_buttons.addWidget(ediButton)
+        if self.DEADALUS.preferences['general']['beta_features']:
+            options_buttons.addWidget(ediButton)
 
         self.ref_widget.addLayout(options_buttons)
 
         # Set the layout for the widget
         self.setLayout(self.ref_widget)
 
+    def show_delete_dialog(self):
+        if not self.PROJECT or not self.PROJECT.reference_airfoils:
+            return
+        dialog = ReferenceDialog(self.PROJECT.reference_airfoils, mode='delete', parent=self)
+        if dialog.exec_() == QDialog.Accepted:
+            for ref in dialog.selected_references:
+                self.PROJECT.reference_airfoils.remove(ref)
+            self.update()
+
+    def show_show_dialog(self):
+        if not self.PROJECT or not self.PROJECT.reference_airfoils:
+            return
+        dialog = ReferenceDialog(self.PROJECT.reference_airfoils, mode='show', parent=self)
+        dialog.exec_()
+        self.update()
+
+    def show_edit_dialog(self):
+        if not self.PROJECT or not self.PROJECT.reference_airfoils:
+            return
+        dialog = ReferenceDialog(self.PROJECT.reference_airfoils, mode='edit', parent=self)
+        dialog.exec_()
+
+    def show_flip_dialog(self):
+        if not self.PROJECT or not self.PROJECT.reference_airfoils:
+            return
+        dialog = ReferenceDialog(self.PROJECT.reference_airfoils, mode='flip', parent=self)
+        dialog.exec_()
+
     def add_reference(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Accepted file formats (*.ddls; *.txt; *.dat);; Deadalus Database Files (*.ddls);; Selig File Format Files (*.txt);; All Files (*)", options=options)
         if fileName:
             if (fileName.split(".")[1]).lower() == "ddls":
-                tools.load_json_reference(fileName)
+                reference = tools.load_json_reference(fileName)
             if (fileName.split(".")[1]).lower() == "txt" or (fileName.split(".")[1]).lower() == "dat":
-                tools.load_selig_reference(fileName)
-            self.logger.debug(f"Opened file '{fileName}'")
-            self.refresh_tree()
+                reference = tools.load_selig_reference(fileName)
+            if reference:
+                self.PROJECT.reference_airfoils.append(reference)
+                self.logger.debug(f"Opened file '{fileName}'")
+                self.update()
+            else:
+                self.logger.error('Loading failed!')
 
-    def delete_reference():
-        pass
+    def delete_reference(self):
+        selected_items = self.tree.selectedItems()
+        if not selected_items:
+            self.logger.warning("First select an airfoil!")
+            return
+
+        to_remove = []
+        for item in selected_items:
+            index = self.tree.indexOfTopLevelItem(item)
+            if 0 <= index < len(self.PROJECT.reference_airfoils):
+                to_remove.append(self.PROJECT.reference_airfoils[index])
+
+        for ref in to_remove:
+            self.PROJECT.reference_airfoils.remove(ref)
+
+        self.update()
 
     def show_reference(self):
         selected_item = self.tree.currentItem()
@@ -122,26 +256,26 @@ class TreeRererence(QTableWidget):
 
         airfoil_obj = self.PROJECT.reference_airfoils[airfoil_index]
         
-        if airfoil_obj.visible == False:
-            airfoil_obj.visible = True
-        else:
-            airfoil_obj.visible = False
+        airfoil_obj.visible = not airfoil_obj.visible
         
-        self.refresh_tree()
+        self.update()
+        self.DEADALUS.AIRFOILDESIGNER.OPEN_GL.update()
 
     def edit_reference():
         pass
     
     def update(self):
         self.tree.clear()  # Clear existing items
+        if self.PROJECT is None:
+            return
         for airfoil in self.PROJECT.reference_airfoils:
             self.add_airfoil_to_tree(airfoil)
         self.logger.info("Reference Tree is refreshed")
 
     def add_airfoil_to_tree(self, airfoil_obj=None):
         """Add an airfoil to the list and tree menu."""
-        name = airfoil_obj.infos.get('name', 'Unknown')
-        format = airfoil_obj.infos.get('format', 'Unknown')
+        name = airfoil_obj.info.get('name', 'Unknown')
+        format = airfoil_obj.info.get('format', 'Unknown')
         visible = "Yes" if airfoil_obj.visible else "No"  # Convert boolean to string
 
         tree_item = QTreeWidgetItem([name, format, visible])  # Add 3 columns of data

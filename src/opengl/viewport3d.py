@@ -34,8 +34,6 @@ from OpenGL.GLU import *
 import src.opengl.bckgrd as background
 import src.opengl.construction as construction
 import src.opengl.solid as solid
-# from src.program import DEADALUS
-from src.program.project import PROJECT
 
 
 class Viewport3D(QOpenGLWidget):
@@ -53,14 +51,19 @@ class Viewport3D(QOpenGLWidget):
       - Double-click Left: Reset view
     """
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self, program=None, parent=None, project=None):
+        super().__init__(None)
+
+        self.DEADALUS = program
+        self.WINGDESIGNER = parent
+        self.PROJECT = project
+
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setMouseTracking(True)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.viewport_settings = DEADALUS.preferences["wing_designer"]["viewport"]
-        self.wing_settings = DEADALUS.preferences["wing_designer"]["wing"]
+        self.viewport_settings = self.DEADALUS.preferences["wing_designer"]["viewport"]
+        self.wing_settings = self.DEADALUS.preferences["wing_designer"]["wing"]
 
         # Camera / view state
         self.target = QtGui.QVector3D(0.0, 0.0, 0.0)  # center of rotation
@@ -125,15 +128,15 @@ class Viewport3D(QOpenGLWidget):
         #self._draw_demo_geometry()
 
         # Drawing objects
-        for i in range(len(PROJECT.project_components)):
+        for i in range(len(self.PROJECT.components)):
 
-            background.draw_origin_arrows(self, zoom=self.distance, origin_x=PROJECT.project_components[i].params['origin_X'], origin_y=PROJECT.project_components[i].params['origin_Y'], origin_z=PROJECT.project_components[i].params['origin_Z'])
+            background.draw_origin_arrows(self, zoom=self.distance, origin_x=self.PROJECT.components[i].params['origin_X'], origin_y=self.PROJECT.components[i].params['origin_Y'], origin_z=self.PROJECT.components[i].params['origin_Z'])
 
-            for j in range(len(PROJECT.project_components[i].wings)):
+            for j in range(len(self.PROJECT.components[i].wings)):
                 
-                #construction.draw_cp_net(PROJECT.project_components[i].wings[j], self.distance)
+                #construction.draw_cp_net(PROJECT.components[i].wings[j], self.distance)
                 
-                for k in range(len(PROJECT.project_components[i].wings[j].segments)):
+                for k in range(len(self.PROJECT.components[i].wings[j].segments)):
 
                     try:
                         # Check for errors before drawing
@@ -143,18 +146,18 @@ class Viewport3D(QOpenGLWidget):
                         
                         #print(f"{k}:", segment.uv_grid)
                         if self.wing_settings["wireframe"]["show"]:
-                            construction.draw_wireframe(self, i, j, k)
+                            construction.draw_wireframe(self.PROJECT, i, j, k)
 
-                        if len(PROJECT.project_components[i].wings[j].segments) > 1:
+                        if len(self.PROJECT.components[i].wings[j].segments) > 1:
                             if self.wing_settings["grid"]["show"]:
                                 for key in ["ps", "ss", "le", "te"]:
-                                    construction.draw_cp_grid(PROJECT.project_components[i].wings[j].segments[k].uv_grid[key])
+                                    construction.draw_cp_grid(self.PROJECT.components[i].wings[j].segments[k].uv_grid[key])
                             if self.wing_settings["solid"]["show"]:
                                 for key in ["ps", "ss", "le", "te"]:
-                                    construction.draw_nurbs_surface(PROJECT.project_components[i].wings[j].segments[k].surfaces[key])
+                                    construction.draw_nurbs_surface(self.PROJECT.components[i].wings[j].segments[k].surfaces[key])
 
-                        #solid.draw_b_spline_surf(PROJECT.project_components[i].wings[j].segments[k])
-                        #shapes.draw_wing(self, PROJECT.project_components[i].wings[j], len(PROJECT.project_components[i].wings[j].segments))
+                        #solid.draw_b_spline_surf(PROJECT.components[i].wings[j].segments[k])
+                        #shapes.draw_wing(self, PROJECT.components[i].wings[j], len(PROJECT.components[i].wings[j].segments))
                         # Check for errors after drawing
                         error = glGetError()
                         if error != GL_NO_ERROR:

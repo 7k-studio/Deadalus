@@ -24,7 +24,6 @@ import numpy as np
 from geomdl import BSpline, utilities
 
 from src.utils.tools_program import CreateBSpline_3D
-import src.globals as globals
 import src.obj.objects2D as objects2D
 
 from geomdl import NURBS
@@ -32,10 +31,13 @@ from geomdl import tessellate
 from geomdl import knotvector
 
 class Component:
-    def __init__(self):
+    def __init__(self, program=None, project=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.infos = {'name': 'component',
-                      'creation_date': '',
+        self.DEADALUS = program
+        self.PROJECT = project
+
+        self.name = 'Component'
+        self.infos = {'creation_date': '',
                       'modification_date': ''}
         
         self.params = {
@@ -44,11 +46,17 @@ class Component:
             'origin_Z': 0,
         }
 
+        self.unit = {
+            'origin_X': 'm',
+            'origin_Y': 'm',
+            'origin_Z': 'm',
+        }
+
         self.wings = []
 
     def move(self, cmp_X:float, cmp_Y:float, cmp_Z:float):
 
-        self.logger.info(f"Moving COMPONENT geometry by X:{cmp_X}, Y:{cmp_Y}, Z:{cmp_Z}...")
+        self.logger.debug(f"WNGWB > Moving COMPONENT geometry by X:{cmp_X}, Y:{cmp_Y}, Z:{cmp_Z}...")
 
         tmp_X = self.params['origin_X'] + cmp_X
         tmp_Y = self.params['origin_Y'] + cmp_Y
@@ -58,17 +66,17 @@ class Component:
     
     def update(self, dummy1, dummy2, dummy3):
         self.logger.info("Updating COMPONENT...")
-        self.logger.info("   This function is pointless :( ")
+        self.logger.debug("   This function is pointless :( ")
         #self.params['origin_X'] = 0
         #self.params['origin_Y'] = 0
         #self.params['origin_Z'] = 0
 
     def transform(self, grandparent_index):
 
-        cmp_X = globals.PROJECT.project_components[grandparent_index].origin_X
-        cmp_Y = globals.PROJECT.project_components[grandparent_index].origin_Y
-        cmp_Z = globals.PROJECT.project_components[grandparent_index].origin_Z
+        cmp_X = self.PROJECT.components[grandparent_index].origin_X
+        cmp_Y = self.PROJECT.components[grandparent_index].origin_Y
+        cmp_Z = self.PROJECT.components[grandparent_index].origin_Z
 
         self.logger.info("Transforming component...")
         self.params['origin_X'], self.params['origin_Y'], self.params['origin_Z'] = self.move_component(cmp_X, cmp_Y, cmp_Z)
-        self.logger.info("Done!")
+        self.logger.debug("Done!")

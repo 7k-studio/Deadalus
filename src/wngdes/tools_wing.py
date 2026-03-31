@@ -41,7 +41,6 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from src.program.project import PROJECT
 
 import datetime
 
@@ -290,21 +289,4 @@ def rotate_airfoil(angle, tmp_le, tmp_ps, tmp_ss, tmp_te, incidence):
     tmp_te = np.dot(rotation_matrix, tmp_te)
     
     return angle, tmp_le, tmp_ps, tmp_ss, tmp_te
-
-def add_component_to_tree(tree_menu, component_obj):
-    """Add an airfoil to the list and tree menu."""
-    PROJECT.project_components.append(component_obj)
-    name = component_obj.infos.get('name', 'Unknown')
-    modification_date = component_obj.infos.get('modification_date', 'Unknown')
-    creation_date = component_obj.infos.get('creation_date', 'Unknown')
-    tree_item = QTreeWidgetItem([str(name), str(modification_date), str(creation_date)])
-    tree_menu.addTopLevelItem(tree_item)
-
-def add_wing_to_tree(item, name, wing_obj, component_obj):
-    """Add an airfoil to the list and tree menu."""     
-    component_obj.wings.append(wing_obj)
-
-def add_segment_to_tree(tree_menu, name, segment_obj, component_index, wing_index):
-    """Add an airfoil to the list and tree menu."""
-    PROJECT.project_components[component_index].wings[wing_index].segments.append(segment_obj)
 

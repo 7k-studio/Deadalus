@@ -63,7 +63,7 @@ class SplashScreen(QWidget):
         version_label.setStyleSheet("font-size: 12px; font-weight: regular;")
         layout.addWidget(version_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
-        copyright_label = QLabel('Copyright (C) 2025 Jakub Kamyk')
+        copyright_label = QLabel('Copyright © 2025-2026 Jakub Kamyk')
         copyright_label.setStyleSheet("font-size: 9px; font-weight: regular;")
         layout.addWidget(copyright_label, alignment=Qt.AlignCenter | Qt.AlignTop)
         
@@ -122,21 +122,19 @@ class SplashScreen(QWidget):
         """Create new DEADALUS project and open the AirfoilDesigner window."""
         self.logger.info("Creating new project")
         self.PROJECT = project.Project(self.DEADALUS)
-        self.airfoil_designer_window = AirfoilDesigner(self.DEADALUS, self.PROJECT)  # Pass airfoil_list
-        self.airfoil_designer_window.show()
+        self.DEADALUS.AIRFOILDESIGNER.set_project(self.PROJECT)
+        self.DEADALUS.AIRFOILDESIGNER.show()
         self.close()
 
     def open_project(self):
         """Load DEADALUS project and open the AirfoilDesigner window."""
         self.logger.info("Opening existing project")
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DEADALUS Database Files (*.ddls);; All Files (*)", options=options)
-        if fileName:
-            self.PROJECT = project.Project(self.DEADALUS)
-            self.PROJECT.loadProject(fileName)
-            self.airfoil_designer_window = AirfoilDesigner(self.DEADALUS, self.PROJECT)  # Pass airfoil_list
-            self.airfoil_designer_window.show()
-            self.close()
+        self.PROJECT = project.Project(self.DEADALUS)
+        self.PROJECT.open()
+        self.DEADALUS.AIRFOILDESIGNER.set_project(self.PROJECT)
+        self.DEADALUS.WINGDESIGNER.set_project(self.PROJECT)
+        self.DEADALUS.AIRFOILDESIGNER.show()
+        self.close()
 
     def open_manual(self):
         self.logger.info("Opening user manual")

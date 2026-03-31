@@ -22,33 +22,30 @@ import logging
 import math
 import sys
 import numpy as np
-import src.obj.tools_program as tools
+import src.utils.tools_program as tools
+from src.obj.objects2D import BSpline, Line
 
 #from src.arfdes.tools_airfoil import CreateBSpline
 #import src.globals as globals
 
 class LeadingEdge:
-    def __init__(self):
-        self.infos = {
-            "type": "F",
-        }
+    def __init__(self, program):
+        self.DEADALUS = program
+        self.type = "F"
 
         self.params = {
-            "thickness": 0.05,
-            "offset": 0,
-            "angle": 0.02,
-            "ps_tan": 0.02,
-            "ps_slope": 10,
-            "ps_curv": 0.01,
-            "ss_tan": 0.02,
-            "ss_slope": 10,
-            "ss_curv": 0.01,
+            "thickness": 0.1,
+            "angle": 0.0,
+            "ps_tan": 0.05,
+            "ps_slope": -20,
+            "ps_curv": 0.05,
+            "ss_tan": 0.05,
+            "ss_slope": -20,
+            "ss_curv": 0.05,
         }
 
         self.unit = {
             "thickness": "m",
-            "offset":    "m",
-            "angle":     "deg",
             "ps_tan":    "m",
             "ps_slope":  "deg",
             "ps_curv":   "m",
@@ -56,28 +53,37 @@ class LeadingEdge:
             "ss_slope":  "deg",
             "ss_curv":   "m",
         }
+
+        self.spline = BSpline(self.DEADALUS)
+
+    def calc_position(self):
+
+        index_min = min(range(len(self.spline.geom[0])), key=self.spline.geom[0].__getitem__)
+        pos_X = self.spline.geom[0][index_min]
+        pos_Y = self.spline.geom[1][index_min]
+
+        return pos_X, pos_Y
+
+        
 
 class TrailingEdge:
-    def __init__(self):
-        self.infos = {
-            "type": "F",
-        }
+    def __init__(self, program):
+        self.DEADALUS = program
+        self.type = "F"
 
         self.params = {
-            "thickness": 0.05,
-            "offset": 0,
-            "angle": 0.02,
-            "ps_tan": 0.02,
-            "ps_slope": 10,
-            "ps_curv": 0.01,
-            "ss_tan": 0.02,
-            "ss_slope": 10,
-            "ss_curv": 0.01,
+            "thickness": 0.01,
+            "angle": 0.0,
+            "ps_tan": 0.004,
+            "ps_slope": -30,
+            "ps_curv": 0.004,
+            "ss_tan": 0.004,
+            "ss_slope": -30,
+            "ss_curv": 0.004,
         }
 
         self.unit = {
             "thickness": "m",
-            "offset":    "m",
             "angle":     "deg",
             "ps_tan":    "m",
             "ps_slope":  "deg",
@@ -87,19 +93,28 @@ class TrailingEdge:
             "ss_curv":   "m",
         }
 
-class PressureSide:
-    def __init__(self):
+        self.spline = BSpline(self.DEADALUS)
+    
+    def calc_position(self):
 
-        self.infos = {
-            "type": "C",
-        }
+        index_max = max(range(len(self.spline.geom[0])), key=self.spline.geom[0].__getitem__)
+        pos_X = self.spline.geom[0][index_max]
+        pos_Y = self.spline.geom[1][index_max]
+
+        return pos_X, pos_Y
+
+class PressureSide:
+    def __init__(self, program):
+        self.DEADALUS = program
+
+        self.type = "C"
 
         self.params = {
-            "fwd_wedge": 0,
-            "fwd_tan":   0.20,
+            "fwd_wedge": 10,
+            "fwd_tan":   0.05,
             "fwd_slope": 0,
-            "fwd_curv":  0.20,
-            "rwd_wedge": 0,
+            "fwd_curv":  0.10,
+            "rwd_wedge": 5,
             "rwd_tan":   0.10,
             "rwd_slope": 0,
             "rwd_curv":  0.10,
@@ -115,22 +130,23 @@ class PressureSide:
             "rwd_slope": "deg",
             "rwd_curv":  "m"
         }
+
+        self.spline = BSpline(self.DEADALUS)
 
 class SuctionSide:
-    def __init__(self):
+    def __init__(self, program):
+        self.DEADALUS = program
 
-        self.infos = {
-            "type": "C",
-        }
+        self.type = "C"
 
         self.params = {
-            "fwd_wedge": 0,
-            "fwd_tan":   0.20,
+            "fwd_wedge": 10,
+            "fwd_tan":   0.05,
             "fwd_slope": 0,
-            "fwd_curv":  0.20,
-            "rwd_wedge": 0,
-            "rwd_tan":   0.10,
-            "rwd_slope": 0,
+            "fwd_curv":  0.10,
+            "rwd_wedge": 5,
+            "rwd_tan":   0.1,
+            "rwd_slope": 0.0,
             "rwd_curv":  0.10,
         }
 
@@ -145,63 +161,82 @@ class SuctionSide:
             "rwd_curv":  "m"
         }
 
-class Airfoil:
+        self.spline = BSpline(self.DEADALUS)
+
+
+class ChordLine:
+    def __init__(self, parent):
+        self.AIRFOIL = parent
+        self.line = Line()
+    
+    def calc_chord(self):
+
+        index_min = min(range(len(self.AIRFOIL.LE.spline.geom[0])), key=self.AIRFOIL.LE.spline.geom[0].__getitem__)
+        X_min = self.AIRFOIL.LE.spline.geom[0][index_min]
+        Y_min = self.AIRFOIL.LE.spline.geom[1][index_min]
+
+        index_max = max(range(len(self.AIRFOIL.TE.spline.geom[0])), key=self.AIRFOIL.TE.spline.geom[0].__getitem__)
+        X_max = self.AIRFOIL.TE.spline.geom[0][index_max]
+        Y_max = self.AIRFOIL.TE.spline.geom[1][index_max]
+
+        chord = math.sqrt((X_max-X_min)**2 + (Y_max-Y_min)**2)
+
+        return chord
+
+class CamberLine:
     def __init__(self):
+        pass
+
+class Airfoil:
+    def __init__(self, program):
+        self.DEADALUS = program
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.id = ''
+        self.name = ""
+        self.path = ""
+        self.format = 'ddls-parametric'
         self.visible = False
 
         #Active parameters
-        self.infos = {
-            'name': 'Airfoil',
-            'format': 'ddls-parametric',
+        self.info = {
             'creation_date': '',
             'modification_date': '',
-            'description': ''}
+            'description': ''
+            }
 
         self.params = {
             "origin_X":  0,
             "origin_Y":  0,
             "stretch":   1,
-            "incidence": 0,
+            "incline":   0,
         }
 
         self.unit = {
             "origin_X":     "m",
             "origin_Y":     "m",
             "stretch":      "m",
-            "incidence":    "deg",
+            "incline":    "deg",
         }
 
         self.stats = {
-            "chord": 1,
-            "thickness max": 1,
+            "Chord": 1,
+            "Position LE X": 0,
+            "Position LE Y": 0,
+            "Position TE X": 0,
+            "Position TE Y": 0,
         }
 
-        self.LE = LeadingEdge()
-        self.TE = TrailingEdge()
-        self.PS = PressureSide()
-        self.SS = SuctionSide()
+        self.LE = LeadingEdge(self.DEADALUS)
+        self.TE = TrailingEdge(self.DEADALUS)
+        self.PS = PressureSide(self.DEADALUS)
+        self.SS = SuctionSide(self.DEADALUS)
 
-        self.geom = {
-            'le': [],
-            'ps': [],
-            'ss': [],
-            'te': []
-        }
-
-        self.constr = {
-            'le': [],
-            'ps': [],
-            'ss': [],
-            'te': []
-        }
+        self.CHORD = ChordLine(self)
 
     def construct(self):
         # Creating orignin points
-        p_le_org = [self.params['origin_X'], self.params['origin_Y']+self.LE.params['offset']]
-        p_te_org = tools.vec_translate(p_le_org, self.params['stretch'], self.params["incidence"])
+        p_le_org = [self.params['origin_X'], self.params['origin_Y']]
+        p_te_org = tools.vec_translate(p_le_org, self.params['stretch'], self.params["incline"])
 
         # Creating up (u) and down (d) point for Leading Edge PS and SS handle 
         p_le_u = tools.vec_translate(p_le_org, self.LE.params['thickness']/2, 90+self.LE.params["angle"])
@@ -215,22 +250,23 @@ class Airfoil:
         # Creating handle for Pressure Side
         #===================================
         try:
-            p_ps_fwd_tan = tools.vec_translate(p_le_u, self.PS.params['fwd_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+            # PS (upper-like) forward tangent should move toward chordwards (inward), not further away.
+            p_ps_fwd_tan = tools.vec_translate(p_le_u, self.PS.params['fwd_tan']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_le_u
 
         try:
-            p_ps_rwd_tan = tools.vec_translate(p_te_u, -self.PS.params['rwd_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+            p_ps_rwd_tan = tools.vec_translate(p_te_u, -self.PS.params['rwd_tan']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]-self.PS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_te_u
 
         try:
-            p_ps_fwd_crv = tools.vec_translate(p_ps_fwd_tan, self.PS.params['fwd_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.PS.params["fwd_slope"]))
+            p_ps_fwd_crv = tools.vec_translate(p_ps_fwd_tan, self.PS.params['fwd_curv']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.PS.params["fwd_slope"]))
         except ZeroDivisionError:
             p_ps_fwd_crv = p_ps_fwd_tan
 
         try:
-            p_ps_rwd_crv = tools.vec_translate(p_ps_rwd_tan, -self.PS.params['rwd_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.PS.params["rwd_slope"]))
+            p_ps_rwd_crv = tools.vec_translate(p_ps_rwd_tan, -self.PS.params['rwd_curv']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]-self.PS.params["rwd_wedge"]-self.PS.params["rwd_slope"]))
         except ZeroDivisionError:
             p_ps_fwd_tan = p_ps_rwd_tan
 
@@ -238,22 +274,23 @@ class Airfoil:
         # Creating handle for Suction Side
         #===================================
         try:
-            p_ss_fwd_tan = tools.vec_translate(p_le_d, self.SS.params['fwd_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
+            # SS (lower-like) forward tangent should move toward chordwards (inward) as well.
+            p_ss_fwd_tan = tools.vec_translate(p_le_d, self.SS.params['fwd_tan']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]-self.SS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_ss_fwd_tan = p_le_d
 
         try:
-            p_ss_rwd_tan = tools.vec_translate(p_te_d, -self.SS.params['rwd_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
+            p_ss_rwd_tan = tools.vec_translate(p_te_d, -self.SS.params['rwd_tan']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_ss_fwd_tan = p_te_d
 
         try:
-            p_ss_fwd_crv = tools.vec_translate(p_ss_fwd_tan, self.SS.params['fwd_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.SS.params["fwd_slope"]))
+            p_ss_fwd_crv = tools.vec_translate(p_ss_fwd_tan, self.SS.params['fwd_curv']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]-self.SS.params["fwd_wedge"]-self.SS.params["fwd_slope"]))
         except ZeroDivisionError:
-            p_ss_fwd_tan = p_ss_fwd_tan
+            p_ss_fwd_crv = p_ss_fwd_tan
 
         try:
-            p_ss_rwd_crv = tools.vec_translate(p_ss_rwd_tan, -self.SS.params['rwd_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.SS.params["rwd_slope"]))
+            p_ss_rwd_crv = tools.vec_translate(p_ss_rwd_tan, -self.SS.params['rwd_curv']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.SS.params["rwd_slope"]))
         except ZeroDivisionError:
             p_ss_rwd_crv = p_ss_rwd_tan
 
@@ -261,22 +298,22 @@ class Airfoil:
         # Creating handle for Leading Edge
         #===================================
         try:
-            p_le_ps_tan = tools.vec_translate(p_le_u, -self.LE.params['ps_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
+            p_le_ps_tan = tools.vec_translate(p_le_u, -self.LE.params['ps_tan']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_le_ps_tan = p_le_u
 
         try:
-            p_le_ss_tan = tools.vec_translate(p_le_d, -self.LE.params['ss_tan']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]))
+            p_le_ss_tan = tools.vec_translate(p_le_d, -self.LE.params['ss_tan']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]-self.SS.params["fwd_wedge"]))
         except ZeroDivisionError:
             p_le_ss_tan = p_le_d
 
         try:
-            p_le_ps_crv = tools.vec_translate(p_le_ps_tan, -self.LE.params['ps_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]+self.LE.params["ps_slope"]))
+            p_le_ps_crv = tools.vec_translate(p_le_ps_tan, -self.LE.params['ps_curv']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]+self.PS.params["fwd_wedge"]-self.LE.params["ps_slope"]))
         except ZeroDivisionError:
             p_le_ps_crv = p_le_ps_tan
 
         try:
-            p_le_ss_crv = tools.vec_translate(p_le_ss_tan, -self.LE.params['ss_curv']*self.params['stretch'], (self.params["incidence"]+self.LE.params["angle"]+self.SS.params["fwd_wedge"]+self.LE.params["ss_slope"]))
+            p_le_ss_crv = tools.vec_translate(p_le_ss_tan, -self.LE.params['ss_curv']*self.params['stretch'], (self.params["incline"]+self.LE.params["angle"]-self.SS.params["fwd_wedge"]+self.LE.params["ss_slope"]))
         except ZeroDivisionError:
             p_le_ss_tan = p_le_ss_tan
 
@@ -284,67 +321,56 @@ class Airfoil:
         # Creating handle for Trailing Edge
         #===================================
         try:
-            p_te_ps_tan = tools.vec_translate(p_te_u, self.TE.params['ps_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]))
+            # TE-side tangents also should move inside toward chord (backward), not over-shoot +x.
+            p_te_ps_tan = tools.vec_translate(p_te_u, self.TE.params['ps_tan']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]-self.PS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_te_ps_tan = p_te_u
 
         try:
-            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
+            p_te_ss_tan = tools.vec_translate(p_te_d, self.TE.params['ss_tan']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]))
         except ZeroDivisionError:
             p_te_ss_tan = p_te_d
 
         try:
-            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.PS.params["rwd_wedge"]+self.TE.params["ps_slope"]))
+            p_te_ps_crv = tools.vec_translate(p_te_ps_tan, self.TE.params['ps_curv']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]-self.PS.params["rwd_wedge"]+self.TE.params["ps_slope"]))
         except ZeroDivisionError:
             p_te_ps_crv = p_te_ps_tan
 
         try:
-            p_te_ss_crv = tools.vec_translate(p_te_ss_tan, self.TE.params['ss_curv']*self.params['stretch'], (self.params["incidence"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]+self.TE.params["ss_slope"]))
+            p_te_ss_crv = tools.vec_translate(p_te_ss_tan, self.TE.params['ss_curv']*self.params['stretch'], (self.params["incline"]+self.TE.params["angle"]+self.SS.params["rwd_wedge"]-self.TE.params["ss_slope"]))
         except ZeroDivisionError:
-            p_te_ss_tan = p_te_ss_tan
+            p_te_ss_crv = p_te_ss_tan
 
-        le_constr = np.vstack([p_le_u, p_le_ps_tan, p_le_ps_crv, p_le_ss_crv, p_le_ss_tan, p_le_d]).T
+        self.LE.spline.control_points = np.vstack([p_le_u, p_le_ps_tan, p_le_ps_crv, p_le_ss_crv, p_le_ss_tan, p_le_d]).T
 
-        te_constr = np.vstack([p_te_u, p_te_ps_tan, p_te_ps_crv, p_te_ss_crv, p_te_ss_tan, p_te_d]).T
+        self.TE.spline.control_points = np.vstack([p_te_u, p_te_ps_tan, p_te_ps_crv, p_te_ss_crv, p_te_ss_tan, p_te_d]).T
 
-        ps_constr = np.vstack([p_le_u, p_ps_fwd_tan, p_ps_fwd_crv, p_ps_rwd_crv, p_ps_rwd_tan, p_te_u]).T
+        self.PS.spline.control_points = np.vstack([p_le_u, p_ps_fwd_tan, p_ps_fwd_crv, p_ps_rwd_crv, p_ps_rwd_tan, p_te_u]).T
 
-        ss_constr = np.vstack([p_le_d, p_ss_fwd_tan, p_ss_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_d]).T
+        self.SS.spline.control_points = np.vstack([p_le_d, p_ss_fwd_tan, p_ss_fwd_crv, p_ss_rwd_crv, p_ss_rwd_tan, p_te_d]).T
 
         # Generate Splines
-        le_spline = tools.CreateBSpline(le_constr)
-        te_spline = tools.CreateBSpline(te_constr)
-        ps_spline = tools.CreateBSpline(ps_constr)
-        ss_spline = tools.CreateBSpline(ss_constr)
+        self.LE.spline.create()
+        self.TE.spline.create()
+        self.PS.spline.create()
+        self.SS.spline.create()
 
         self.logger.debug("LE, TE, PS, SS geometry established")
 
-        return le_spline, ps_spline, ss_spline, te_spline, le_constr, ps_constr, ss_constr, te_constr
-    
-    def calc_chord(self):
-
-        index_min = min(range(len(self.geom['le'][0])), key=self.geom['le'][0].__getitem__)
-        X_min = self.geom['le'][0][index_min]
-        Y_min = self.geom['le'][1][index_min]
-
-        index_max = max(range(len(self.geom['te'][0])), key=self.geom['te'][0].__getitem__)
-        X_max = self.geom['te'][0][index_max]
-        Y_max = self.geom['te'][1][index_max]
-
-        self.stats['chord'] = math.sqrt((X_max-X_min)**2 + (Y_max-Y_min)**2)
-        self.logger.debug(f"{X_max}-{X_min}={self.stats['chord']}")
-
     def update(self):
         self.logger.info("Recalculating airfoil geometry...")
-        self.geom['le'], self.geom['ps'], self.geom['ss'], self.geom['te'], self.constr['le'], self.constr['ps'], self.constr['ss'], self.constr['te']= self.construct()
+        self.construct()
         self.logger.info("Recalculating airfoil statistics...")
-        self.calc_chord()
+        self.stats['Chord'] = self.CHORD.calc_chord()
+        self.stats['Position LE X'], self.stats['Position LE Y'] = self.LE.calc_position()
+        self.stats['Position TE X'], self.stats['Position TE Y'] = self.TE.calc_position()
 
 class SeligAirfoil:
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.infos = {'name': 'N/A',
-                      'format': 'selig',}
-        self.visible = False
+        self.name = ""
+        self.path = ""
+        self.format = 'selig'
+        
         self.top_curve = []
         self.dwn_curve = []
