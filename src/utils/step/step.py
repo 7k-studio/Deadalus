@@ -586,7 +586,7 @@ def export_3d_segment_wing(filepath, base_name):
                     segment_elements_store = {}
 
                     segment = wing.segments[i]
-                    connection = [wing.segments[i].anchor, wing.segments[i].anchor]
+                    connection = [wing.segments[i].anchor, wing.segments[i+1].anchor]
 
                     # === PRESSURE SIDE ===
                     uv_grid = ensure_grid_connectivity(wing.segments[i], wing.segments[i+1], ['ps','le_ps', 'ps', 'te_ps'])

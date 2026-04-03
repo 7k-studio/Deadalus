@@ -556,3 +556,226 @@ class VertexPoint:
 ### X ###
 ### Y ###
 ### Z ###
+C:\Users\jakub\AppData\Local\DassaultSystemes\CATReport\Formula Student FW.err
+
+Input file: D:\Programy\7kStudio\demo\Formula Student FW.step
+Output file: 
+
+============================================
+*** = Processing new independent element
+  * = Intermediate processing
+!!  = Independent element K.O.
+!   = Intermediate error
+--------------------------------------------
+<I> = Information
+<W> = Warning
+<E> = Error
+--------------------------------------------
+[0000]  = Message identifier : 0000
+[T=xxx] = Entity Type : xxx
+[#0000] = Entity identifier number : 0000
+============================================
+Actual display level : Customer
+
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#38] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#110] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#74] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#146] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+   <W> [0903] [T=OPEN_SHELL] [#447] Surface created with errors; trying to repair  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#38] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+!! <E> [0002] [T=ADVANCED_FACE] [#41] Element not created  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#38] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#38] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#38] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#29] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#35] The tangent extremity of the BSpline curve is null  
+   <I> [0060] [T=ADVANCED_FACE] [#41] Bad face/surface orientation. Problem fixed  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#110] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+!! <E> [0002] [T=ADVANCED_FACE] [#113] Element not created  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#110] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#110] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#110] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#101] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#107] The tangent extremity of the BSpline curve is null  
+   <I> [0060] [T=ADVANCED_FACE] [#113] Bad face/surface orientation. Problem fixed  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#74] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+!! <E> [0002] [T=ADVANCED_FACE] [#77] Element not created  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#74] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#74] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#74] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#65] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#71] The tangent extremity of the BSpline curve is null  
+   <I> [0060] [T=ADVANCED_FACE] [#77] Bad face/surface orientation. Problem fixed  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#146] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+!! <E> [0002] [T=ADVANCED_FACE] [#149] Element not created  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#146] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#146] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+   <W> [0224] [T=B_SPLINE_SURFACE_WITH_KNOTS] [#146] The tangent extremity of the BSpline surface is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#137] The tangent extremity of the BSpline curve is null  
+   <W> [0166] [T=B_SPLINE_CURVE_WITH_KNOTS] [#143] The tangent extremity of the BSpline curve is null  
+   <I> [0060] [T=ADVANCED_FACE] [#149] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#188] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#188] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#260] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#260] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#224] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#224] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#296] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#296] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#335] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#335] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#407] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#407] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#371] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#371] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#443] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#443] Bad face/surface orientation. Problem fixed  
+   <I> [0776] [T=OPEN_SHELL] [#447] The entity name is Wing from segment
+	o~~~~~~~~~~~~~~~~~~~~~~~~~~o
+   <W> [0903] [T=OPEN_SHELL] [#579] Surface created with errors; trying to repair  
+!! <E> [0002] [T=ADVANCED_FACE] [#479] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#479] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#543] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#543] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#511] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#511] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#575] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#575] Bad face/surface orientation. Problem fixed  
+   <I> [0776] [T=ADVANCED_FACE] [#479] The entity name is ps surface
+   <I> [0776] [T=ADVANCED_FACE] [#543] The entity name is le surface
+   <I> [0776] [T=ADVANCED_FACE] [#511] The entity name is ss surface
+   <I> [0776] [T=ADVANCED_FACE] [#575] The entity name is te surface
+!! <E> [0002] [T=OPEN_SHELL] [#579] Element not created  
+	o~~~~~~~~~~~~~~~~~~~~~~~~~~o
+   <W> [0903] [T=OPEN_SHELL] [#711] Surface created with errors; trying to repair  
+!! <E> [0002] [T=ADVANCED_FACE] [#611] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#611] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#675] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#675] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#643] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#643] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#707] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#707] Bad face/surface orientation. Problem fixed  
+   <I> [0776] [T=ADVANCED_FACE] [#611] The entity name is ps surface
+   <I> [0776] [T=ADVANCED_FACE] [#675] The entity name is le surface
+   <I> [0776] [T=ADVANCED_FACE] [#643] The entity name is ss surface
+   <I> [0776] [T=ADVANCED_FACE] [#707] The entity name is te surface
+!! <E> [0002] [T=OPEN_SHELL] [#711] Element not created  
+	o~~~~~~~~~~~~~~~~~~~~~~~~~~o
+   <W> [0903] [T=OPEN_SHELL] [#843] Surface created with errors; trying to repair  
+!! <E> [0002] [T=ADVANCED_FACE] [#743] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#743] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#807] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#807] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#775] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#775] Bad face/surface orientation. Problem fixed  
+!! <E> [0002] [T=ADVANCED_FACE] [#839] Element not created  
+   <I> [0060] [T=ADVANCED_FACE] [#839] Bad face/surface orientation. Problem fixed  
+   <I> [0776] [T=ADVANCED_FACE] [#743] The entity name is ps surface
+   <I> [0776] [T=ADVANCED_FACE] [#807] The entity name is le surface
+   <I> [0776] [T=ADVANCED_FACE] [#775] The entity name is ss surface
+   <I> [0776] [T=ADVANCED_FACE] [#839] The entity name is te surface
+!! <E> [0002] [T=OPEN_SHELL] [#843] Element not created  
+	o~~~~~~~~~~~~~~~~~~~~~~~~~~o
+✅ Great progress - issue identified and there is a clean fix
+Excellent news: your CATIA report is directly pointing to a degenerate spline/tangent issue, and the code path is clear. The main problem is not only connection selection in step.py (that’s already fixed) but the actual control-point configuration that feeds those splines.
+
+🔎 What CATIA errors mean
+B_SPLINE_CURVE_WITH_KNOTS [...] tangent extremity is null
+=> start/end tangent = 0, typically because first two or last two control points are identical (degenerate direction).
+ADVANCED_FACE element not created / bad face orientation
+=> geometry happened, but boundary edge/surface invalid or degenerate.
+In your STEP output:
+
+curves #29, #35, #65, #71, #101, #107, #137, #143 etc are all the 4 “edge” curves used for inter-segment faces.
+in the faulty write path, these are B-splines with repeated first/last control points, so CATIA warns.
+🛠️ Where to change in step.py
+1. connection = [...] line in export_3d_segment_wing
+Already fixed:
+
+from [connection = [wing.segments[i].anchor, wing.segments[i].anchor]](http://vscodecontentref/5) (wrong)
+to [connection = [wing.segments[i].anchor, wing.segments[i+1].anchor]](http://vscodecontentref/6) (correct)
+2. In _write_oriented_edge_from_uv_grid(...), add a duplicate-point guard
+Current else and if connection == G0-G0 branches build 4-slot splines by raw control points taken from cp_uv_grid.
+If points are repeated:
+
+B_SPLINE with repeated endpoint -> null tangent warnings
+surfaces built with these edges can fail.
+Recommended step.py hedge:
+
+normalize each edge point list before creating BsplineWithKnots:
+remove consecutive duplicates,
+if 2 points left → use Line (or degree=1 B-spline),
+if <2 → skip / use degenerate abort path.
+specifically for G0-G1 and G1-G0: do not let the tangent-control revisit same anchor exactly.
+Example sketch in _write_oriented_edge_from_uv_grid:
+
+for edge curve points:
+curve_pts = remove_consecutive_duplicates(raw_pts)
+if len(curve_pts) == 2: line path
+else: BsplineWithKnots(... curve_pts ...)
+🧩 Even better: fix in class_wing.build_connection too
+This function prepares the control points used by STEP exporter.
+In current code:
+
+G0-G1: parent_*_tan_cp = parent_anchor (same as endpoint) → safe? no, this causes null tangent on parent side.
+G1-G0: child_*_tan_cp incorrectly uses parent_*_seg_anchor instead of child_*_seg_anchor.
+So stronger fix chain:
+
+correct G1-G0 to use child_*_seg_anchor for child tangent points (with +0 not parent coordinate)
+avoid copying endpoint as tangent point:
+G0-G1 should have tiny offset or valid point, not exact duplicate.
+G1-G0 likewise.
+Then step exporter outputs better splines and warnings should disappear.
+🧾 Summary for “what to do in step.py”
+step.py should treat G0-G1 and G1-G0 as spline (already done)
+add robust dedup logic before constructing each boundary spline
+fallback to Line when spline control points collapse to a straight/duplicate pair
+maybe also ensure vector/direction is valid (for degenerate length close to zero)
+This will eliminate the “tangent extremity null” warnings and make surfaces valid in CATIA.
+
+🎯 Final note
+You’ve already removed the first bug. The remaining CATIA errors are consistent with degeneracy in control points on the boundary splines, which is fixed by:
+
+build_connection math fix, and
+step.py guard around repeated control points before writing B_SPLINE_CURVE_WITH_KNOTS.

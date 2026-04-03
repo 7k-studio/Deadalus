@@ -613,8 +613,8 @@ def sample_curve(points, t):
     return out
 
 def make_nurbs_surface_points(control_points):
-    samples_u=int(globals.DEADALUS.preferences["general"]["performance"]/3+7)
-    samples_v=int(globals.DEADALUS.preferences["general"]["performance"]/3+7)
+    samples_u=int(globals.DEADALUS.preferences["general"]["performance"]/5+7)
+    samples_v=int(globals.DEADALUS.preferences["general"]["performance"]/5+7)
     u_count, v_count, _ = control_points.shape
     surf = NURBS.Surface()
     surf.degree_u = min(3, u_count - 1)
@@ -692,7 +692,7 @@ def build_b_spline_surf_for_segment(segment):
         surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
         surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
 
-        res = -0.00056 * globals.DEADALUS.preferences["general"]["performance"] + 0.1
+        res = -0.00036 * globals.DEADALUS.preferences["general"]["performance"] + 0.1
         surf.delta = (res, res)
         surf.evaluate()
         segment.surfaces[key] = build_surface_mesh(surf)
