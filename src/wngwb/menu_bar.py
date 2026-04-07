@@ -424,6 +424,45 @@ class MenuBar(QMenuBar):
                         component_index = self.main_window.tree_menu.indexOfTopLevelItem(grandparent_item)
 
                         del globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index]
+                        
+                        try:
+                            
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].uv_grid = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].surfaces = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].surfaces_info = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].geom = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': [],
+                                'le_ps': [],
+                                'te_ps': [],
+                                'le_ss': [],
+                                'te_ss': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].update()
+
+                        except:
+                            self.logger.warning('No surface to clean')
                         self.logger.info(f"Deleted segment at index {component_index}:{wing_index}:{segment_index}.")
                         self.main_window.tree_menu.init_tree()
                         self.open_gl.update()
