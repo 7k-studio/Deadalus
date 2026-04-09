@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import src.globals as globals
@@ -77,13 +77,13 @@ def CreateBSpline(const_points):
     t=np.append(t,[1,1,1])
 
     tck=[t,[const_points[0],const_points[1]],3]
-    if globals.DEADALUS.preferences['general']['performance'] == 'fast':
+    if globals.DAEDALUS.preferences['general']['performance'] == 'fast':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*1,25)),endpoint=True)
-    if globals.DEADALUS.preferences['general']['performance'] == 'normal':
+    if globals.DAEDALUS.preferences['general']['performance'] == 'normal':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*2,50)),endpoint=True)
-    if globals.DEADALUS.preferences['general']['performance'] == 'good':
+    if globals.DAEDALUS.preferences['general']['performance'] == 'good':
         # Use a faster method for performance
         u3=np.linspace(0,1,(max(l*3,75)),endpoint=True)
 
@@ -109,7 +109,7 @@ def CreateBSpline_3D(const_points, degree, resolution=None):
     
     # Sampling resolution
     if resolution == None:
-        f = int(globals.DEADALUS.preferences['general']['performance'])
+        f = int(globals.DAEDALUS.preferences['general']['performance'])
     else:
         f = resolution
 

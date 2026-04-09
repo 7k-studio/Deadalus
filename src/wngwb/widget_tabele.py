@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -199,7 +199,7 @@ class Tabele(QTableWidget):
                 airfoil_dropdown.setCurrentText(current_name)
             elif airfoil_names:
                 airfoil_dropdown.setCurrentIndex(0)
-            airfoil_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            airfoil_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_value_from_input(r, new_value))
             self.setCellWidget(row, 1, airfoil_dropdown)
             nominal_value = QTableWidgetItem(current_name)
             nominal_value.setTextAlignment(Qt.AlignCenter)
@@ -219,7 +219,7 @@ class Tabele(QTableWidget):
                 anchor_dropdown.setCurrentText(current_name)
             elif anchor_names:
                 anchor_dropdown.setCurrentIndex(0)
-            anchor_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_airfoil_value(r, new_value))
+            anchor_dropdown.currentTextChanged.connect(lambda new_value, r=row: self.update_value_from_input(r, new_value))
             self.setCellWidget(row, 1, anchor_dropdown)
             nominal_value = QTableWidgetItem(current_name)
             nominal_value.setTextAlignment(Qt.AlignCenter)

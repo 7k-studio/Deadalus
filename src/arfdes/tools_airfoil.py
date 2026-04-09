@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -110,7 +110,7 @@ def CreateBSpline(const_points, force_resolution=None):
     tck=[t,[const_points[0],const_points[1]],3]
     
     
-    f = int(globals.DEADALUS.preferences['general']['performance'])
+    f = int(globals.DAEDALUS.preferences['general']['performance'])
     if force_resolution:
         f = force_resolution
 
@@ -209,12 +209,12 @@ def load_airfoil_from_json(fileName):
             airfoil_version = data["program version"]
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
-            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            logger.warning("File may not load properly or is not compatible with DAEDALUS")
             return None
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = globals.DAEDALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -294,12 +294,12 @@ def load_from_ddls_030(data):
             airfoil_infos   = airfoil_data["infos"]
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
-            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            logger.warning("File may not load properly or is not compatible with DAEDALUS")
             return None
         
         if airfoil_version:
             airfoil_version = airfoil_version.split("-")[0].split(".")
-            program_version = globals.DEADALUS.program_version
+            program_version = globals.DAEDALUS.program_version
             program_version = program_version.split("-")[0].split(".")
 
             if program_version[1] != airfoil_version[1] or program_version[0] != airfoil_version[0]:
@@ -355,8 +355,8 @@ def save_airfoil_to_json(airfoil_idx=None):
     current_airfoil = globals.PROJECT.project_airfoils[airfoil_idx]
 
     data = {
-        "program name": globals.DEADALUS.program_name,
-        "program version": globals.DEADALUS.program_version,
+        "program name": globals.DAEDALUS.program_name,
+        "program version": globals.DAEDALUS.program_version,
         "airfoil": {
             "infos": {
                 **current_airfoil.infos,

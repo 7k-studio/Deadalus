@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -39,8 +39,8 @@ import src.obj.objects2D as objects2D
 
 class Program:
     def __init__(self):
-        self.program_name = "Deadalus"
-        self.program_version = "0.3.3-beta"
+        self.program_name = "Daedalus"
+        self.program_version = "0.3.4-beta"
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.preferences = {
@@ -149,7 +149,7 @@ class Program:
         #logo_label.setPixmap(pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
 
-        title_label = QLabel('DEADALUS')
+        title_label = QLabel('DAEDALUS')
         title_label.setFont(QFont("Cambria", 36))
         title_label.setAlignment(Qt.AlignCenter)
 
@@ -180,7 +180,7 @@ class Program:
         description_text.setReadOnly(True)
         description_text.setPlainText('\n'.join(about_text))
         
-        description_label = QLabel("DEADALUS is a program for parametricaly designing airfoils and wings.")
+        description_label = QLabel("DAEDALUS is a program for parametricaly designing airfoils and wings.")
         description_label.setAlignment(Qt.AlignCenter)
         description_label.setWordWrap(True)
 
@@ -211,7 +211,7 @@ class Program:
         webbrowser.open(f"file://{file_path}")
     
     def showRealiseNotes(self):
-        webbrowser.open(f"https://github.com/7k-studio/Deadalus/releases")
+        webbrowser.open(f"https://github.com/7k-studio/Daedalus/releases")
 
 class Project:
     def __init__(self):
@@ -320,9 +320,9 @@ def saveProject(fileName):
         }
         designed_components.append(components)
 
-    Deadalus = {
-        "program name": DEADALUS.program_name,
-        "program version": DEADALUS.program_version,
+    Daedalus = {
+        "program name": DAEDALUS.program_name,
+        "program version": DAEDALUS.program_version,
         "file name": os.path.basename(fileName),
     }
 
@@ -337,7 +337,7 @@ def saveProject(fileName):
     }
 
     data = {
-        "Program": Deadalus,
+        "Program": Daedalus,
         "Project": Project
     }
 
@@ -366,10 +366,10 @@ def loadProject(fileName):
     data = convert_list_to_ndarray(data)
 
     if "Program" in data:
-        if data["Program"].get("program version", DEADALUS.program_version):
-            file_version = data["Program"].get("program version", DEADALUS.program_version)
+        if data["Program"].get("program version", DAEDALUS.program_version):
+            file_version = data["Program"].get("program version", DAEDALUS.program_version)
             file_version = file_version.split("-")[0].split(".")
-            program_version = DEADALUS.program_version
+            program_version = DAEDALUS.program_version
             program_version = program_version.split("-")[0].split(".")
             if program_version[1] != file_version[1] or program_version[0] != file_version[0]:
                 PROJECT.logger.warning("Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
@@ -490,5 +490,5 @@ def loadProject(fileName):
 
     return True
 
-DEADALUS = Program()  # Create a global instance of Program
+DAEDALUS = Program()  # Create a global instance of Program
 PROJECT = Project()  # Create a global instance of Project

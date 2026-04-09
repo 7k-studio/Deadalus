@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -177,7 +177,7 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
             self.main_window.tree_menu.init_tree()
@@ -185,7 +185,7 @@ class MenuBar(QMenuBar):
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
             self.logger.info(f"Saved file: {fileName}")
@@ -194,7 +194,7 @@ class MenuBar(QMenuBar):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getSaveFileName(self, "Export File", "", "STEP AP203 (*.step;*.stp);", options=options)
         if fileName:
-            import src.utils.step as step
+            import src.utils.step.step as step
             #step.export_only_control_points(fileName)
             base_name = os.path.basename(fileName)
             step.export_3d_segment_wing(fileName, base_name)
@@ -424,6 +424,45 @@ class MenuBar(QMenuBar):
                         component_index = self.main_window.tree_menu.indexOfTopLevelItem(grandparent_item)
 
                         del globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index]
+                        
+                        try:
+                            
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].uv_grid = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].surfaces = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].surfaces_info = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].geom = {
+                                'le': [],
+                                'ps': [],
+                                'ss': [],
+                                'te': [],
+                                'le_ps': [],
+                                'te_ps': [],
+                                'le_ss': [],
+                                'te_ss': []
+                            }
+
+                            globals.PROJECT.project_components[component_index].wings[wing_index].segments[segment_index-1].update()
+
+                        except:
+                            self.logger.warning('No surface to clean')
                         self.logger.info(f"Deleted segment at index {component_index}:{wing_index}:{segment_index}.")
                         self.main_window.tree_menu.init_tree()
                         self.open_gl.update()
@@ -464,7 +503,7 @@ class MenuBar(QMenuBar):
         msg.exec_()
 
     def showAbout(self):
-        dialog = globals.DEADALUS.showAboutDialog(self)
+        dialog = globals.DAEDALUS.showAboutDialog(self)
 
     def showManual(self):
-        manual = globals.DEADALUS.showUserManual()
+        manual = globals.DAEDALUS.showUserManual()

@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -32,7 +32,7 @@ import logging
 class SplashScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__()
-        self.DEADALUS = parent
+        self.DAEDALUS = parent
         self.logger = logging.getLogger(self.__class__.__name__)
         self.setWindowTitle("Splash Screen")
         self.setFixedSize(500, 500)
@@ -52,11 +52,11 @@ class SplashScreen(QWidget):
         splash_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(splash_label)
 
-        program_label = QLabel('Deadalus Airfoil & Wing designer')
+        program_label = QLabel('Daedalus Airfoil & Wing designer')
         program_label.setStyleSheet("font-size: 12px; font-weight: regular; color: black;")
         layout.addWidget(program_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
-        version_label = QLabel('v{}'.format(self.DEADALUS.program_version))
+        version_label = QLabel('v{}'.format(self.DAEDALUS.program_version))
         version_label.setStyleSheet("font-size: 12px; font-weight: regular; color: black;")
         layout.addWidget(version_label, alignment=Qt.AlignLeft | Qt.AlignTop)
 
@@ -118,27 +118,27 @@ class SplashScreen(QWidget):
         self.logger.info("SplashScreen initialized")
 
     def new_project(self):
-        """Create new DEADALUS project and open the AirfoilDesigner window."""
+        """Create new DAEDALUS project and open the AirfoilDesigner window."""
         self.logger.info("Creating new project")
         self.PROJECT = globals.PROJECT.newProject()
-        self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
+        self.airfoil_designer_window = AirfoilDesigner(globals.DAEDALUS, globals.PROJECT)  # Pass airfoil_list
         self.airfoil_designer_window.show()
         self.close()
 
     def open_project(self):
-        """Load DEADALUS project and open the AirfoilDesigner window."""
+        """Load DAEDALUS project and open the AirfoilDesigner window."""
         self.logger.info("Opening existing project")
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DEADALUS Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "DAEDALUS Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             self.PROJECT = globals.loadProject(fileName)
-            self.airfoil_designer_window = AirfoilDesigner(globals.DEADALUS, globals.PROJECT)  # Pass airfoil_list
+            self.airfoil_designer_window = AirfoilDesigner(globals.DAEDALUS, globals.PROJECT)  # Pass airfoil_list
             self.airfoil_designer_window.show()
             self.close()
 
     def open_manual(self):
         self.logger.info("Opening user manual")
-        manual = globals.DEADALUS.showUserManual()
+        manual = globals.DAEDALUS.showUserManual()
 
     def open_notes(self):
-        manual = globals.DEADALUS.showRealiseNotes()
+        manual = globals.DAEDALUS.showRealiseNotes()
