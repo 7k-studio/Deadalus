@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -42,7 +42,7 @@ class MenuBar(QMenuBar):
 
     def __init__(self, program=None, project=None, parent=None, program_info=None, tree_menu=None):
         super(MenuBar, self).__init__(parent)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.main_window = parent
         self.tree_menu = tree_menu
@@ -103,7 +103,7 @@ class MenuBar(QMenuBar):
         editMenu.addSeparator()
         editMenu.addAction(renameAirfoilAction)
         editMenu.addAction(editDescriptionAction)
-        if globals.DEADALUS.preferences['general']['beta_features']:
+        if globals.DAEDALUS.preferences['general']['beta_features']:
             editMenu.addAction(fit2refAction)
 
         """View menu creation"""
@@ -149,7 +149,7 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.loadProject(fileName)
             self.logger.debug(f"Opened file '{fileName}'")
@@ -157,7 +157,7 @@ class MenuBar(QMenuBar):
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             globals.saveProject(fileName)
             self.logger.debug(f"Saved file: {fileName}")
@@ -180,7 +180,7 @@ class MenuBar(QMenuBar):
         """load the airfoil data from a JSON format file."""
         self.logger.info("Appending airfoil...")
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Daedalus Airfoil Format (*.arf);;All Files (*)", options=options)
 
         if fileName:
             try:
@@ -228,7 +228,7 @@ class MenuBar(QMenuBar):
         json_object = tools_airfoil.save_airfoil_to_json(airfoil_index)
 
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "DEADALUS Airfoil Format (*.arf);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "DAEDALUS Airfoil Format (*.arf);;All Files (*)", options=options)
         if fileName:
             with open(f"{fileName}", "w") as outfile:
                 outfile.write(json_object)
@@ -408,7 +408,7 @@ class MenuBar(QMenuBar):
         self.airfoil_designer_window.show()
 
     def showAbout(self):
-        dialog = globals.DEADALUS.showAboutDialog(self)
+        dialog = globals.DAEDALUS.showAboutDialog(self)
     
     def showManual(self):
-        manual = globals.DEADALUS.showUserManual()
+        manual = globals.DAEDALUS.showUserManual()

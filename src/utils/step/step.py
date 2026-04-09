@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -30,10 +30,10 @@ import src.utils.step.class_step as STEP
 
 logger = logging.getLogger(__name__)
 
-class Deadalus2Step:
+class Daedalus2Step:
     def __init__(self):
-        self.name = "Deadalus2Step203"
-        self.description = "Deadalus Python STEP AP203 Export"
+        self.name = "Daedalus2Step203"
+        self.description = "Daedalus Python STEP AP203 Export"
         self.version = "0.2.0-beta"
         self.schema = 'config_control_design'
 
@@ -544,7 +544,7 @@ def ensure_grid_connectivity(parent, child, key):
 
 def export_3d_segment_wing(filepath, base_name):
     PROJECT = globals.PROJECT
-    UNIT = globals.DEADALUS.preferences["general"]["units"]
+    UNIT = globals.DAEDALUS.preferences["general"]["units"]
     current_idx = 1
 
     all_elements_store = []
@@ -768,7 +768,7 @@ def export_3d_segment_wing(filepath, base_name):
     write_a_step_file(filepath, base_name, measurement_store, all_elements_store)
 
 def write_a_step_file(filepath, base_name, measurement_store, all_elements_store):
-    D2Step = Deadalus2Step()
+    D2Step = Daedalus2Step()
     def process_value(value, step_lines):
         """Append export() output of value or its elements to step_lines."""
         if isinstance(value, (list, tuple, np.ndarray)):

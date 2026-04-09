@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -33,24 +33,24 @@ def main():
     icon = QIcon("src/assets/logo.png")
     app.setWindowIcon(icon)
 
-    splash = SplashScreen(globals.DEADALUS)
+    splash = SplashScreen(globals.DAEDALUS)
     splash.show()
     
     sys.exit(app.exec_())
 
 def header(file):
-    file.write("       ________        __________    ____________    ________        ____________    ___            ___      ___    ___________  \n")
-    file.write("      /  ____  \      /  _______/\  /  ______   /\  /  ____  \      /  ______   /\  /  /\          /  /\    /  /\  /  ________/\ \n")
-    file.write("     /  /\___\  \    /  /\______\/ /  /\____/  / / /  /\___\  \    /  /\____/  / / /  / /         /  / /   /  / / /  /\_______\/ \n")
-    file.write("    /  / /   /  /\  /  /_/____    /  /_/___/  / / /  / /   /  /\  /  /_/___/  / / /  / /         /  / /   /  / / /  /_/______    \n")
-    file.write("   /  / /   /  / / /  _______/\  /  ______   / / /  / /   /  / / /  ______   / / /  / /         /  / /   /  / / /________   /\   \n")
-    file.write("  /  / /   /  / / /  /\______\/ /  /\____/  / / /  / /   /  / / /  /\____/  / / /  / /         /  / /   /  / /  \_______/  / /   \n")
-    file.write(" /  /_/___/  / / /  /_/_____   /  / /   /  / / /  /_/___/  / / /  / /   /  / / /  /_/______   /  /_/___/  / / _________/  / /    \n")
-    file.write("/___________/ / /__________/\ /__/ /   /__/ / /___________/ / /__/ /   /__/ / /___________/\ /___________/ / /___________/ /     \n")
-    file.write("\___________\/  \__________\/ \__\/    \__\/  \___________\/  \__\/    \__\/  \___________\/ \___________\/  \___________\/      \n")
+    file.write("       ________        ____________    __________    ________        ____________    ___            ___      ___    ___________  \n")
+    file.write("      /  ____  \      /  ______   /\  /  _______/\  /  ____  \      /  ______   /\  /  /\          /  /\    /  /\  /  ________/\ \n")
+    file.write("     /  /\___\  \    /  /\____/  / / /  /\______\/ /  /\___\  \    /  /\____/  / / /  / /         /  / /   /  / / /  /\_______\/ \n")
+    file.write("    /  / /   /  /\  /  /_/___/  / / /  /_/____    /  / /   /  /\  /  /_/___/  / / /  / /         /  / /   /  / / /  /_/______    \n")
+    file.write("   /  / /   /  / / /  ______   / / /  _______/\  /  / /   /  / / /  ______   / / /  / /         /  / /   /  / / /________   /\   \n")
+    file.write("  /  / /   /  / / /  /\____/  / / /  /\______\/ /  / /   /  / / /  /\____/  / / /  / /         /  / /   /  / /  \_______/  / /   \n")
+    file.write(" /  /_/___/  / / /  / /   /  / / /  /_/_____   /  /_/___/  / / /  / /   /  / / /  /_/______   /  /_/___/  / / _________/  / /    \n")
+    file.write("/___________/ / /__/ /   /__/ / /__________/\ /___________/ / /__/ /   /__/ / /___________/\ /___________/ / /___________/ /     \n")
+    file.write("\___________\/  \__\/    \__\/  \__________\/ \___________\/  \__\/    \__\/  \___________\/ \___________\/  \___________\/      \n")
     file.write("\n")
     file.write("|/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\//\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\|\n")
-    file.write(f"Program version: {globals.DEADALUS.program_version}\n")
+    file.write(f"Program version: {globals.DAEDALUS.program_version}\n")
     file.write(f"Program opened on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
     
 def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):

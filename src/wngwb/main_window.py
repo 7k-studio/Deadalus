@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent, flags)
         self.logger = logging.getLogger(self.__class__.__name__)
         
-        self.setWindowTitle("DEADALUS: Wing Workbench")
+        self.setWindowTitle("DAEDALUS: Wing Workbench")
         self.setWindowIcon(QIcon('src/assets/logo.png'))
         self.window_width, self.window_height = 1200, 800
         self.setMinimumSize(self.window_width, self.window_height)

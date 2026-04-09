@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -144,9 +144,9 @@ class Tabele(QTableWidget):
             self.setItem(row, 2, nominal_value)  # Optional: Add nominal value column
             unit = airfoil_obj.unit.get(key, '')
             if unit == 'length':
-                unit = globals.DEADALUS.preferences['general']['units'].get('length', 'm')
+                unit = globals.DAEDALUS.preferences['general']['units'].get('length', 'm')
             if unit == 'angle':
-                unit = globals.DEADALUS.preferences['general']['units'].get('angle', 'rad')
+                unit = globals.DAEDALUS.preferences['general']['units'].get('angle', 'rad')
             unit_value = QTableWidgetItem(str(unit))
             unit_value.setTextAlignment(Qt.AlignCenter)
             self.setItem(row, 3, unit_value)
