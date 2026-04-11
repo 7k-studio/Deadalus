@@ -2,20 +2,20 @@
 
 Copyright (C) 2026 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -75,7 +75,7 @@ class AirfoilDesigner(QMainWindow):
         self.time = date.today().strftime("%Y-%m-%d")
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
 
         self._build_ui()
@@ -95,11 +95,11 @@ class AirfoilDesigner(QMainWindow):
 
         # Add the OpenGL viewport to the splitter
         self.VIEWPORT = QWidget()
-        self.OPEN_GL = ViewportOpenGL(program=self.DEADALUS, project=self.PROJECT, parent=self.VIEWPORT)
+        self.OPEN_GL = ViewportOpenGL(program=self.DAEDALUS, project=self.PROJECT, parent=self.VIEWPORT)
         self.MAIN_SPLITTER.addWidget(self.OPEN_GL)
 
         # Create top toolbar and register it with the QMainWindow so it sits below the menu bar
-        self.TOOL_BAR = ToolBar(program=self.DEADALUS, project=self.PROJECT, parent=self)
+        self.TOOL_BAR = ToolBar(program=self.DAEDALUS, project=self.PROJECT, parent=self)
 
         # Add the toolbar to the main window top area (under the menu bar)
         self.addToolBar(Qt.TopToolBarArea, self.TOOL_BAR)
@@ -120,14 +120,14 @@ class AirfoilDesigner(QMainWindow):
 
         # Widgets for INPUT container
         # Left side tree airfoil
-        self.TREE_AIRFOIL = TreeAirfoil(program=self.DEADALUS, project=self.PROJECT, parent=self)
+        self.TREE_AIRFOIL = TreeAirfoil(program=self.DAEDALUS, project=self.PROJECT, parent=self)
         self.dock_airfoil = QDockWidget("Airfoil Tree", self)
         self.dock_airfoil.setWidget(self.TREE_AIRFOIL)
         self.dock_airfoil.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_airfoil)
 
         # Left side tree reference
-        self.TREE_REFERENCE = TreeRererence(program=self.DEADALUS, project=self.PROJECT, parent=self)
+        self.TREE_REFERENCE = TreeRererence(program=self.DAEDALUS, project=self.PROJECT, parent=self)
         self.dock_reference = QDockWidget("Reference Tree", self)
         self.dock_reference.setWidget(self.TREE_REFERENCE)
         self.dock_reference.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
@@ -141,7 +141,7 @@ class AirfoilDesigner(QMainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dock_parameters)
 
         # Right side description textarea
-        self.TEXT_DESCRIPTION = TextDescription(program=self.DEADALUS, project=self.PROJECT, parent=self)
+        self.TEXT_DESCRIPTION = TextDescription(program=self.DAEDALUS, project=self.PROJECT, parent=self)
         self.TEXT_DESCRIPTION.set_description("Please select an airfoil to see its description")
         self.dock_description = QDockWidget("Description TextArea", self)
         self.dock_description.setWidget(self.TEXT_DESCRIPTION)
@@ -159,7 +159,7 @@ class AirfoilDesigner(QMainWindow):
         self.TABLE_PARAMETERS.parametersChanged.connect(self.TABLE_STATISTICS.update)
 
         # Log Viewer Widget
-        self.LOG_VIEWER = LogViewer(log_file="toolout.log", parent=self, program=self.DEADALUS)
+        self.LOG_VIEWER = LogViewer(log_file="toolout.log", parent=self, program=self.DAEDALUS)
         self.dock_logger = QDockWidget("Logger Console", self)
         self.dock_logger.setWidget(self.LOG_VIEWER)
         self.dock_logger.setAllowedAreas(Qt.BottomDockWidgetArea)
@@ -174,7 +174,7 @@ class AirfoilDesigner(QMainWindow):
         self.dock_logger.visibilityChanged.connect(self.update_menu_bar_state)
 
         # Create the menu bar
-        self.MENU_BAR = MenuBar(program=self.DEADALUS, project=self.PROJECT, parent=self, time=self.time)  # Use the MenuBar class
+        self.MENU_BAR = MenuBar(program=self.DAEDALUS, project=self.PROJECT, parent=self, time=self.time)  # Use the MenuBar class
         self.setMenuBar(self.MENU_BAR)
 
         # Connect visibilityChanged signals to the menu bar's update_action_state method
@@ -220,7 +220,7 @@ class AirfoilDesigner(QMainWindow):
         self.logger.info("Initialization completed")
     
     def _update_header(self):
-        self.setWindowTitle(f"{self.DEADALUS.name}: {self.name} - Untitled" if self.PROJECT.name is None else f"{self.DEADALUS.name}: {self.name} - {self.PROJECT.name}")
+        self.setWindowTitle(f"{self.DAEDALUS.name}: {self.name} - Untitled" if self.PROJECT.name is None else f"{self.DAEDALUS.name}: {self.name} - {self.PROJECT.name}")
 
     def _populate_ui(self):
         self._update_header()
@@ -342,11 +342,11 @@ class AirfoilDesigner(QMainWindow):
         """load the airfoil data from a JSON format file."""
         self.logger.info("Appending airfoil...")
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Airfoil Format (*.arf);;All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Daedalus Airfoil Format (*.arf);;All Files (*)", options=options)
 
         if fileName:
             # try:
-            airfoil_obj = tools_airfoils.load_airfoil_from_json(fileName, self.DEADALUS.version)                
+            airfoil_obj = tools_airfoils.load_airfoil_from_json(fileName, self.DAEDALUS.version)                
             self.PROJECT._ensure_unique_name(airfoil_obj)  # Ensure unique name             
             self.PROJECT.project_airfoils.append(airfoil_obj)
             if airfoil_obj:
@@ -375,12 +375,12 @@ class AirfoilDesigner(QMainWindow):
 
         options = QFileDialog.Options()
         default_name = f"{airfoil.name}.arf" if airfoil.name else f"Untitled.arf"
-        filePath, _ = QFileDialog.getSaveFileName(self, "Save File", default_name, "DEADALUS Airfoil Format (*.arf);;All Files (*)", options=options)
+        filePath, _ = QFileDialog.getSaveFileName(self, "Save File", default_name, "DAEDALUS Airfoil Format (*.arf);;All Files (*)", options=options)
         if filePath:
             airfoil.name = os.path.basename(filePath).split('.')[0]
             airfoil.path = filePath
             
-            json_object = tools_airfoils.save_airfoil_to_json(airfoil, self.PROJECT, self.DEADALUS)
+            json_object = tools_airfoils.save_airfoil_to_json(airfoil, self.PROJECT, self.DAEDALUS)
         
             with open(f"{filePath}", "w") as outfile:
                 outfile.write(json_object)

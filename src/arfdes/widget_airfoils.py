@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 #System imports
@@ -57,7 +57,7 @@ class TreeAirfoil(QTableWidget):
         self.setMinimumSize(200, 200)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.AIRFOILDESIGNER = parent
 
@@ -235,7 +235,7 @@ class TreeAirfoil(QTableWidget):
             self.logger.error("Cannot add airfoil: PROJECT is not set")
             return
 
-        airfoil_obj = Airfoil(self.DEADALUS)
+        airfoil_obj = Airfoil(self.DAEDALUS)
         airfoil_obj.name = name  # Ensure the name is set
         airfoil_obj.info['creation_date'] = time
         airfoil_obj.info['modification_date'] = time

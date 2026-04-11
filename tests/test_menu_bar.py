@@ -80,7 +80,7 @@ def test_new_airfoil_calls_tree_add(monkeypatch):
 
     mb = MenuBar.__new__()
     # Inject dependencies without running __init__
-    mb.DEADALUS = types.SimpleNamespace(preferences={'general': {'beta_features': False}})
+    mb.DAEDALUS = types.SimpleNamespace(preferences={'general': {'beta_features': False}})
     mb.PROJECT = DummyProject()
     mb.ARFDES = types.SimpleNamespace(TREE_AIRFOIL=DummyTree())
     mb.time = None
@@ -97,7 +97,7 @@ def test_append_airfoil_appends_and_updates_tree(tmp_path, monkeypatch):
     MenuBar = mb_mod.MenuBar
 
     mb = object.__new__(MenuBar)
-    mb.DEADALUS = types.SimpleNamespace(preferences={'general': {'beta_features': False}})
+    mb.DAEDALUS = types.SimpleNamespace(preferences={'general': {'beta_features': False}})
     project = DummyProject()
     mb.PROJECT = project
     tree = DummyTree()

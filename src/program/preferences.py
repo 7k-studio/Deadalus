@@ -2,20 +2,20 @@
 
 Copyright (C) 2026 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import os
@@ -30,7 +30,7 @@ import json
 class PreferencesWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__()
-        self.DEADALUS = parent
+        self.DAEDALUS = parent
         self.setWindowTitle("Preferences")
         self.resize(300, 200)
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -76,14 +76,14 @@ class PreferencesWindow(QDialog):
         length_text = QLabel("Length:")
         self.length_combo_box = QComboBox()
         self.length_combo_box.addItems(["meters"])
-        self.length_combo_box.setCurrentText(self.DEADALUS.preferences['general']['units'].get("length", "meters"))
+        self.length_combo_box.setCurrentText(self.DAEDALUS.preferences['general']['units'].get("length", "meters"))
 
         # ComboBox for units
         angle_text = QLabel("Angle:")
         self.angle_combo_box = QComboBox()
         self.angle_combo_box.addItems(["rad"])
-        self.angle_combo_box.setCurrentText(self.DEADALUS.preferences['general']['units'].get("angle", "rad"))
-        self.length_combo_box.setCurrentText(self.DEADALUS.preferences['general']['units'].get("length", "meters"))
+        self.angle_combo_box.setCurrentText(self.DAEDALUS.preferences['general']['units'].get("angle", "rad"))
+        self.length_combo_box.setCurrentText(self.DAEDALUS.preferences['general']['units'].get("length", "meters"))
         # ComboBox for Color Scheme
         color_text = QLabel("Color Scheme:")
         self.color_combo_box = QComboBox()
@@ -96,7 +96,7 @@ class PreferencesWindow(QDialog):
             self.logger.warning("Could not list styles directory '%s': %s", styles_dir, e)
 
         # Select saved preference case-insensitively
-        pref = self.DEADALUS.preferences['general'].get("color_scheme", "Deadalus-Light")
+        pref = self.DAEDALUS.preferences['general'].get("color_scheme", "Daedalus-Light")
         for i in range(self.color_combo_box.count()):
             if self.color_combo_box.itemText(i).lower() == str(pref).lower():
                 self.color_combo_box.setCurrentIndex(i)
@@ -111,7 +111,7 @@ class PreferencesWindow(QDialog):
         self.general_performance_slider.setMaximum(100)
         self.general_performance_slider.setTickInterval(10)
         self.general_performance_slider.setSingleStep(10)
-        self.general_performance_slider.setValue(self.DEADALUS.preferences['general']['performance'])  # Set initial value
+        self.general_performance_slider.setValue(self.DAEDALUS.preferences['general']['performance'])  # Set initial value
 
         # Label to show % value
         self.general_performance_label = QLabel(f"{self.general_performance_slider.value()}%")
@@ -119,7 +119,7 @@ class PreferencesWindow(QDialog):
         self.general_performance_slider.valueChanged.connect(self.on_performance_changed)
 
         self.general_beta_features = QCheckBox("Beta Features")
-        self.general_beta_features.setChecked(self.DEADALUS.preferences['general']['beta_features'])
+        self.general_beta_features.setChecked(self.DAEDALUS.preferences['general']['beta_features'])
 
         layout.addWidget(units_text)
 
@@ -146,7 +146,7 @@ class PreferencesWindow(QDialog):
 
     def on_performance_changed(self, value):
         self.general_performance_label.setText(f"{value}%")
-        self.DEADALUS.preferences['general']["performance"] = value
+        self.DAEDALUS.preferences['general']["performance"] = value
 
     def init_airfoil_tab(self):
         layout = QVBoxLayout()
@@ -159,23 +159,23 @@ class PreferencesWindow(QDialog):
         color_text = QLabel("Viewport color:")
         self.a_color_combo_box = QComboBox()
         self.a_color_combo_box.addItems(["Bright", "Dark", "Blueprint", "Greenprint"])
-        self.a_color_combo_box.setCurrentText(self.DEADALUS.preferences['airfoil_designer']['viewport'].get("color_scheme", "Bright"))
+        self.a_color_combo_box.setCurrentText(self.DAEDALUS.preferences['airfoil_designer']['viewport'].get("color_scheme", "Bright"))
 
         self.a_viewport_show_grid = QCheckBox("Show grid")
-        self.a_viewport_show_grid.setChecked(self.DEADALUS.preferences['airfoil_designer']['viewport']['grid']['show'])
+        self.a_viewport_show_grid.setChecked(self.DAEDALUS.preferences['airfoil_designer']['viewport']['grid']['show'])
 
         self.a_viewport_show_ruller = QCheckBox("Show ruler")
-        self.a_viewport_show_ruller.setChecked(self.DEADALUS.preferences['airfoil_designer']['viewport']['ruler']['show'])
+        self.a_viewport_show_ruller.setChecked(self.DAEDALUS.preferences['airfoil_designer']['viewport']['ruler']['show'])
 
         airfoil_text = QLabel("Airfoil:")
         airfoil_text.setToolTip("")
 
         self.airfoil_show_control_points = QCheckBox("Show control points")
-        self.airfoil_show_control_points.setChecked(self.DEADALUS.preferences['airfoil_designer']['airfoil']['control_points']['show'])
+        self.airfoil_show_control_points.setChecked(self.DAEDALUS.preferences['airfoil_designer']['airfoil']['control_points']['show'])
         self.airfoil_show_construction = QCheckBox("Show construction")
-        self.airfoil_show_construction.setChecked(self.DEADALUS.preferences['airfoil_designer']['airfoil']['construction']['show'])
+        self.airfoil_show_construction.setChecked(self.DAEDALUS.preferences['airfoil_designer']['airfoil']['construction']['show'])
         self.airfoil_show_wireframe = QCheckBox("Show wireframe")
-        self.airfoil_show_wireframe.setChecked(self.DEADALUS.preferences['airfoil_designer']['airfoil']['wireframe']['show'])
+        self.airfoil_show_wireframe.setChecked(self.DAEDALUS.preferences['airfoil_designer']['airfoil']['wireframe']['show'])
 
         color_layout.addWidget(color_text)
         color_layout.addWidget(self.a_color_combo_box)
@@ -200,20 +200,20 @@ class PreferencesWindow(QDialog):
         viewport_text.setToolTip("")
 
         self.w_viewport_show_grid = QCheckBox("Show grid")
-        self.w_viewport_show_grid.setChecked(self.DEADALUS.preferences['wing_designer']['viewport']['grid']['show'])
+        self.w_viewport_show_grid.setChecked(self.DAEDALUS.preferences['wing_designer']['viewport']['grid']['show'])
 
         #self.viewport_show_ruller = QCheckBox("Show ruller")
-        #self.viewport_show_ruller.setChecked(DEADALUS.preferences['wing_designer']['viewport']['ruller']['show'])
+        #self.viewport_show_ruller.setChecked(DAEDALUS.preferences['wing_designer']['viewport']['ruller']['show'])
 
         wing_text = QLabel("Wing:")
         wing_text.setToolTip("")
 
         self.wing_show_grid = QCheckBox("Show control points")
-        self.wing_show_grid.setChecked(self.DEADALUS.preferences['wing_designer']['wing']['grid']['show'])
+        self.wing_show_grid.setChecked(self.DAEDALUS.preferences['wing_designer']['wing']['grid']['show'])
         self.wing_show_wireframe = QCheckBox("Show construction")
-        self.wing_show_wireframe.setChecked(self.DEADALUS.preferences['wing_designer']['wing']['wireframe']['show'])
+        self.wing_show_wireframe.setChecked(self.DAEDALUS.preferences['wing_designer']['wing']['wireframe']['show'])
         self.wing_show_solid = QCheckBox("Show wireframe")
-        self.wing_show_solid.setChecked(self.DEADALUS.preferences['wing_designer']['wing']['solid']['show'])
+        self.wing_show_solid.setChecked(self.DAEDALUS.preferences['wing_designer']['wing']['solid']['show'])
 
         layout.addWidget(viewport_text)
         layout.addWidget(self.w_viewport_show_grid)
@@ -231,30 +231,30 @@ class PreferencesWindow(QDialog):
 
         # --- GENERAL TAB --- #
         if self.length_combo_box.currentText() == 'meters':
-            self.DEADALUS.preferences['general']["units"]["length"] = 'm'
+            self.DAEDALUS.preferences['general']["units"]["length"] = 'm'
         if self.angle_combo_box.currentText() == 'radians':
-            self.DEADALUS.preferences['general']["units"]["angle"] = 'rad'
+            self.DAEDALUS.preferences['general']["units"]["angle"] = 'rad'
 
-        self.DEADALUS.preferences['general']["performance"] = self.general_performance_slider.value()
-        self.DEADALUS.preferences['general']["color_scheme"] = self.color_combo_box.currentText()
-        self.DEADALUS.preferences['general']["beta_features"] = self.general_beta_features.isChecked()
+        self.DAEDALUS.preferences['general']["performance"] = self.general_performance_slider.value()
+        self.DAEDALUS.preferences['general']["color_scheme"] = self.color_combo_box.currentText()
+        self.DAEDALUS.preferences['general']["beta_features"] = self.general_beta_features.isChecked()
 
         # --- AIRFOIL DESIGNER TAB --- #
-        self.DEADALUS.preferences['airfoil_designer']["viewport"]["color_scheme"] = self.a_color_combo_box.currentText()
-        self.DEADALUS.preferences['airfoil_designer']["viewport"]["grid"]['show'] = self.a_viewport_show_grid.isChecked()
-        self.DEADALUS.preferences['airfoil_designer']["viewport"]["ruler"]['show'] = self.a_viewport_show_ruller.isChecked()
+        self.DAEDALUS.preferences['airfoil_designer']["viewport"]["color_scheme"] = self.a_color_combo_box.currentText()
+        self.DAEDALUS.preferences['airfoil_designer']["viewport"]["grid"]['show'] = self.a_viewport_show_grid.isChecked()
+        self.DAEDALUS.preferences['airfoil_designer']["viewport"]["ruler"]['show'] = self.a_viewport_show_ruller.isChecked()
 
-        self.DEADALUS.preferences['airfoil_designer']["airfoil"]["control_points"]['show'] = self.airfoil_show_control_points.isChecked()
-        self.DEADALUS.preferences['airfoil_designer']["airfoil"]["construction"]['show'] = self.airfoil_show_construction.isChecked()
-        self.DEADALUS.preferences['airfoil_designer']["airfoil"]["wireframe"]['show'] = self.airfoil_show_wireframe.isChecked()
+        self.DAEDALUS.preferences['airfoil_designer']["airfoil"]["control_points"]['show'] = self.airfoil_show_control_points.isChecked()
+        self.DAEDALUS.preferences['airfoil_designer']["airfoil"]["construction"]['show'] = self.airfoil_show_construction.isChecked()
+        self.DAEDALUS.preferences['airfoil_designer']["airfoil"]["wireframe"]['show'] = self.airfoil_show_wireframe.isChecked()
 
         # --- WING DESIGNER TAB --- #
-        self.DEADALUS.preferences['wing_designer']["viewport"]["grid"]['show'] = self.w_viewport_show_grid.isChecked()
-        #DEADALUS.preferences['wing_designer']["viewport"]["ruler"]['show'] = self.w_viewport_show_ruller.isChecked()
+        self.DAEDALUS.preferences['wing_designer']["viewport"]["grid"]['show'] = self.w_viewport_show_grid.isChecked()
+        #DAEDALUS.preferences['wing_designer']["viewport"]["ruler"]['show'] = self.w_viewport_show_ruller.isChecked()
 
-        self.DEADALUS.preferences['wing_designer']["wing"]["grid"]['show'] = self.wing_show_grid.isChecked()
-        self.DEADALUS.preferences['wing_designer']["wing"]["wireframe"]['show'] = self.wing_show_wireframe.isChecked()
-        self.DEADALUS.preferences['wing_designer']["wing"]["solid"]['show'] = self.wing_show_solid.isChecked()
+        self.DAEDALUS.preferences['wing_designer']["wing"]["grid"]['show'] = self.wing_show_grid.isChecked()
+        self.DAEDALUS.preferences['wing_designer']["wing"]["wireframe"]['show'] = self.wing_show_wireframe.isChecked()
+        self.DAEDALUS.preferences['wing_designer']["wing"]["solid"]['show'] = self.wing_show_solid.isChecked()
 
         self.accept()
         
@@ -262,56 +262,56 @@ class PreferencesWindow(QDialog):
 
         preferences['general'] = {
             "units":{
-                "length": self.DEADALUS.preferences['general']['units'].get("length", "m"),
-                "angle": self.DEADALUS.preferences['general']['units'].get("angle", "rad"),
+                "length": self.DAEDALUS.preferences['general']['units'].get("length", "m"),
+                "angle": self.DAEDALUS.preferences['general']['units'].get("angle", "rad"),
             },
             "performance": self.general_performance_slider.value(),
-            "color_scheme": self.DEADALUS.preferences['general'].get('color_scheme', "Deadlus-light"),
-            "beta_features": self.DEADALUS.preferences['general'].get("beta_features", False),
+            "color_scheme": self.DAEDALUS.preferences['general'].get('color_scheme', "Deadlus-light"),
+            "beta_features": self.DAEDALUS.preferences['general'].get("beta_features", False),
         }
 
         preferences['airfoil_designer'] = {
             "viewport": {
-                "color_scheme": self.DEADALUS.preferences['airfoil_designer']['viewport'].get("color_scheme", "Bright"),
+                "color_scheme": self.DAEDALUS.preferences['airfoil_designer']['viewport'].get("color_scheme", "Bright"),
                 "grid": {
-                    "show": self.DEADALUS.preferences['airfoil_designer']['viewport']['grid'].get("show", True)
+                    "show": self.DAEDALUS.preferences['airfoil_designer']['viewport']['grid'].get("show", True)
                     },
                 "ruler": {
-                    "show": self.DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True)
+                    "show": self.DAEDALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True)
                     },
             },
             "airfoil": {
                 "control_points": {
-                    "show": self.DEADALUS.preferences['airfoil_designer']['airfoil']['control_points'].get("show", True),
-                    "color": self.DEADALUS.preferences['airfoil_designer']['airfoil']['control_points'].get("color", True)
+                    "show": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['control_points'].get("show", True),
+                    "color": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['control_points'].get("color", True)
                     },
                 "construction": {
-                    "show": self.DEADALUS.preferences['airfoil_designer']['airfoil']['construction'].get("show", True),
-                    "color": self.DEADALUS.preferences['airfoil_designer']['airfoil']['construction'].get("color", True)
+                    "show": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['construction'].get("show", True),
+                    "color": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['construction'].get("color", True)
                     },
                 "wireframe": {
-                    "show": self.DEADALUS.preferences['airfoil_designer']['airfoil']['wireframe'].get("show", True),
-                    "color": self.DEADALUS.preferences['airfoil_designer']['airfoil']['wireframe'].get("color", True)
+                    "show": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['wireframe'].get("show", True),
+                    "color": self.DAEDALUS.preferences['airfoil_designer']['airfoil']['wireframe'].get("color", True)
                     }
             }
         }
         preferences['wing_designer'] = {
             "viewport": {
                 "grid": {
-                    "show": self.DEADALUS.preferences['wing_designer']['viewport']['grid'].get("show", True)
+                    "show": self.DAEDALUS.preferences['wing_designer']['viewport']['grid'].get("show", True)
                     },
-                #"ruler": DEADALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True),
+                #"ruler": DAEDALUS.preferences['airfoil_designer']['viewport']['ruler'].get("show", True),
             },
             "wing": {
                 "grid":{
-                    "show": self.DEADALUS.preferences['wing_designer']['wing']['grid'].get("show", True)
+                    "show": self.DAEDALUS.preferences['wing_designer']['wing']['grid'].get("show", True)
                 },
                 "wireframe": {
-                    "show": self.DEADALUS.preferences['wing_designer']['wing']['wireframe'].get("show", True),
-                    "color": self.DEADALUS.preferences['wing_designer']['wing']['wireframe'].get("color", True)
+                    "show": self.DAEDALUS.preferences['wing_designer']['wing']['wireframe'].get("show", True),
+                    "color": self.DAEDALUS.preferences['wing_designer']['wing']['wireframe'].get("color", True)
                 },
                 "solid": {
-                    "show": self.DEADALUS.preferences['wing_designer']['wing']['solid'].get("show", True)
+                    "show": self.DAEDALUS.preferences['wing_designer']['wing']['solid'].get("show", True)
                 }
             }
         }
@@ -322,7 +322,7 @@ class PreferencesWindow(QDialog):
             outfile.write(json_object)
             self.logger.info(f"Saved file: settings")
         
-        self.DEADALUS.APP.setStyleSheet(self.DEADALUS.buildStyleSheet())
+        self.DAEDALUS.APP.setStyleSheet(self.DAEDALUS.buildStyleSheet())
 
 # For testing the dialog independently
 if __name__ == "__main__":

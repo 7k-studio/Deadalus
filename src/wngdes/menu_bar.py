@@ -2,20 +2,20 @@
 
 Copyright (C) 2026 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -50,7 +50,7 @@ class MenuBar(QMenuBar):
     def __init__(self, program=None, project=None, parent=None, viewport=None):
         super(MenuBar, self).__init__(parent)
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.WINGDESIGNER = parent
         self.open_gl = viewport
@@ -216,7 +216,7 @@ class MenuBar(QMenuBar):
 
     def openFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             self.PROJECT.load(fileName)
             self.main_window.tree_menu.init_tree()
@@ -224,7 +224,7 @@ class MenuBar(QMenuBar):
 
     def saveFile(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getSaveFileName(self, "Save File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             self.PROJECT.save(fileName)
             self.logger.info(f"Saved file: {fileName}")
@@ -298,10 +298,10 @@ class MenuBar(QMenuBar):
         msg.exec_()
 
     def showAbout(self):
-        dialog = globals.DEADALUS.showAboutDialog(self)
+        dialog = globals.DAEDALUS.showAboutDialog(self)
 
     def showManual(self):
-        manual = globals.DEADALUS.showUserManual()
+        manual = globals.DAEDALUS.showUserManual()
     
     def update_action_state(self, action, dock_widget):
         """Update the state of the given action based on the dock widget's visibility."""

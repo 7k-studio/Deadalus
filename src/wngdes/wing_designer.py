@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -64,7 +64,7 @@ class WingDesigner(QMainWindow):
         self.name = "Wing Designer"
         self.logger = logging.getLogger(self.__class__.__name__)
         
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
 
         self._build_ui()
@@ -82,7 +82,7 @@ class WingDesigner(QMainWindow):
 
         # Add the OpenGL viewport to the inner splitter
         self.VIEWPORT = QWidget()
-        self.OPEN_GL = Viewport3D(program=self.DEADALUS, parent=self, project=self.PROJECT)
+        self.OPEN_GL = Viewport3D(program=self.DAEDALUS, parent=self, project=self.PROJECT)
         viewport_layout = QVBoxLayout(self.VIEWPORT)
         viewport_layout.addWidget(self.OPEN_GL)
         #self.viewport.setMinimumWidth(500)
@@ -112,7 +112,7 @@ class WingDesigner(QMainWindow):
         #content_layout.addWidget(self.TABELE_PARAMETERS)
 
         # Log Viewer Widget
-        self.LOG_VIEWER = LogViewer(log_file="toolout.log", parent=self, program=self.DEADALUS)
+        self.LOG_VIEWER = LogViewer(log_file="toolout.log", parent=self, program=self.DAEDALUS)
         self.dock_logger = QDockWidget("Logger Console", self)
         self.dock_logger.setWidget(self.LOG_VIEWER)
         self.dock_logger.setAllowedAreas(Qt.BottomDockWidgetArea)
@@ -137,7 +137,7 @@ class WingDesigner(QMainWindow):
         self.logger.info("Module: Wing Workbench initialized")
 
     def _update_header(self):
-        self.setWindowTitle(f"{self.DEADALUS.name}: {self.name} - Untitled" if self.PROJECT.name is None else f"{self.DEADALUS.name}: {self.name} - {self.PROJECT.name}")
+        self.setWindowTitle(f"{self.DAEDALUS.name}: {self.name} - Untitled" if self.PROJECT.name is None else f"{self.DAEDALUS.name}: {self.name} - {self.PROJECT.name}")
 
     def _populate_ui(self):
         self._update_header()
@@ -166,7 +166,7 @@ class WingDesigner(QMainWindow):
     
     def addComponent(self):
         """Add a new component to the tree menu."""
-        component_obj = src.obj.class_component.Component(self.DEADALUS, self.PROJECT)
+        component_obj = src.obj.class_component.Component(self.DAEDALUS, self.PROJECT)
         component_obj.name = f'Component {len(self.PROJECT.components)+1}'  # Ensure the name is set in infos
         component_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
         component_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
@@ -175,7 +175,7 @@ class WingDesigner(QMainWindow):
 
     def addWing(self):
         """Add a new wing to the selected component."""
-        wing_obj = src.obj.class_wing.Wing(self.DEADALUS, self.PROJECT)
+        wing_obj = src.obj.class_wing.Wing(self.DAEDALUS, self.PROJECT)
         wing_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")
         wing_obj.infos['modification_date'] = date.today().strftime("%Y-%m-%d")
 
@@ -218,7 +218,7 @@ class WingDesigner(QMainWindow):
                     segment_name = f'Segment {selected_item.childCount()+1}'
                     segment_index = selected_item.childCount()
                     
-                    segment_obj = src.obj.class_segment.Segment(self.DEADALUS, self.PROJECT)
+                    segment_obj = src.obj.class_segment.Segment(self.DAEDALUS, self.PROJECT)
                     segment_obj.airfoil = self.PROJECT.airfoils[0]  # Ensure the name is set in infos
                     segment_obj.name = segment_name  # Ensure the name is set in infos
                     segment_obj.infos['creation_date'] = date.today().strftime("%Y-%m-%d")

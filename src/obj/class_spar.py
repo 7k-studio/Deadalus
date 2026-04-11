@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -569,7 +569,7 @@ def make_surface(control_grid):
     surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
     surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
 
-    d = 0.05 * int(globals.DEADALUS.preferences['general']['performance']) / 100
+    d = 0.05 * int(globals.DAEDALUS.preferences['general']['performance']) / 100
     surf.delta = (d, d)
     surf.evaluate()
     return surf
@@ -613,8 +613,8 @@ def sample_curve(points, t):
     return out
 
 def make_nurbs_surface_points(control_points):
-    samples_u=int(globals.DEADALUS.preferences["general"]["performance"]/3+7)
-    samples_v=int(globals.DEADALUS.preferences["general"]["performance"]/3+7)
+    samples_u=int(globals.DAEDALUS.preferences["general"]["performance"]/3+7)
+    samples_v=int(globals.DAEDALUS.preferences["general"]["performance"]/3+7)
     u_count, v_count, _ = control_points.shape
     surf = NURBS.Surface()
     surf.degree_u = min(3, u_count - 1)
@@ -692,7 +692,7 @@ def build_b_spline_surf_for_segment(segment):
         surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
         surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
 
-        res = -0.00056 * globals.DEADALUS.preferences["general"]["performance"] + 0.1
+        res = -0.00056 * globals.DAEDALUS.preferences["general"]["performance"] + 0.1
         surf.delta = (res, res)
         surf.evaluate()
         segment.surfaces[key] = build_surface_mesh(surf)

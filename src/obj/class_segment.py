@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -34,7 +34,7 @@ from geomdl import knotvector
 class Segment:
     def __init__(self, program=None, project=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
 
         self.name = 'Segment'
@@ -43,7 +43,7 @@ class Segment:
         self.infos = {'creation_date': '',
                       'modification_date': ''}
         
-        self.airfoil = Airfoil(self.DEADALUS)
+        self.airfoil = Airfoil(self.DAEDALUS)
         self.skin = Skin()
         
         self.params = {
@@ -188,10 +188,10 @@ class Segment:
         control_points_Z = [self.params['origin_Z']] * len(self.airfoil.constr['te'][0])
         self.control_points['te'] = np.vstack([self.control_points['te'], control_points_Z])
 
-        self.geom['le'] = CreateBSpline_3D(self.control_points['le'], len(self.airfoil.constr['le'][0])-1, resolution=int(self.DEADALUS.preferences['general']['performance']))
-        self.geom['ps'] = CreateBSpline_3D(self.control_points['ps'], len(self.airfoil.constr['ps'][0])-1, resolution=int(self.DEADALUS.preferences['general']['performance']))
-        self.geom['ss'] = CreateBSpline_3D(self.control_points['ss'], len(self.airfoil.constr['ss'][0])-1, resolution=int(self.DEADALUS.preferences['general']['performance']))
-        self.geom['te'] = CreateBSpline_3D(self.control_points['te'], len(self.airfoil.constr['te'][0])-1, resolution=int(self.DEADALUS.preferences['general']['performance']))
+        self.geom['le'] = CreateBSpline_3D(self.control_points['le'], len(self.airfoil.constr['le'][0])-1, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+        self.geom['ps'] = CreateBSpline_3D(self.control_points['ps'], len(self.airfoil.constr['ps'][0])-1, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+        self.geom['ss'] = CreateBSpline_3D(self.control_points['ss'], len(self.airfoil.constr['ss'][0])-1, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+        self.geom['te'] = CreateBSpline_3D(self.control_points['te'], len(self.airfoil.constr['te'][0])-1, resolution=int(self.DAEDALUS.preferences['general']['performance']))
 
         self.transform(grandparent_index, parent_index, item_index)
 

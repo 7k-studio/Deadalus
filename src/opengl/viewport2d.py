@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -47,20 +47,20 @@ class ViewportOpenGL(QGLWidget):
     def __init__(self, program=None, project=None, parent=None):
         super(ViewportOpenGL, self).__init__(parent)
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.zoom = 2.0
         self.translation = [-0.5, 0, 0]
         self.lastPos = QPoint()
         self.airfoil = None
-        self.viewport_settings = self.DEADALUS.preferences["airfoil_designer"]["viewport"]
-        self.airfoil_settings = self.DEADALUS.preferences["airfoil_designer"]["airfoil"]
+        self.viewport_settings = self.DAEDALUS.preferences["airfoil_designer"]["viewport"]
+        self.airfoil_settings = self.DAEDALUS.preferences["airfoil_designer"]["airfoil"]
 
-        self.bg_color = self.DEADALUS.AD_viewport_color[self.DEADALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['background']
-        self.grid_color = self.DEADALUS.AD_viewport_color[self.DEADALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['grid']
-        self.minor_grid_color = self.DEADALUS.AD_viewport_color[self.DEADALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['minor_grid']
-        self.ruler_color = self.DEADALUS.AD_viewport_color[self.DEADALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['ruler']
-        self.text_color = self.DEADALUS.AD_viewport_color[self.DEADALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['text']
+        self.bg_color = self.DAEDALUS.AD_viewport_color[self.DAEDALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['background']
+        self.grid_color = self.DAEDALUS.AD_viewport_color[self.DAEDALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['grid']
+        self.minor_grid_color = self.DAEDALUS.AD_viewport_color[self.DAEDALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['minor_grid']
+        self.ruler_color = self.DAEDALUS.AD_viewport_color[self.DAEDALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['ruler']
+        self.text_color = self.DAEDALUS.AD_viewport_color[self.DAEDALUS.preferences['airfoil_designer']['viewport'].get('color_scheme', 'Bright')]['text']
         
         # Initialize Freetype text renderer
         self.text_renderer = FreetypeTextRenderer(font_size=10)
@@ -330,7 +330,7 @@ class ViewportOpenGL(QGLWidget):
         glVertex2f(margin, height - margin)
         glVertex2f(margin, height - gui_h + margin)
         glEnd()
-        self.draw_text(self.DEADALUS.preferences['general']['units']['length'], 20, self.height()-20, centered=True)
+        self.draw_text(self.DAEDALUS.preferences['general']['units']['length'], 20, self.height()-20, centered=True)
 
         # decorative cut-off from viewport
         glBegin(GL_LINE_STRIP)

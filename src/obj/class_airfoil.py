@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -30,7 +30,7 @@ from src.obj.objects2D import BSpline, Line
 
 class LeadingEdge:
     def __init__(self, program):
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.type = "F"
 
         self.params = {
@@ -54,7 +54,7 @@ class LeadingEdge:
             "ss_curv":   "m",
         }
 
-        self.spline = BSpline(self.DEADALUS)
+        self.spline = BSpline(self.DAEDALUS)
 
     def calc_position(self):
 
@@ -68,7 +68,7 @@ class LeadingEdge:
 
 class TrailingEdge:
     def __init__(self, program):
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.type = "F"
 
         self.params = {
@@ -93,7 +93,7 @@ class TrailingEdge:
             "ss_curv":   "m",
         }
 
-        self.spline = BSpline(self.DEADALUS)
+        self.spline = BSpline(self.DAEDALUS)
     
     def calc_position(self):
 
@@ -105,7 +105,7 @@ class TrailingEdge:
 
 class PressureSide:
     def __init__(self, program):
-        self.DEADALUS = program
+        self.DAEDALUS = program
 
         self.type = "C"
 
@@ -131,11 +131,11 @@ class PressureSide:
             "rwd_curv":  "m"
         }
 
-        self.spline = BSpline(self.DEADALUS)
+        self.spline = BSpline(self.DAEDALUS)
 
 class SuctionSide:
     def __init__(self, program):
-        self.DEADALUS = program
+        self.DAEDALUS = program
 
         self.type = "C"
 
@@ -161,7 +161,7 @@ class SuctionSide:
             "rwd_curv":  "m"
         }
 
-        self.spline = BSpline(self.DEADALUS)
+        self.spline = BSpline(self.DAEDALUS)
 
 
 class ChordLine:
@@ -189,7 +189,7 @@ class CamberLine:
 
 class Airfoil:
     def __init__(self, program):
-        self.DEADALUS = program
+        self.DAEDALUS = program
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.name = ""
@@ -226,10 +226,10 @@ class Airfoil:
             "Position TE Y": 0,
         }
 
-        self.LE = LeadingEdge(self.DEADALUS)
-        self.TE = TrailingEdge(self.DEADALUS)
-        self.PS = PressureSide(self.DEADALUS)
-        self.SS = SuctionSide(self.DEADALUS)
+        self.LE = LeadingEdge(self.DAEDALUS)
+        self.TE = TrailingEdge(self.DAEDALUS)
+        self.PS = PressureSide(self.DAEDALUS)
+        self.SS = SuctionSide(self.DAEDALUS)
 
         self.CHORD = ChordLine(self)
 

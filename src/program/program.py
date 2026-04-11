@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -46,7 +46,7 @@ class Program:
     def __init__(self):
         
         # basic program info
-        self.name = "Deadalus"
+        self.name = "Daedalus"
         self.version = "0.4.0-beta"
 
         # logger
@@ -98,7 +98,7 @@ class Program:
                     "angle":  "rad"
                 }, # Options: "meters / radians", (future: "milimeters / degrees", "feet / degrees")
                 "performance": 50,  # Options: 10 - 100
-                "color_scheme": "Deadalus-light",
+                "color_scheme": "Daedalus-light",
                 "beta_features": False,  # Enable beta features
             },
             'airfoil_designer': {
@@ -189,18 +189,18 @@ class Program:
         except json.JSONDecodeError:
             self.logger.error("Decoding preferences file. Using default settings.")
 
-    def parse_css_with_deadalus_style(self, css_file):
+    def parse_css_with_daedalus_style(self, css_file):
         """
-        Parse CSS content and extract DeadalusStyle object.
+        Parse CSS content and extract DaedalusStyle object.
         
         Returns:
-            tuple: (deadalus_dict, clean_css)
+            tuple: (daedalus_dict, clean_css)
         """
-        # Look for the DeadalusStyle block
-        pattern = r'DeadalusStyle\s*\{([^}]+)\}'
-        match = re.search(pattern, css_file) # Find the DeadalusStyle block
+        # Look for the DaedalusStyle block
+        pattern = r'DaedalusStyle\s*\{([^}]+)\}'
+        match = re.search(pattern, css_file) # Find the DaedalusStyle block
         
-        deadalus_dict = {}
+        daedalus_dict = {}
         clean_css = css_file
 
         if match:
@@ -215,18 +215,18 @@ class Program:
                     key = key.strip()
                     # Clean up the value: strip whitespace and remove surrounding quotes
                     val = value.strip().strip('"').strip("'")
-                    deadalus_dict[key] = val
-            #Remove the DeadalusStyle block from CSS
+                    daedalus_dict[key] = val
+            #Remove the DaedalusStyle block from CSS
             clean_css = re.sub(pattern, '', css_file).strip()
 
-        return deadalus_dict, clean_css
+        return daedalus_dict, clean_css
             
     def buildStyleSheet(self):
         path_to_style = f"src/assets/styles/{self.preferences['general']['color_scheme']}.css"
         css_path = os.path.abspath(path_to_style)
         with open(css_path, 'r', encoding="utf-8") as f:
-            StyleDeadalus, StylePyQt = self.parse_css_with_deadalus_style(f.read())
-            self.color_scheme = StyleDeadalus
+            StyleDaedalus, StylePyQt = self.parse_css_with_daedalus_style(f.read())
+            self.color_scheme = StyleDaedalus
             self.logger.debug(self.color_scheme)
         
         return StylePyQt
@@ -242,7 +242,7 @@ class Program:
         #logo_label.setPixmap(pixmap.scaled(200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo_label.setAlignment(Qt.AlignCenter)
 
-        title_label = QLabel('DEADALUS')
+        title_label = QLabel('DAEDALUS')
         title_label.setFont(QFont("Cambria", 36))
         title_label.setAlignment(Qt.AlignCenter)
 
@@ -268,7 +268,7 @@ class Program:
         description_text.setReadOnly(True)
         description_text.setPlainText('\n'.join(about_text))
         
-        description_label = QLabel("DEADALUS is a program for parametricaly designing airfoils and wings.")
+        description_label = QLabel("DAEDALUS is a program for parametricaly designing airfoils and wings.")
         description_label.setAlignment(Qt.AlignCenter)
         description_label.setWordWrap(True)
 
@@ -299,7 +299,7 @@ class Program:
         webbrowser.open(f"file://{file_path}")
     
     def showRealiseNotes(self):
-        webbrowser.open(f"https://github.com/7k-studio/Deadalus/releases")
+        webbrowser.open(f"https://github.com/7k-studio/Daedalus/releases")
 
     def showPreferences(self):
         """Open the preferences dialog."""
@@ -323,4 +323,4 @@ class Program:
             self.logger.info("Exit")
             QApplication.quit()
 
-# DEADALUS = Program()  # Create a global instance of Program
+# DAEDALUS = Program()  # Create a global instance of Program

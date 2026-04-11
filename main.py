@@ -2,20 +2,20 @@
 
 Copyright (C) 2026 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 # Library import
@@ -35,7 +35,7 @@ from src.arfdes.airfoil_designer import AirfoilDesigner
 from src.wngdes.wing_designer import WingDesigner
 
 # In-Program import
-# from src.program import DEADALUS
+# from src.program import DAEDALUS
 
 def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
@@ -47,12 +47,12 @@ def log_uncaught_exceptions(exc_type, exc_value, exc_traceback):
 
 def main():
     from src.program.program import Program
-    DEADALUS = Program()
+    DAEDALUS = Program()
 
     #app = QApplication(sys.argv)
     #icon = QIcon("src/assets/logo.png")
     #app.setWindowIcon(icon)
-    #app.setStyleSheet(DEADALUS.buildStyleSheet())
+    #app.setStyleSheet(DAEDALUS.buildStyleSheet())
 
     log_file = 'toolout.log'
 
@@ -60,26 +60,26 @@ def main():
         os.remove(log_file)
 
     with open(log_file, "w") as file:
-        header(DEADALUS.version, file)
+        header(DAEDALUS.version, file)
     
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
 
     sys.excepthook = log_uncaught_exceptions
 
-    DEADALUS.APP = QApplication(sys.argv)
+    DAEDALUS.APP = QApplication(sys.argv)
     icon = QIcon("src/assets/logo.png")
-    DEADALUS.APP.setWindowIcon(icon)
-    DEADALUS.APP.setStyleSheet(DEADALUS.buildStyleSheet())
-    DEADALUS.SPLASHSCREEN = SplashScreen(DEADALUS)
-    DEADALUS.AIRFOILDESIGNER = AirfoilDesigner(DEADALUS, project=None)
-    DEADALUS.WINGDESIGNER = WingDesigner(DEADALUS, project=None)
-    DEADALUS.SPLASHSCREEN.show()
+    DAEDALUS.APP.setWindowIcon(icon)
+    DAEDALUS.APP.setStyleSheet(DAEDALUS.buildStyleSheet())
+    DAEDALUS.SPLASHSCREEN = SplashScreen(DAEDALUS)
+    DAEDALUS.AIRFOILDESIGNER = AirfoilDesigner(DAEDALUS, project=None)
+    DAEDALUS.WINGDESIGNER = WingDesigner(DAEDALUS, project=None)
+    DAEDALUS.SPLASHSCREEN.show()
 
-    #splash = SplashScreen(DEADALUS)
+    #splash = SplashScreen(DAEDALUS)
     #splash.show()
     
     # sys.exit(app.exec_())
-    sys.exit(DEADALUS.APP.exec_())
+    sys.exit(DAEDALUS.APP.exec_())
 
 def header(version, file):
     file.write("       _______        _________    ___________    _______        ___________    ___           ___     ___    __________  \n")
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #     os.remove(log_file)
 
     # with open(log_file, "w") as file:
-    #     header(DEADALUS, file)
+    #     header(DAEDALUS, file)
     
     # logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s: %(name)s: %(funcName)s: %(message)s", handlers=[logging.FileHandler("toolout.log"), logging.StreamHandler()])
     # logger = logging.getLogger(__name__)

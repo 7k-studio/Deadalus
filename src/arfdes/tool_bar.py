@@ -17,7 +17,7 @@ class ToolBar(QToolBar):
 
     def __init__(self, program=None, project=None, parent=None, height=75):
         super().__init__(parent)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.AIRFOILDESIGNER = parent
         self.setFixedHeight(height)
@@ -28,11 +28,11 @@ class ToolBar(QToolBar):
         self.setIconSize(QSize(32,32))
         
         # Add tool buttons wired to the existing toggle methods (shortcuts shown in tooltip)
-        self.add_tool_button("New Airfoil",    icon_path=f"{self.DEADALUS.color_scheme['pathToIcons']}/AddAirfoil.svg",    shortcut="Shift+N", callback=self.AIRFOILDESIGNER.newAirfoil)
-        self.add_tool_button("Append Airfoil", icon_path=f"{self.DEADALUS.color_scheme['pathToIcons']}/AppendAirfoil.svg", shortcut="Shift+A", callback=self.AIRFOILDESIGNER.appendAirfoil)
-        self.add_tool_button("Delete Airfoil", icon_path=f"{self.DEADALUS.color_scheme['pathToIcons']}/DeleteAirfoil.svg", shortcut="Shift+X", callback=self.AIRFOILDESIGNER.deleteAirfoil)
-        self.add_tool_button("Flip Airfoil",   icon_path=f"{self.DEADALUS.color_scheme['pathToIcons']}/FlipAirfoil.svg",   shortcut="Shift+F", callback=self.AIRFOILDESIGNER.flipAirfoil)
-        self.add_tool_button("Save Airfoil",   icon_path=f"{self.DEADALUS.color_scheme['pathToIcons']}/SaveAirfoil.svg",   shortcut="Shift+S", callback=self.AIRFOILDESIGNER.saveAirfoil)
+        self.add_tool_button("New Airfoil",    icon_path=f"{self.DAEDALUS.color_scheme['pathToIcons']}/AddAirfoil.svg",    shortcut="Shift+N", callback=self.AIRFOILDESIGNER.newAirfoil)
+        self.add_tool_button("Append Airfoil", icon_path=f"{self.DAEDALUS.color_scheme['pathToIcons']}/AppendAirfoil.svg", shortcut="Shift+A", callback=self.AIRFOILDESIGNER.appendAirfoil)
+        self.add_tool_button("Delete Airfoil", icon_path=f"{self.DAEDALUS.color_scheme['pathToIcons']}/DeleteAirfoil.svg", shortcut="Shift+X", callback=self.AIRFOILDESIGNER.deleteAirfoil)
+        self.add_tool_button("Flip Airfoil",   icon_path=f"{self.DAEDALUS.color_scheme['pathToIcons']}/FlipAirfoil.svg",   shortcut="Shift+F", callback=self.AIRFOILDESIGNER.flipAirfoil)
+        self.add_tool_button("Save Airfoil",   icon_path=f"{self.DAEDALUS.color_scheme['pathToIcons']}/SaveAirfoil.svg",   shortcut="Shift+S", callback=self.AIRFOILDESIGNER.saveAirfoil)
 
         def _rgb(c):
             if isinstance(c, (tuple, list)):

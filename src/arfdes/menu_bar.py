@@ -2,20 +2,20 @@
 
 Copyright (C) 2026 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -49,7 +49,7 @@ class MenuBar(QMenuBar):
 
     def __init__(self, program=None, project=None, parent=None, time=None):
         super(MenuBar, self).__init__(parent)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.ARFDES = parent
         self.time = time
@@ -75,7 +75,7 @@ class MenuBar(QMenuBar):
         saveAction.triggered.connect(self.save_project)
         saveAsAction.triggered.connect(self.save_as_project)
         editDescAction.triggered.connect(self.edit_description_project)
-        exitAction.triggered.connect(self.DEADALUS.quit)
+        exitAction.triggered.connect(self.DAEDALUS.quit)
 
         fileMenu.addAction(newAction)
         fileMenu.addAction(openAction)
@@ -118,7 +118,7 @@ class MenuBar(QMenuBar):
         airfoilMenu.addSeparator()
         airfoilMenu.addAction(renameAirfoilAction)
         airfoilMenu.addAction(editDescriptionAction)
-        if self.DEADALUS.preferences['general']['beta_features']:
+        if self.DAEDALUS.preferences['general']['beta_features']:
             airfoilMenu.addAction(fit2refAction)
         
         """Reference menu creation"""
@@ -139,7 +139,7 @@ class MenuBar(QMenuBar):
         self.referenceMenu.addAction(addReferenceAction)
         self.referenceMenu.addAction(deleteReferenceAction)
         self.referenceMenu.addAction(showReferenceAction)
-        if self.DEADALUS.preferences['general']['beta_features']:
+        if self.DAEDALUS.preferences['general']['beta_features']:
             self.referenceMenu.addAction(editReferenceAction)
             self.referenceMenu.addAction(flipReferenceAction)
 
@@ -159,7 +159,7 @@ class MenuBar(QMenuBar):
         self.showCamberlineAction.triggered.connect(self.showCamberline)
 
         viewMenu.addAction(fitViewAction)
-        if self.DEADALUS.preferences['general']['beta_features']:
+        if self.DAEDALUS.preferences['general']['beta_features']:
             viewMenu.addAction(self.showCurvCombAction)
             viewMenu.addAction(self.showCamberlineAction)
 
@@ -216,9 +216,9 @@ class MenuBar(QMenuBar):
         aboutAction = QAction('About', self)
         preferencesAction = QAction('Preferences', self)
 
-        manualAction.triggered.connect(self.DEADALUS.showUserManual)
-        aboutAction.triggered.connect(self.DEADALUS.showAboutDialog)
-        preferencesAction.triggered.connect(self.DEADALUS.showPreferences)
+        manualAction.triggered.connect(self.DAEDALUS.showUserManual)
+        aboutAction.triggered.connect(self.DAEDALUS.showAboutDialog)
+        preferencesAction.triggered.connect(self.DAEDALUS.showPreferences)
 
         programMenu.addAction(manualAction)
         programMenu.addAction(aboutAction)
@@ -309,8 +309,8 @@ class MenuBar(QMenuBar):
         for airfoil in self.PROJECT.airfoils:
             airfoil.update()
 
-        self.DEADALUS.WINGDESIGNER.set_project(self.PROJECT)
-        self.DEADALUS.WINGDESIGNER.show()
+        self.DAEDALUS.WINGDESIGNER.set_project(self.PROJECT)
+        self.DAEDALUS.WINGDESIGNER.show()
     
     def new_project(self):
         if self.PROJECT:

@@ -1,22 +1,22 @@
-# Deadalus
+# Daedalus
 
 This project is a free CAD software whitch allows user to create an airfoil from scratch, or match it with reference, and to create wing out of created airfoils.
 Program consists of two modules:
 1. Airfoil designer - for airfoil operations
 2. Wing Workbench - for wing creation and modification
    
-Deadalus implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The application allows for mouse interaction to translate, rotate, and zoom within the 3D space. It features a structured layout with a tree menu for navigation, a dropdown menu for basic functions, and a table widgets for user interaction.
+Daedalus implements a 3D OpenGL viewport embedded in a PyQt5 GUI. The application allows for mouse interaction to translate, rotate, and zoom within the 3D space. It features a structured layout with a tree menu for navigation, a dropdown menu for basic functions, and a table widgets for user interaction.
 
 ## Project Structure
 
 ```
-Deadalus
+Daedalus
 ├── main.py                      # Entry point of the application
 ├── src
 │   ├── settings                 # Store for user settings
 |   ├── program
 |   |   ├── preferences.py       # Loads / Saves / Changes settngs
-|   |   ├── program.py           # Main class for Deadalus program
+|   |   ├── program.py           # Main class for Daedalus program
 |   |   ├── project.py           # Project class to store the data
 |   |   ├── splash_screen.py     # Splash screen on file load-up
 |   |   └── widget_log.py        # Console to display file log
@@ -109,7 +109,7 @@ Deadalus
 
 ## Usage
 
-Once the application is running, you can create a parametric airfoil and wing design. Use interactive tabele of parameters to modify the objects. Interact with the 2D/3D viewport using the mouse to preview created objects. Use the tree menu to navigate through different components of the application. Use export functions to save project to standard CAD format like: .dxf and .step. Use save button to save current state of the project within Deadalus program. 
+Once the application is running, you can create a parametric airfoil and wing design. Use interactive tabele of parameters to modify the objects. Interact with the 2D/3D viewport using the mouse to preview created objects. Use the tree menu to navigate through different components of the application. Use export functions to save project to standard CAD format like: .dxf and .step. Use save button to save current state of the project within Daedalus program. 
 
 ## License
 

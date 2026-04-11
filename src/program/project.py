@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 
@@ -63,7 +63,7 @@ import src.arfdes.tools_airfoils as tools
 class Project:
     def __init__(self, program=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.name = None
         self.creation_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.modification_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -96,7 +96,7 @@ class Project:
         if self.name != None and self.path != None:
 
             self.modification_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            txt = self._prep_json_data(self, self.DEADALUS.name, self.DEADALUS.version)
+            txt = self._prep_json_data(self, self.DAEDALUS.name, self.DAEDALUS.version)
             self.logger.debug(txt)
 
             self.logger.info(f"Saved file: {self.path}")
@@ -106,7 +106,7 @@ class Project:
     def save_as(self):
         options = QFileDialog.Options()
         default_name = f"{self.name}.ddls" if self.name else f"Untitled.ddls"
-        filePath, _ = QFileDialog.getSaveFileName(None, "Save File", default_name, "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        filePath, _ = QFileDialog.getSaveFileName(None, "Save File", default_name, "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         print('filepath', filePath)
         print('_', _)
         if filePath:
@@ -126,7 +126,7 @@ class Project:
         from src.obj.objects3D import Component, Wing, Segment  # Import the templates
         
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(None, "Open File", "", "Deadalus Database Files (*.ddls);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(None, "Open File", "", "Daedalus Database Files (*.ddls);; All Files (*)", options=options)
         if fileName:
             warning_count = 0
 
@@ -139,10 +139,10 @@ class Project:
             data = convert_list_to_ndarray(data)
 
             if "Program" in data:
-                if data["Program"].get("program version", self.DEADALUS.version):
-                    file_version = data["Program"].get("program version", self.DEADALUS.version)
+                if data["Program"].get("program version", self.DAEDALUS.version):
+                    file_version = data["Program"].get("program version", self.DAEDALUS.version)
                     file_version = file_version.split("-")[0].split(".")
-                    program_version = self.DEADALUS.version
+                    program_version = self.DAEDALUS.version
                     program_version = program_version.split("-")[0].split(".")
                     if program_version[1] != file_version[1] or program_version[0] != file_version[0]:
                         self.logger.warning("Current program version is different from the saved version. Some features may not work as expected. \nMissing parameters will take default values.")
@@ -317,7 +317,7 @@ class Project:
         airfoil_entries = []
         for arf_obj in self.airfoils:
 
-            airfoil_data = save_airfoil_to_json(arf_obj, self, self.DEADALUS)  # serialized JSON string
+            airfoil_data = save_airfoil_to_json(arf_obj, self, self.DAEDALUS)  # serialized JSON string
             airfoil_json = json.loads(airfoil_data)   # parse to dict
             
             airfoil_entries.append({
@@ -388,9 +388,9 @@ class Project:
             }
             designed_components.append(components)
 
-        Deadalus = {
-            "program name": self.DEADALUS.name,
-            "program version": self.DEADALUS.version,
+        Daedalus = {
+            "program name": self.DAEDALUS.name,
+            "program version": self.DAEDALUS.version,
         }
 
         Project = {
@@ -404,7 +404,7 @@ class Project:
         }
 
         data = {
-            "Program": Deadalus,
+            "Program": Daedalus,
             "Project": Project
         }
 

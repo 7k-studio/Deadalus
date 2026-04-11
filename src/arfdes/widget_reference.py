@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 #System imports
@@ -135,7 +135,7 @@ class TreeRererence(QTableWidget):
         super(TreeRererence, self).__init__(parent)
         self.setMinimumSize(200, 100)
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.init_tree()
 
@@ -174,7 +174,7 @@ class TreeRererence(QTableWidget):
         options_buttons.addWidget(addButton)
         options_buttons.addWidget(delButton)
         options_buttons.addWidget(shoButton)
-        if self.DEADALUS.preferences['general']['beta_features']:
+        if self.DAEDALUS.preferences['general']['beta_features']:
             options_buttons.addWidget(ediButton)
 
         self.ref_widget.addLayout(options_buttons)
@@ -212,7 +212,7 @@ class TreeRererence(QTableWidget):
 
     def add_reference(self):
         options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Accepted file formats (*.ddls; *.txt; *.dat);; Deadalus Database Files (*.ddls);; Selig File Format Files (*.txt);; All Files (*)", options=options)
+        fileName, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Accepted file formats (*.ddls; *.txt; *.dat);; Daedalus Database Files (*.ddls);; Selig File Format Files (*.txt);; All Files (*)", options=options)
         if fileName:
             if (fileName.split(".")[1]).lower() == "ddls":
                 reference = tools.load_json_reference(fileName)
@@ -259,7 +259,7 @@ class TreeRererence(QTableWidget):
         airfoil_obj.visible = not airfoil_obj.visible
         
         self.update()
-        self.DEADALUS.AIRFOILDESIGNER.OPEN_GL.update()
+        self.DAEDALUS.AIRFOILDESIGNER.OPEN_GL.update()
 
     def edit_reference():
         pass

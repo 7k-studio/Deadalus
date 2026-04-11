@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -54,7 +54,7 @@ class Viewport3D(QOpenGLWidget):
     def __init__(self, program=None, parent=None, project=None):
         super().__init__(None)
 
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.WINGDESIGNER = parent
         self.PROJECT = project
 
@@ -62,8 +62,8 @@ class Viewport3D(QOpenGLWidget):
         self.setMouseTracking(True)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        self.viewport_settings = self.DEADALUS.preferences["wing_designer"]["viewport"]
-        self.wing_settings = self.DEADALUS.preferences["wing_designer"]["wing"]
+        self.viewport_settings = self.DAEDALUS.preferences["wing_designer"]["viewport"]
+        self.wing_settings = self.DAEDALUS.preferences["wing_designer"]["wing"]
 
         # Camera / view state
         self.target = QtGui.QVector3D(0.0, 0.0, 0.0)  # center of rotation

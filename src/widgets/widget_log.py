@@ -2,13 +2,13 @@ from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtCore import QTimer, Qt, QFileSystemWatcher
 from PyQt5.QtGui import QTextCursor, QColor, QTextCharFormat, QFont
 import os
-# from src.program import DEADALUS
+# from src.program import DAEDALUS
 
 class LogViewer(QTextEdit):
     def __init__(self, log_file, parent=None, program=None):
         super().__init__(parent)
         self.log_file = log_file
-        self.DEADALUS = program  # Separate the program reference from the widget parent
+        self.DAEDALUS = program  # Separate the program reference from the widget parent
         self.setReadOnly(True)
         self.setLineWrapMode(QTextEdit.NoWrap)
         self.last_position = 0  # Track the last read position in the file
@@ -72,7 +72,7 @@ class LogViewer(QTextEdit):
         }
         
         try:
-            color_scheme = self.DEADALUS.color_scheme if self.DEADALUS else default_colors
+            color_scheme = self.DAEDALUS.color_scheme if self.DAEDALUS else default_colors
         except (AttributeError, TypeError):
             color_scheme = default_colors
         

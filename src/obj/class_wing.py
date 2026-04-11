@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 class Wing:
     def __init__(self, program=None, project=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.DEADALUS = program
+        self.DAEDALUS = program
         self.PROJECT = project
         self.name = 'Wing'
         self.infos = {'creation_date': '',
@@ -252,10 +252,10 @@ class Wing:
                 degree = len(tmp_le_ps)-1
                 self.logger.debug('Degree: ', degree)
 
-                self.segments[i].geom['le_ps'] = CreateBSpline_3D(self.segments[i].control_points['le_ps'], degree, resolution=int(self.DEADALUS.preferences['general']['performance']))
-                self.segments[i].geom['te_ps'] = CreateBSpline_3D(self.segments[i].control_points['te_ps'], degree, resolution=int(self.DEADALUS.preferences['general']['performance']))
-                self.segments[i].geom['le_ss'] = CreateBSpline_3D(self.segments[i].control_points['le_ss'], degree, resolution=int(self.DEADALUS.preferences['general']['performance']))
-                self.segments[i].geom['te_ss'] = CreateBSpline_3D(self.segments[i].control_points['te_ss'], degree, resolution=int(self.DEADALUS.preferences['general']['performance']))
+                self.segments[i].geom['le_ps'] = CreateBSpline_3D(self.segments[i].control_points['le_ps'], degree, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+                self.segments[i].geom['te_ps'] = CreateBSpline_3D(self.segments[i].control_points['te_ps'], degree, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+                self.segments[i].geom['le_ss'] = CreateBSpline_3D(self.segments[i].control_points['le_ss'], degree, resolution=int(self.DAEDALUS.preferences['general']['performance']))
+                self.segments[i].geom['te_ss'] = CreateBSpline_3D(self.segments[i].control_points['te_ss'], degree, resolution=int(self.DAEDALUS.preferences['general']['performance']))
 
                 self.segments[i].skin.PS.v_fwd = self.segments[i].airfoil.PS.spline
                 self.segments[i].skin.PS.v_rwd = self.segments[i+1].airfoil.PS.spline
@@ -342,7 +342,7 @@ class Wing:
                 control_points = np.array(segment.uv_grid[key])
                 
                 if control_points.size > 0:
-                    segment.surfaces[key] = make_nurbs_surface_points(control_points, resolution=int(self.DEADALUS.preferences['general']['performance']))
+                    segment.surfaces[key] = make_nurbs_surface_points(control_points, resolution=int(self.DAEDALUS.preferences['general']['performance']))
 
 def build_surface_mesh(surf):
     """
@@ -378,7 +378,7 @@ def make_surface(control_grid):
     surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
     surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
 
-    d = 0.05 * int(globals.DEADALUS.preferences['general']['performance']) / 100
+    d = 0.05 * int(globals.DAEDALUS.preferences['general']['performance']) / 100
     surf.delta = (d, d)
     surf.evaluate()
     return surf
@@ -501,7 +501,7 @@ def build_b_spline_surf_for_segment(segment):
         surf.knotvector_u = utilities.generate_knot_vector(surf.degree_u, n_u)
         surf.knotvector_v = utilities.generate_knot_vector(surf.degree_v, n_v)
 
-        res = -0.00056 * globals.DEADALUS.preferences["general"]["performance"] + 0.1
+        res = -0.00056 * globals.DAEDALUS.preferences["general"]["performance"] + 0.1
         surf.delta = (res, res)
         surf.evaluate()
         segment.surfaces[key] = build_surface_mesh(surf)

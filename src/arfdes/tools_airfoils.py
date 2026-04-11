@@ -2,20 +2,20 @@
 
 Copyright (C) 2025 Jakub Kamyk
 
-This file is part of DEADALUS.
+This file is part of DAEDALUS.
 
-DEADALUS is free software: you can redistribute it and/or modify
+DAEDALUS is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-DEADALUS is distributed in the hope that it will be useful,
+DAEDALUS is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with DEADALUS.  If not, see <http://www.gnu.org/licenses/>.
+along with DAEDALUS.  If not, see <http://www.gnu.org/licenses/>.
 
 '''
 import logging
@@ -27,7 +27,7 @@ from scipy import interpolate
 from tqdm import tqdm
 import json
 import src.obj
-# from src.program import DEADALUS  # Import from globals.py
+# from src.program import DAEDALUS  # Import from globals.py
 from src.obj.class_airfoil import Airfoil
 
 logger = logging.getLogger(__name__)
@@ -109,7 +109,7 @@ def CreateBSpline(const_points, force_resolution=None):
 
     tck=[t,[const_points[0],const_points[1]],3]
     
-    f = int(DEADALUS.preferences['general']['performance'])
+    f = int(DAEDALUS.preferences['general']['performance'])
     if force_resolution:
         f = force_resolution
 
@@ -210,7 +210,7 @@ def load_airfoil_from_json(fileName, program_version):
             airfoil_version = data["program version"]
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
-            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            logger.warning("File may not load properly or is not compatible with DAEDALUS")
             return None
         
         if airfoil_version:
@@ -252,7 +252,7 @@ def load_from_ddls_030(data, fileName):
             airfoil_info   = airfoil_data["info"]
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
-            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            logger.warning("File may not load properly or is not compatible with DAEDALUS")
             return None
 
         try:
@@ -347,7 +347,7 @@ def load_from_ddls_040(data, fileName):
             
         except KeyError as e:
             logger.error(f"Missing key in ARF data - {e}")
-            logger.warning("File may not load properly or is not compatible with DEADALUS")
+            logger.warning("File may not load properly or is not compatible with DAEDALUS")
             return None
 
         try:
